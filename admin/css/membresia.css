@@ -1,0 +1,141 @@
+
+    body{
+        margin:0;
+        font-family: Arial, sans-serif;
+        background:#f9fafb; /* fondo claro */
+        color:#1f2937; /* texto gris oscuro */
+    }
+
+    .contenedor{
+        width:90%;
+        margin:auto;
+        padding:20px;
+    }
+
+    h2{
+        text-align:center;
+        color:#2563eb; /* azul suave */
+        margin-bottom:20px;
+    }
+
+    /* FORM */
+    .formulario{
+        background:#ffffff;
+        width: 700px;
+        padding:20px;
+        border-radius:12px;
+        
+        box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .grid{
+        display:grid;
+        grid-template-columns:repeat(2,1fr);
+        gap:50px;
+    }
+
+    .campo label{
+        display:block;
+        margin-bottom:5px;
+        font-size:14px;
+        color:#374151;
+    }
+
+    .campo input,
+    .campo select{
+        width:100%;
+        padding:10px;
+        border-radius:8px;
+        border:1px solid #d1d5db;
+        outline:none;
+        background:#f9fafb;
+        color:#111827;
+    }
+
+    .full{
+        grid-column:1 / -1;
+    }
+
+    .ubicacion{
+        display:flex;
+        gap:8px;
+    }
+
+    .ubicacion button{
+        background:#93c5fd; /* azul claro */
+        border:none;
+        padding:10px 12px;
+        border-radius:8px;
+        cursor:pointer;
+        color:#1f2937;
+    }
+
+    /* BOTONES */
+    .botones{
+        margin-top:15px;
+        display:flex;
+        gap:10px;
+    }
+
+    .btn{
+        padding:10px 15px;
+        border:none;
+        border-radius:8px;
+        cursor:pointer;
+        font-weight:bold;
+    }
+
+    .guardar{
+        background:#86efac; /* verde claro */
+        color:#065f46;
+    }
+
+    .editar{
+        background:#93c5fd; /* azul claro */
+        color:#1e3a8a;
+    }
+
+    /* TABLA */
+    .tabla{
+        width:100%;
+        margin-top:20px;
+        border-collapse:collapse;
+        background:#ffffff;
+        border-radius:10px;
+        overflow:hidden;
+        box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .tabla th{
+        background:#e5e7eb;
+        padding:10px;
+        text-align:left;
+        color:#374151;
+    }
+
+    .tabla td{
+        padding:10px;
+        border-bottom:1px solid #f3f4f6;
+    }
+
+    .badge{
+        background:#fde68a; /* amarillo pastel */
+        color:#78350f;
+        padding:4px 8px;
+        border-radius:6px;
+        font-size:12px;
+    }
+
+    /* ACCIONES */
+    .btn-small{
+        padding:6px 8px;
+        border-radius:6px;
+        text-decoration:none;
+        margin-right:5px;
+        font-size:0.85rem;
+    }
+
+    .eliminar{
+        background:#fca5a5; /* rojo claro */
+        color:#7f1d1d;
+    }

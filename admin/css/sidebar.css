@@ -1,0 +1,167 @@
+
+/* SIDEBAR */
+.sidebar {
+    background: #1e293b;
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;          /* siempre alto completo */
+    width: 260px;           /* pon tu ancho real */
+    overflow-y: auto;  
+}
+
+/* MENÚ */
+.menu-title {
+    padding: 12px 30px;
+    cursor: pointer;
+    border-bottom: 1px solid #334155;
+}
+
+.menu-title:hover {
+    background: #334155;
+}
+
+.submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: #0f172a;
+}
+
+.submenu a {
+    display: block;
+    padding: 12px 30px;
+    color: #cbd5e1;
+    text-decoration: none;
+}
+
+.submenu a:hover {
+    background: #1e293b;
+}
+
+.submenu.active {
+    max-height: 300px;
+}
+
+/* ÁREA PRINCIPAL */
+.main-area {
+    margin-left: 260px;              /* deja espacio al costado del sidebar */
+    width: calc(100% - 260px);       /* ocupa todo el resto */
+    min-height: 100vh;               /* asegura altura completa */
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* TOPBAR */
+.topbar {
+    height: 60px;
+    background: white;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* USER MENU */
+.user-menu {
+    position: relative;
+}
+
+.user-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    min-width: 150px;
+}
+
+.dropdown-content button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+}
+
+.dropdown-content button:hover {
+    background: #f1f1f1;
+}
+
+.dropdown.active .dropdown-content {
+    display: block;
+}
+
+/* Ítems directos (sin submenú) */
+.menu-item .menu-title.direct-link {
+    display: block;               /* para que ocupe todo el ancho */
+    padding: 12px 20px;
+    color: #e2e8f0;               /* tono claro similar a tus h3 */
+    text-decoration: none;
+    border-bottom: 1px solid #334155;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.menu-item .menu-title.direct-link:hover {
+    background: #334155;
+    color: white;
+}
+
+/* Opcional: estado activo (cuando estamos en esa página) */
+.menu-item .menu-title.direct-link.active {
+    background: #334155;
+    color: #60a5fa;               /* azul claro o el color que prefieras para activo */
+    font-weight: 600;
+}
+
+/* CONTENIDO */
+.content {
+    flex: 1;
+    padding: 30px;
+    background: #f1f5f9;
+    box-sizing: border-box;          /* evita que el padding reduzca el ancho */
+}
+
+
+
+/*Logo*/
+/* LOGO SIDEBAR */
+.sidebar-logo {
+    text-align: center;
+    padding: 20px 10px;
+    border-bottom: 1px solid #334155;
+}
+
+.sidebar-logo img {
+    width: 80px;
+    margin-bottom: 10px;
+    filter:brightness(0) invert(1);
+}
+
+.sidebar-logo h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #cbd5e1;
+}
+
+
+
+
+
+
+
+
+
+
+

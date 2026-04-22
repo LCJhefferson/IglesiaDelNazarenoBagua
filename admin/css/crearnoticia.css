@@ -1,0 +1,84 @@
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f6f9;
+}
+
+.contenedor {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+
+.contenido {
+    flex: 1;
+    padding: 30px;
+}
+
+
+.formulario {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.formulario label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.formulario input,
+.formulario textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* BOTONES */
+.botones {
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.guardar {
+    background: #27ae60;
+    color: white;
+}
+
+.cancelar {
+    background: #c0392b;
+    color: white;
+}
+
+
+.preview {
+    margin-top: 30px;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.card-noticia {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.card-noticia h4 {
+    margin: 0;
+}
+
+.card-noticia span {
+    font-size: 12px;
+    color: gray;
+}

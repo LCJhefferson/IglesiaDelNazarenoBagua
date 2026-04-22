@@ -1,0 +1,135 @@
+/* ========================= */
+/* LOGIN CLARO MODERNO */
+/* ========================= */
+
+.login-wrapper {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f4f6f9; /* fondo claro */
+}
+
+.login-card {
+    background: #ffffff;
+    padding: 45px;
+    width: 400px;
+    border-radius: 14px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.login-card h2 {
+    margin-bottom: 25px;
+    color: #333;
+}
+
+/* INPUTS */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    background: #fafafa;
+    transition: 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #4a90e2; /* azul suave */
+    background: #fff;
+}
+
+/* BOTÓN */
+.btn-login {
+    width: 100%;
+    padding: 13px;
+    background: #4a90e2; /* azul moderno */
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.btn-login:hover {
+    background: #357abd;
+}
+
+/* RECUPERAR */
+.recuperar {
+    margin-top: 15px;
+}
+
+.recuperar a {
+    font-size: 13px;
+    color: #555;
+    text-decoration: none;
+}
+
+.recuperar a:hover {
+    color: #4a90e2;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================= */
+/* ALERTA FLOTANTE */
+/* ========================= */
+.alerta {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+
+    background: #ffffff;
+    padding: 15px 20px;
+    border-radius: 10px;
+
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+
+    font-size: 14px;
+    color: #333;
+
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: 0.4s;
+
+    z-index: 9999;
+}
+
+/* ACTIVA */
+.alerta.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* TIPOS */
+.alerta.error {
+    border-left: 5px solid #e74c3c;
+}
+
+.alerta.success {
+    border-left: 5px solid #2ecc71;
+}
