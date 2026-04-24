@@ -30,15 +30,10 @@ if (isset($_GET['vista'])) {
     if ($vista === 'NewUsuarioForm') {
         echo '<link rel="stylesheet" href="admin/css/NewUsuarioForm.css">';
     }
-    if ($vista === 'NoticiasForm') {
-        echo '<link rel="stylesheet" href="admin/css/NoticiasForm.css">';
+    if ($vista === 'noticias') {
+        echo '<link rel="stylesheet" href="admin/css/noticias.css">';
     }
-        if ($vista === 'crearnoticia') {
-        echo '<link rel="stylesheet" href="admin/css/crearnoticia.css">';
-    }
-     if ($vista === 'gestionarnoticias') {
-        echo '<link rel="stylesheet" href="admin/css/gestionarnoticias.css">';
-    }
+    
     if ($vista === 'membresia') {
         echo '<link rel="stylesheet" href="admin/css/membresia.css">';
     }
@@ -47,7 +42,7 @@ if (isset($_GET['vista'])) {
     }
           if ($vista === 'reguistro_usuario') { //reenderizar mejor hay un problema con la renderizacion
         echo '<link rel="stylesheet" href="admin/css/reguistro_usuario.css">';
-    }
+    }http://localhost/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=trasmision
     if ($vista === 'usuarios_admin') { 
         echo '<link rel="stylesheet" href="admin/css/usuarios_admin.css">';
     }
@@ -57,7 +52,7 @@ if (isset($_GET['vista'])) {
     if ($vista === 'visitasMap') { 
         echo '<link rel="stylesheet" href="admin/css/visitasMap.css">';
     }
-    if ($vista === 'transmision') { 
+    if ($vista === 'trasmision') { 
         echo '<link rel="stylesheet" href="admin/css/transmision.css">';
     }
 
@@ -100,8 +95,8 @@ if (isset($_GET['vista'])) {
     if ($vista === 'NewUsuarioForm') {
         echo '<script src="admin/js/NewUsuarioForm.js"></script>';
     }
-    if ($vista === 'NoticiasForm') {
-        echo '<script src="admin/js/NoticiasForm.js"></script>';
+    if ($vista === 'noticias') {
+        echo '<script src="admin/js/noticias.js"></script>';
     }
     if ($vista === 'usuarios_admin') {
         echo '<script src="admin/js/usuarios_admin.js"></script>';
@@ -117,7 +112,10 @@ if (isset($_GET['vista'])) {
     }  
     if ($vista === 'reguistro_usuario') {
         echo '<script src="admin/js/reguistro_usuario.js"></script>';
-    }            
+    }   
+    if ($vista === 'membresia') {
+        echo '<script src="admin/js/membresia.js"></script>';
+    }          
 }
 ?>
 

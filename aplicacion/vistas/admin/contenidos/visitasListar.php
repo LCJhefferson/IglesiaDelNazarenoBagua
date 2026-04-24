@@ -32,26 +32,26 @@
 <!-- Tabla -->
 <table>
   <thead>
-    <tr><th>Miembro</th><th>Dirección</th><th>Última visita</th><th>Estado</th><th style="text-align:center">Acciones</th></tr>
+    <tr><th>Miembro</th><th>Dirección</th><th>Motivo de la visita ultima</th><th>Última visita</th><th>Estado</th><th style="text-align:center">Acciones</th></tr>
   </thead>
   <tbody>
     <tr>
-      <td>Carlos Mendoza</td><td>Av. Principal 123</td><td>Hace 1 mes</td>
-      <td><span class="badge-estado estado-verde"><i class="fa-solid fa-circle-check"></i> Realizada</span></td>
+      <td>Carlos Mendoza</td><td>Av. Principal 123</td><td>Regular</td><td>Hace 1 mes</td>
+      <td><span class="badge-estado estado-verde"><i class="fa-s  olid fa-circle-check"></i> Realizada</span></td>
       <td class="acciones" style="text-align:center;">
         <button title="Marcar como visitado">✔️</button>
         <button title="Cancelar visita">❌</button>
       </td>
     </tr>
     <tr>
-      <td>María López</td><td>Jr. Amazonas 456</td><td>Hace 2 meses y 25 días</td>
+      <td>María López</td><td>Jr. Amazonas 456</td><td>Regular</td><td>Hace 2 meses y 25 días</td>
       <td><span class="badge-estado estado-amarillo"><i class="fa-solid fa-clock"></i> Pendiente</span></td>
       <td class="acciones" style="text-align:center;">
         <button>✔️</button><button>❌</button>
       </td>
     </tr>
     <tr>
-      <td>Juan Pérez</td><td>Av. Bagua Grande</td><td>Hace 4 meses</td>
+      <td>Juan Pérez</td><td>Av. Bagua Grande</td><td>Por enfermedad</td><td>Hace 4 meses</td>
       <td><span class="badge-estado estado-rojo"><i class="fa-solid fa-triangle-exclamation"></i> Retrasada</span></td>
       <td class="acciones" style="text-align:center;">
         <button>✔️</button><button>❌</button>

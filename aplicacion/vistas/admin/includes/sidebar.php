@@ -40,6 +40,12 @@
         </div>
 
         <div class="menu-item">
+            
+                <a href="aplicacion/vistas/admin/dashboard.php?vista=noticias"       class="menu-title direct-link">Noticias</a>
+            
+        </div>
+
+        <div class="menu-item">
             <div class="menu-title">Visitas</div>
             <div class="submenu">
                 <a href="aplicacion/vistas/admin/dashboard.php?vista=visitasListar">Listar</a>
@@ -47,14 +53,7 @@
             </div>
         </div>
 
-        <div class="menu-item">
-            <div class="menu-title">Noticias</div>
-            <div class="submenu">
-                <a href="aplicacion/vistas/admin/dashboard.php?vista=crearnoticia">Nueva noticia</a>
-                <a href="aplicacion/vistas/admin/dashboard.php?vista=gestionarnoticias">Administrar Noticias</a>
-            </div>
-        </div>
-      
+       
         
 
 
