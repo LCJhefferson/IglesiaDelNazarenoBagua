@@ -1,0 +1,24 @@
+[
+    {
+        "id": 1,
+        "titulo": "l",
+        "resumen": "s",
+        "contenido": "sssssssssssssssss",
+        "fecha": "2026-04-24T08:49",
+        "imagen": "imagenes\/1777013393_191c5fff-c5f1-4ddd-9f55-45c417056303.png",
+        "imagenes": [
+            "imagenes\/1777013393_0_Gemini_Generated_Image_v6m7n0v6m7n0v6m7.png"
+        ],
+        "video": ""
+    },
+    {
+        "id": 2,
+        "titulo": "s",
+        "resumen": "",
+        "contenido": "",
+        "fecha": "2026-04-24T09:56",
+        "imagen": "",
+        "imagenes": [],
+        "video": ""
+    }
+]
