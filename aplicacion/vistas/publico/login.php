@@ -1,60 +1,53 @@
-<?php if (isset($_GET['error'])): ?>
-<script>
-    <?php if ($_GET['error'] == 1): ?>
-        mostrarAlerta("Completa todos los campos ❌", "error");
-    <?php elseif ($_GET['error'] == 2): ?>
-        mostrarAlerta("Contraseña incorrecta ❌", "error");
-    <?php elseif ($_GET['error'] == 3): ?>
-        mostrarAlerta("Usuario no encontrado ❌", "error");
-    <?php endif; ?>
-</script>
-<?php endif; ?>
-
-
-
+<?php
+session_start();
+if (isset($_SESSION['usuario'])) {
+    header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php");
+    exit;
+}
+$error = (int)($_GET['error'] ?? 0);
+?>
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Iglesia del Nazareno Bagua</title>
     <base href="/IglesiaDelNazarenoBagua/">
     <link rel="stylesheet" href="public/css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
 <body>
 
-
-
 <div id="alerta" class="alerta"></div>
+
 <div class="login-wrapper">
     <div class="login-card">
-        <h2>Iniciar Sesión</h2>
 
-        
+        <!-- Logo -->
+        <div class="login-logo">
+            <img src="public/imagenes/selloOficial.png" alt="Logo Iglesia">
+        </div>
 
-        <form method="POST" action="procesar_login.php">
+        <h2>Bienvenido</h2>
+        <p class="login-subtitulo">Iglesia del Nazareno — Bagua</p>
+
+        <form method="POST" action="/IglesiaDelNazarenoBagua/procesar_login.php">
 
             <div class="form-group">
-                <input type="text" name="usuario" placeholder="Usuario" required>
+                <i class="fa-solid fa-user icono-input"></i>
+                <input type="text" name="usuario" placeholder="Usuario" required autocomplete="username">
             </div>
 
             <div class="form-group">
-                <input type="password" name="password" placeholder="Contraseña" required>
-            </div>
-
-            <!-- NUEVO: SELECT DE ROLES -->
-            <div class="form-group">
-                <select name="rol" required>
-                    <option value="">Selecciona tu rol</option>
-                    <option value="1">Administrador</option>
-                    <option value="2">Pastor</option>
-                    <option value="3">Usuario</option>
-                </select>
+                <i class="fa-solid fa-lock icono-input"></i>
+                <input type="password" name="password" id="inputPassword" placeholder="Contraseña" required autocomplete="current-password">
+                <i class="fa-solid fa-eye icono-ojo" onclick="togglePassword()"></i>
             </div>
 
             <button type="submit" class="btn-login">
-                Ingresar
+                <i class="fa-solid fa-right-to-bracket"></i> Ingresar
             </button>
 
-            <!-- RECUPERAR CONTRASEÑA -->
             <div class="recuperar">
                 <a href="#">¿Olvidaste tu contraseña?</a>
             </div>
@@ -62,13 +55,32 @@
         </form>
     </div>
 </div>
+
 <script src="public/js/login.js"></script>
+<script>
+    // ── Mostrar alertas ──
+    const mensajes = {
+        1: "Completa todos los campos ❌",
+        2: "Credenciales incorrectas ❌",
+        3: "Usuario no encontrado ❌"
+    };
+    const error = <?= $error ?>;
+    if (error && mensajes[error]) {
+        mostrarAlerta(mensajes[error], "error");
+    }
+
+    // ── Mostrar/ocultar contraseña ──
+    function togglePassword() {
+        const input = document.getElementById('inputPassword');
+        const ojo   = document.querySelector('.icono-ojo');
+        if (input.type === 'password') {
+            input.type = 'text';
+            ojo.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            ojo.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+</script>
 </body>
 </html>
-
-
-
-
-//mostrarAlerta("Datos incorrectos ❌", "error");
-
-// mostrarAlerta("Acceso correcto ✔️", "success");

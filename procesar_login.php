@@ -1,101 +1,51 @@
 <?php
 session_start();
+require_once __DIR__ . '/aplicacion/core/Autoload.php';
 
-// recibir datos
-$usuario = $_POST['usuario'] ?? '';
-$password = $_POST['password'] ?? '';
-$rol = $_POST['rol'] ?? '';
+use aplicacion\dao\UserDAO;
 
-// validar campos vacíos
-if (empty($usuario) || empty($password) || empty($rol)) {
+$usuario  = trim($_POST['usuario']  ?? '');
+$password = trim($_POST['password'] ?? '');
+
+// Validar campos vacíos
+if (empty($usuario) || empty($password)) {
     header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/publico/login.php?error=1");
     exit;
 }
 
-// USUARIO DE PRUEBA
-if ($usuario === "admin" && $password === "1234") {
+// Buscar en la BD
+$dao       = new UserDAO();
+$resultado = $dao->buscarParaLogin($usuario);
 
-    $_SESSION['usuario'] = $usuario;
-    $_SESSION['rol'] = $rol;
-
-    header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php");
+// Usuario no encontrado
+if (!$resultado) {
+    header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/publico/login.php?error=3");
     exit;
+}
 
-} else {
+// Contraseña incorrecta
+if (!password_verify($password, $resultado['password'])) {
     header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/publico/login.php?error=2");
     exit;
 }
 
+// ✅ Todo correcto — guardar sesión
+// ✅ Todo correcto — guardar sesión
+session_regenerate_id(true);
+$_SESSION['usuario']    = $resultado['username'];
+$_SESSION['rol_id']     = $resultado['id_rol'];
+$_SESSION['rol_nombre'] = $resultado['rol_nombre'];
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-
-
-session_start();
-
-// conexión a la BD
-require_once 'aplicacion/nucleo/conexion.php';
-
-// recibir datos del formulario
-$usuario = $_POST['usuario'] ?? '';
-$password = $_POST['password'] ?? '';
-$rol = $_POST['rol'] ?? '';
-
-// validar campos vacíos
-if (empty($usuario) || empty($password) || empty($rol)) {
-    header("Location: aplicacion/vistas/publico/login.php?error=1");
-    exit;
+// Redirigir según rol
+switch ($resultado['id_rol']) {
+    case 1: // Admin
+        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php");
+        break;
+    case 2: // Pastor
+        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php");
+        break;
+    default:
+        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/publico/login.php?error=3");
+        break;
 }
-
-// consulta a la base de datos
-$sql = "SELECT * FROM usuarios WHERE usuario = ? AND id_rol = ?";
-$stmt = $conexion->prepare($sql);
-$stmt->bind_param("si", $usuario, $rol);
-$stmt->execute();
-
-$resultado = $stmt->get_result();
-
-if ($resultado->num_rows === 1) {
-    $user = $resultado->fetch_assoc();
-
-    // verificar contraseña (simple por ahora)
-    if ($password === $user['password']) {
-
-        // guardar sesión
-        $_SESSION['usuario'] = $user['usuario'];
-        $_SESSION['rol'] = $user['id_rol'];
-
-        // redirigir según rol
-        header("Location: aplicacion/vistas/admin/dashboard.php");
-        exit;
-
-    } else {
-        header("Location: aplicacion/vistas/publico/login.php?error=2");
-        exit;
-    }
-
-} else {
-    header("Location: aplicacion/vistas/publico/login.php?error=3");
-    exit;
-}
-
-*/
+exit;

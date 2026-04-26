@@ -1,135 +1,160 @@
-/* ========================= */
-/* LOGIN CLARO MODERNO */
-/* ========================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a3a5c 0%, #4a90e2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 .login-wrapper {
-    height: 100vh;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #f4f6f9; /* fondo claro */
+    padding: 20px;
 }
 
 .login-card {
     background: #ffffff;
-    padding: 45px;
-    width: 400px;
-    border-radius: 14px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    padding: 40px 35px;
+    width: 100%;
+    max-width: 380px;
+    border-radius: 20px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
     text-align: center;
 }
 
+/* ── Logo ── */
+.login-logo {
+    margin-bottom: 10px;
+}
+.login-logo img {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+}
+
+/* ── Títulos ── */
 .login-card h2 {
-    margin-bottom: 25px;
-    color: #333;
+    font-size: 24px;
+    color: #1a3a5c;
+    margin-bottom: 4px;
+    font-weight: 700;
+}
+.login-subtitulo {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 28px;
 }
 
-/* INPUTS */
+/* ── Inputs ── */
 .form-group {
+    position: relative;
     margin-bottom: 18px;
+    text-align: left;
 }
-
-.form-group input,
-.form-group select {
+.form-group input {
     width: 100%;
-    padding: 13px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    padding: 13px 42px;
+    border: 1.5px solid #dde3f0;
+    border-radius: 10px;
     outline: none;
     font-size: 14px;
-    background: #fafafa;
-    transition: 0.3s;
+    background: #f7f9fc;
+    color: #1a1f36;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
 }
-
-.form-group input:focus,
-.form-group select:focus {
-    border-color: #4a90e2; /* azul suave */
+.form-group input:focus {
+    border-color: #4a90e2;
     background: #fff;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
 }
+.icono-input {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #4a90e2;
+    font-size: 14px;
+    pointer-events: none;
+}
+.icono-ojo {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.icono-ojo:hover { color: #4a90e2; }
 
-/* BOTÓN */
+/* ── Botón ── */
 .btn-login {
     width: 100%;
     padding: 13px;
-    background: #4a90e2; /* azul moderno */
+    background: linear-gradient(135deg, #1a3a5c, #4a90e2);
     border: none;
     color: #fff;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    font-weight: 500;
-    transition: 0.3s;
+    font-size: 15px;
+    font-weight: 600;
+    transition: opacity 0.3s, transform 0.2s;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0.5px;
 }
-
 .btn-login:hover {
-    background: #357abd;
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 144, 226, 0.4);
 }
 
-/* RECUPERAR */
+/* ── Recuperar ── */
 .recuperar {
-    margin-top: 15px;
+    margin-top: 18px;
 }
-
 .recuperar a {
     font-size: 13px;
-    color: #555;
-    text-decoration: none;
-}
-
-.recuperar a:hover {
     color: #4a90e2;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.recuperar a:hover {
+    color: #1a3a5c;
+    text-decoration: underline;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ========================= */
-/* ALERTA FLOTANTE */
-/* ========================= */
+/* ── Alerta flotante ── */
 .alerta {
     position: fixed;
     top: 20px;
     right: 20px;
-
     background: #ffffff;
     padding: 15px 20px;
     border-radius: 10px;
-
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     font-size: 14px;
     color: #333;
-
     opacity: 0;
     transform: translateY(-20px);
-    transition: 0.4s;
-
+    transition: opacity 0.4s, transform 0.4s;
     z-index: 9999;
+    pointer-events: none;
 }
+.alerta.show { opacity: 1; transform: translateY(0); }
+.alerta.error   { border-left: 5px solid #e74c3c; }
+.alerta.success { border-left: 5px solid #2ecc71; }
 
-/* ACTIVA */
-.alerta.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* TIPOS */
-.alerta.error {
-    border-left: 5px solid #e74c3c;
-}
-
-.alerta.success {
-    border-left: 5px solid #2ecc71;
+/* ── Responsive ── */
+@media (max-width: 480px) {
+    .login-card { padding: 30px 20px; }
 }

@@ -1,121 +1,94 @@
 <?php
-session_start();
 
+ini_set('session.cookie_lifetime', 0);
+session_start();
+require_once __DIR__ . '/../../core/Autoload.php';
 if (!isset($_SESSION['usuario'])) {
     header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/publico/login.php");
     exit;
 }
-?>
 
+if (!in_array($_SESSION['rol_id'], [1, 2])) {
+    header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/publico/login.php?error=3");
+    exit;
+}
+
+$vista = $_GET['vista'] ?? null;
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Panel Admin</title>
-
-<base href="/IglesiaDelNazarenoBagua/">
-
-
-
-<link rel="stylesheet" href="admin/css/dashboard.css">
-<link rel="stylesheet" href="admin/css/sidebar.css">
+    <meta charset="UTF-8">
+    <title>Panel Admin</title>
+    <base href="/IglesiaDelNazarenoBagua/">
+    <link rel="stylesheet" href="admin/css/dashboard.css">
+    <link rel="stylesheet" href="admin/css/sidebar.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/> <!-- ← ESTO FALTA -->
 
 
-
-
-
-<?php
-if (isset($_GET['vista'])) {
-    $vista = $_GET['vista'];
-    if ($vista === 'NewUsuarioForm') {
-        echo '<link rel="stylesheet" href="admin/css/NewUsuarioForm.css">';
+    <?php
+    $estilos = [
+        'NewUsuarioForm'    => 'NewUsuarioForm.css',
+        'noticias'          => 'noticias.css',
+        'membresia'         => 'membresia.css',
+        'recurso_admin'     => 'recurso_admin.css',
+        'reguistro_usuario' => 'reguistro_usuario.css',
+        'usuarios_admin'    => 'usuarios_admin.css',
+        'visitasListar'     => 'visitasListar.css',
+        'visitasMap'        => 'visitasMap.css',
+        'trasmision'        => 'transmision.css',
+    ];
+    if ($vista && isset($estilos[$vista])) {
+        echo '<link rel="stylesheet" href="admin/css/' . $estilos[$vista] . '">';
     }
-    if ($vista === 'noticias') {
-        echo '<link rel="stylesheet" href="admin/css/noticias.css">';
-    }
-    
-    if ($vista === 'membresia') {
-        echo '<link rel="stylesheet" href="admin/css/membresia.css">';
-    }
-    if ($vista === 'recurso_admin') {
-        echo '<link rel="stylesheet" href="admin/css/recurso_admin.css">';
-    }
-          if ($vista === 'reguistro_usuario') { //reenderizar mejor hay un problema con la renderizacion
-        echo '<link rel="stylesheet" href="admin/css/reguistro_usuario.css">';
-    }http://localhost/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=trasmision
-    if ($vista === 'usuarios_admin') { 
-        echo '<link rel="stylesheet" href="admin/css/usuarios_admin.css">';
-    }
-    if ($vista === 'visitasListar') { 
-        echo '<link rel="stylesheet" href="admin/css/visitasListar.css">';
-    }
-    if ($vista === 'visitasMap') { 
-        echo '<link rel="stylesheet" href="admin/css/visitasMap.css">';
-    }
-    if ($vista === 'trasmision') { 
-        echo '<link rel="stylesheet" href="admin/css/transmision.css">';
-    }
-
-    // y así con cada vista
-}
-?>
+    ?>
 </head>
-
 <body>
 
 <div class="admin-container">
-    <!-- SIDEBAR -->
     <?php include 'includes/sidebar.php'; ?>
 
     <main class="main-area">
         <section class="content" id="contenedor-vista">
             <?php
-            // Aquí decides qué contenido mostrar según el botón o parámetro
-            if (isset($_GET['vista'])) {
-                $vista = $_GET['vista'];
-                $ruta = "contenidos/" . $vista . ".php";
-                if (file_exists($ruta)) {
-                    include $ruta;
+            if ($vista) {
+                if ($vista === 'usuarios_admin' && $_SESSION['rol_id'] !== 1) {
+                    echo "<p style='color:red;'>No tienes permiso para ver esta sección.</p>";
                 } else {
-                    echo "<p style='color:red;'>No se encontró la vista solicitada.</p>";
+                    $ruta = "contenidos/" . $vista . ".php";
+                    if (file_exists($ruta)) {
+                        include $ruta;
+                    } else {
+                        echo "<p style='color:red;'>Vista no encontrada.</p>";
+                    }
                 }
             } else {
-                echo '<div class="contenedor-tarjeta"><div class="tarjeta"><h3>Bienvenido al panel</h3></div></div>';
+                echo '<div class="contenedor-tarjeta">
+                        <div class="tarjeta">
+                            <h3>Bienvenido, ' . htmlspecialchars($_SESSION['usuario']) . ' 👋</h3>
+                            <p>Rol: ' . htmlspecialchars($_SESSION['rol_nombre']) . '</p>
+                        </div>
+                      </div>';
             }
             ?>
         </section>
     </main>
-
 </div>
+
 <script src="admin/js/sidebar.js"></script>
 
 <?php
-if (isset($_GET['vista'])) {
-    $vista = $_GET['vista'];
-    if ($vista === 'NewUsuarioForm') {
-        echo '<script src="admin/js/NewUsuarioForm.js"></script>';
-    }
-    if ($vista === 'noticias') {
-        echo '<script src="admin/js/noticias.js"></script>';
-    }
-    if ($vista === 'usuarios_admin') {
-        echo '<script src="admin/js/usuarios_admin.js"></script>';
-    }
-    if ($vista === 'visitasMap') {
-        echo '<script src="admin/js/visitasMap.js"></script>';
-    }    
-    if ($vista === 'recurso_admin') {
-        echo '<script src="admin/js/recurso_admin.js"></script>';
-    }   
-    if ($vista === 'recurso_admin') {
-        echo '<script src="admin/js/recurso_admin.js"></script>';
-    }  
-    if ($vista === 'reguistro_usuario') {
-        echo '<script src="admin/js/reguistro_usuario.js"></script>';
-    }   
-    if ($vista === 'membresia') {
-        echo '<script src="admin/js/membresia.js"></script>';
-    }          
+$scripts = [
+    'NewUsuario'    => 'NewUsuario.js',
+    'noticias'          => 'noticias.js',
+    'usuarios_admin'    => 'usuarios_admin.js',
+    'visitasMap'        => 'visitasMap.js',
+    'recurso_admin'     => 'recurso_admin.js',
+    'reguistro_usuario' => 'reguistro_usuario.js',
+    'membresia'         => 'membresia.js',
+];
+if ($vista && isset($scripts[$vista])) {
+    echo '<script src="admin/js/' . $scripts[$vista] . '"></script>';
 }
 ?>
 
