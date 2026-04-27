@@ -1,0 +1,100 @@
+/* Contenedor Principal */
+.contenedor-transmision {
+    max-width: 1000px;
+    margin: 40px auto; /* Centra el contenido y da espacio arriba/abajo */
+    padding: 0 20px;
+    min-height: 90vh; /* Asegura que el footer no se suba si hay poco contenido */
+}
+
+/* Cabecera de la transmisión */
+.header-vivo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-vivo h1 {
+    font-size: 1.8rem;
+    color: #2d3748;
+    margin: 0;
+}
+
+/* Badge de "EN VIVO" con animación */
+.badge-vivo {
+    background-color: #fed7d7;
+    color: #e53e3e;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.badge-vivo::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background-color: #e53e3e;
+    border-radius: 50%;
+    animation: palpitar 1.5s infinite;
+}
+
+@keyframes palpitar {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Marco del Video (Efecto Cine) */
+.video-frame {
+    position: relative;
+    padding-bottom: 56.25%; /* Relación 16:9 */
+    height: 0;
+    overflow: hidden;
+    border-radius: 15px;
+    background: #000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    margin-bottom: 25px;
+}
+
+.video-frame iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Detalles del Video */
+.video-detalle {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.video-detalle h2 {
+    color: #4c51bf; /* Color azul de tu marca */
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.video-detalle p {
+    color: #718096;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Ajustes Responsivos */
+@media (max-width: 768px) {
+    .header-vivo {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .header-vivo h1 { font-size: 1.5rem; }
+}

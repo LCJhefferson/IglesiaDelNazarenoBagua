@@ -1,33 +1,19 @@
+const titulos = { publico:'Vista Pública', subir:'Subir Archivo', archivos:'Mis Archivos', papelera:'Papelera' };
 
-
-    const titulos = {
-        publico:  'Vista Pública',
-        subir:    'Subir Archivo',
-        archivos: 'Mis Archivos',
-        papelera: 'Papelera'
-    };
-
-    let idArchivoEditando = null;
-
+    // ── MENÚ ──
     function alternarMenu() {
-        const panel  = document.getElementById('panelMenu');
-        const boton  = document.getElementById('btnHamburguesa');
-        const fondo  = document.getElementById('fondoOscuro');
-        if (panel.classList.contains('visible')) {
-            cerrarMenu();
-        } else {
-            panel.classList.add('visible');
-            boton.classList.add('abierto');
-            fondo.classList.add('visible');
-        }
+        const panel = document.getElementById('panelMenu');
+        const boton = document.getElementById('btnHamburguesa');
+        const fondo = document.getElementById('fondoOscuro');
+        panel.classList.contains('visible') ? cerrarMenu() : (panel.classList.add('visible'), boton.classList.add('abierto'), fondo.classList.add('visible'));
     }
-
     function cerrarMenu() {
         document.getElementById('panelMenu').classList.remove('visible');
         document.getElementById('btnHamburguesa').classList.remove('abierto');
         document.getElementById('fondoOscuro').classList.remove('visible');
     }
 
+    // ── PÁGINAS ──
     function mostrarPagina(id) {
         document.querySelectorAll('.pagina').forEach(p => p.classList.remove('activa'));
         document.querySelectorAll('.opcion-menu').forEach(op => op.classList.remove('activo'));
@@ -38,36 +24,33 @@
         cerrarMenu();
     }
 
+    // ── FILTROS ──
     function filtrarArchivos(consulta) {
         document.querySelectorAll('#todosArchivos .tarjeta-archivo').forEach(t => {
             t.style.display = t.querySelector('.nombre-archivo').textContent.toLowerCase().includes(consulta.toLowerCase()) ? '' : 'none';
         });
     }
-
     function filtrarPorTipo(tipo) {
         document.querySelectorAll('#todosArchivos .tarjeta-archivo').forEach(t => {
             if (tipo === 'todos') { t.style.display = ''; return; }
-            t.style.display = t.querySelector('.etiqueta-archivo').textContent.toLowerCase().includes(tipo) ? '' : 'none';
+            const etiqueta = t.querySelector('.etiqueta-archivo');
+            t.style.display = etiqueta && etiqueta.textContent.toLowerCase().includes(tipo) ? '' : 'none';
         });
     }
 
+    // ── VISTA PREVIA FORMULARIO ──
     function actualizarPrevista() {
         const titulo = document.getElementById('campoTitulo').value;
         const desc   = document.getElementById('campoDescripcion').value;
         document.getElementById('tituloPrevio').textContent      = titulo || 'Título del archivo';
         document.getElementById('descripcionPrevia').textContent = desc   || 'La descripción aparecerá aquí...';
     }
-
-    function manejarSeleccion(campo) {
-        if (campo.files[0]) mostrarArchivoSeleccionado(campo.files[0]);
-    }
-
+    function manejarSeleccion(campo) { if (campo.files[0]) mostrarArchivoSeleccionado(campo.files[0]); }
     function manejarSoltado(e) {
         e.preventDefault();
         document.getElementById('zonaArrastre').classList.remove('arrastrando');
         if (e.dataTransfer.files[0]) mostrarArchivoSeleccionado(e.dataTransfer.files[0]);
     }
-
     function mostrarArchivoSeleccionado(archivo) {
         const zona = document.getElementById('zonaArrastre');
         const ext  = archivo.name.split('.').pop().toUpperCase();
@@ -80,19 +63,17 @@
                     <div style="font-size:.75rem;color:var(--texto-suave);margin-top:2px;">${mb} MB · ${ext}</div>
                 </div>
                 <div style="display:flex;gap:6px;flex-shrink:0;">
-                    <button type="button" class="boton boton-contorno" style="padding:6px 14px;font-size:.78rem;border-radius:6px;" onclick="cambiarArchivo()"><i class="fa-solid fa-pen"></i> Cambiar</button>
-                    <button type="button" class="boton" style="padding:6px 10px;font-size:.78rem;border-radius:6px;background:transparent;border:1.5px solid var(--borde);color:var(--peligro);" onclick="quitarArchivo()"><i class="fa-solid fa-xmark"></i></button>
+                    <button type="button" class="boton boton-contorno" style="padding:6px 14px;font-size:.78rem;" onclick="cambiarArchivo()"><i class="fa-solid fa-pen"></i> Cambiar</button>
+                    <button type="button" class="boton" style="padding:6px 10px;font-size:.78rem;background:transparent;border:1.5px solid var(--borde);color:var(--peligro);" onclick="quitarArchivo()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>`;
-        zona.style.border     = '2px solid var(--exito)';
+        zona.style.border = '2px solid var(--exito)';
         zona.style.background = 'var(--blanco)';
-        zona.style.padding    = '16px 18px';
-        zona.style.cursor     = 'default';
-        zona.onclick          = null;
+        zona.style.padding = '16px 18px';
+        zona.style.cursor = 'default';
+        zona.onclick = null;
     }
-
     function cambiarArchivo() { document.getElementById('campoPrincipal').click(); }
-
     function quitarArchivo() {
         const zona = document.getElementById('zonaArrastre');
         zona.style.border = zona.style.background = zona.style.padding = zona.style.cursor = '';
@@ -100,55 +81,76 @@
         zona.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i><p>Arrastra un archivo aquí o <span>selecciona uno</span></p><p style="margin-top:6px;font-size:.75rem">PDF, imágenes, videos — Máx. 50MB</p>`;
         document.getElementById('campoPrincipal').value = '';
     }
+    function limpiarFormulario() {
+        document.getElementById('campoId').value = '';
+        document.getElementById('campoTitulo').value = '';
+        document.getElementById('campoDescripcion').value = '';
+        document.getElementById('campoCategoria').value = '';
+        document.getElementById('campoYoutube').value = '';
+        document.getElementById('campoRutaActual').value = '';
+        document.getElementById('campoTipoActual').value = '';
+        document.getElementById('tituloFormulario').textContent = '📤 Subir nuevo archivo';
+        document.getElementById('textoBotonGuardar').textContent = 'Publicar archivo';
+        quitarArchivo();
+        actualizarPrevista();
+    }
 
-    function abrirModalEditar(id) {
-        const datos = {
-            1:{nombre:'Guía 40 días de oración',descripcion:'Material de oración para la temporada de pentecostés.',categoria:'documentos',fecha:'10 Abr 2026'},
-            2:{nombre:'Gráficos Cuaresma Redes',descripcion:'Gráficos para redes sociales, domingo, jueves y viernes.',categoria:'imagenes',fecha:'05 Abr 2026'},
-            3:{nombre:'Semana Mundial de Oración',descripcion:'Recursos y video para la semana mundial de oración 2026.',categoria:'videos',fecha:'01 Mar 2026'},
-            4:{nombre:'Manual de Liderazgo',descripcion:'Guía completa para líderes de célula y ministerios.',categoria:'documentos',fecha:'20 Feb 2026'},
-            5:{nombre:'Fotografías Evento Anual',descripcion:'Galería fotográfica del encuentro regional anual.',categoria:'imagenes',fecha:'15 Ene 2026'},
-            6:{nombre:'Sermón Domingo de Ramos',descripcion:'Video del sermón especial para domingo de ramos.',categoria:'videos',fecha:'12 Abr 2026'},
-        };
-        idArchivoEditando = id;
-        const d = datos[id];
-        if (d) {
-            document.getElementById('editarNombre').value      = d.nombre;
-            document.getElementById('editarDescripcion').value = d.descripcion;
-            document.getElementById('editarCategoria').value   = d.categoria;
-            document.getElementById('editarFecha').value       = d.fecha;
-        }
+    // ── MODAL EDITAR ──
+    // Recibe los datos del archivo directo desde PHP (ya saneados)
+    function abrirModalEditar(id, titulo, descripcion, categoria, tipo, ruta, youtube) {
+        document.getElementById('editarId').value          = id;
+        document.getElementById('editarTitulo').value      = titulo;
+        document.getElementById('editarDescripcion').value = descripcion;
+        document.getElementById('editarCategoria').value   = categoria;
+        document.getElementById('editarTipoActual').value  = tipo;
+        document.getElementById('editarRuta').value        = ruta;
+        document.getElementById('editarYoutube').value     = youtube;
         document.getElementById('modalEditar').classList.add('abierto');
     }
-
     function cerrarModalEditar() {
         document.getElementById('modalEditar').classList.remove('abierto');
-        idArchivoEditando = null;
     }
 
-    function guardarCambios() {
-        mostrarAviso('Archivo "' + document.getElementById('editarNombre').value + '" actualizado', 'exito');
-        cerrarModalEditar();
+    // ── MODAL CONFIRMAR ELIMINAR (a papelera) ──
+ function confirmarEliminar(id, nombre) {
+    document.getElementById('textoConfirmarEliminar').innerHTML =
+        `"<strong>${nombre}</strong>" se moverá a la papelera. Podrás restaurarlo después.`;
+    document.getElementById('enlaceConfirmarEliminar').href =
+        '/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=recurso_admin&eliminar=' + id;
+    document.getElementById('modalConfirmarEliminar').classList.add('abierto');
+}
+    function cerrarModalConfirmar() {
+        document.getElementById('modalConfirmarEliminar').classList.remove('abierto');
     }
 
+    // ── MODAL CONFIRMAR ELIMINAR DEFINITIVO ──
+  function confirmarEliminarDefinitivo(id, nombre) {
+    document.getElementById('textoConfirmarDefinitivo').innerHTML =
+        `"<strong>${nombre}</strong>" será eliminado <strong>permanentemente</strong>. Esta acción no se puede deshacer.`;
+    document.getElementById('enlaceConfirmarDefinitivo').href =
+        '/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=recurso_admin&eliminar_definitivo=' + id;
+    document.getElementById('modalConfirmarDefinitivo').classList.add('abierto');
+}
+    function cerrarModalDefinitivo() {
+        document.getElementById('modalConfirmarDefinitivo').classList.remove('abierto');
+    }
+
+    // ── TOAST ──
     function mostrarAviso(mensaje, tipo = 'exito') {
         const caja = document.getElementById('aviso');
         document.getElementById('mensajeAviso').textContent = mensaje;
         caja.className = `aviso ${tipo}`;
         caja.querySelector('i').className = tipo === 'exito' ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-xmark';
         caja.classList.add('visible');
-        setTimeout(() => caja.classList.remove('visible'), 2800);
+        setTimeout(() => caja.classList.remove('visible'), 3000);
     }
 
-    // Chips de filtro
-    document.querySelectorAll('.chip-filtro').forEach(chip => {
-        chip.addEventListener('click', function () {
-            document.querySelectorAll('.chip-filtro').forEach(c => c.classList.remove('activo'));
-            this.classList.add('activo');
+    // ── CERRAR MODALES AL HACER CLIC FUERA ──
+    ['modalEditar','modalConfirmarEliminar','modalConfirmarDefinitivo'].forEach(id => {
+        document.getElementById(id).addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('abierto');
+            }
         });
     });
 
-    // Cerrar modal al hacer clic fuera
-    document.getElementById('modalEditar').addEventListener('click', function (e) {
-        if (e.target === this) cerrarModalEditar();
-    });

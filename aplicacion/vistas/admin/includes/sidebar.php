@@ -26,15 +26,21 @@
         </div>
 
         <div class="menu-item">
-            <a href="aplicacion/vistas/admin/dashboard.php?vista=trasmision" class="menu-title direct-link">Trasmision</a>
+            <a href="aplicacion/vistas/admin/dashboard.php?vista=transmision" class="menu-title direct-link">Trasmision</a>
         </div>
 
-        <div class="menu-item">
-            <a href="aplicacion/vistas/admin/dashboard.php?vista=#" class="menu-title direct-link">Dicipulado</a>
-        </div>
+        
 
         <div class="menu-item">
             <a href="aplicacion/vistas/admin/dashboard.php?vista=noticias" class="menu-title direct-link">Noticias</a>
+        </div> 
+        
+        <div class="menu-item">
+            <div class="menu-title">Discipulado</div>
+            <div class="submenu">
+                <a href="aplicacion/vistas/admin/dashboard.php?vista=listaDiscipulados">Lista</a>
+                <a href="aplicacion/vistas/admin/dashboard.php?vista=gruposDiscipulado">Grupos</a>
+            </div>
         </div>
 
         <div class="menu-item">

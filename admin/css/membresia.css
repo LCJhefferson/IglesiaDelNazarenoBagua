@@ -127,12 +127,20 @@ tr:hover{
 
 .pastor{
     background:rgba(47,158,68,.1);
-    color:var(--verde);
+    color:var(--acento);
 }
 
 .discipulo{
+    background:rgba(212, 212, 212, 0.363);
+    color:var(--texto);
+}
+.lider{
     background:rgba(245,159,0,.1);
     color:var(--naranja);
+}
+.miembro{
+    background:rgba(47,158,68,.1);
+    color:var(--verde);
 }
 
 /* BOTONES */

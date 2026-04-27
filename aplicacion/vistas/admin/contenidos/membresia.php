@@ -1,99 +1,25 @@
 <?php
-$archivo = "miembros.json";
+require_once __DIR__ . '/../../../core/Autoload.php';
+use aplicacion\controladores\MiembroController;
 
-/* ───────── FUNCIONES ───────── */
-function leerDatos($archivo){
-    if (!file_exists($archivo)) {
-        file_put_contents($archivo, json_encode([]));
-    }
-    return json_decode(file_get_contents($archivo), true);
-}
+$controller = new MiembroController();
+$controller->manejarPeticion(); 
 
-function guardarDatos($archivo, $datos){
-    file_put_contents($archivo, json_encode($datos, JSON_PRETTY_PRINT));
-}
+$miembros = $controller->listarMiembros();
+$cargos = $controller->obtenerCargos();
+$condiciones = $controller->obtenerCondiciones();
 
-$miembros = leerDatos($archivo);
+// Estadísticas filtradas por estado activo (1)
+$activos = count(array_filter($miembros, fn($m) => (int)($m['estado'] ?? 1) === 1));
+$inactivos = count(array_filter($miembros, fn($m) => (int)($m['estado'] ?? 1) === 0));
 
-/* ───────── REGISTRAR ───────── */
-if (isset($_POST['registrar'])) {
+// Lógica de cargos: ID 1 = Pastor, ID 2 = Líder, ID 3 = Miembro
+$pastores = count(array_filter($miembros, fn($m) => ((int)$m['cargo_id'] === 1 && (int)$m['estado'] === 1)));
+$lideres = count(array_filter($miembros, fn($m) => ((int)$m['cargo_id'] === 2 && (int)$m['estado'] === 1)));
 
-    $id = !empty($miembros) ? max(array_column($miembros,'id')) + 1 : 1;
-
-    $miembros[] = [
-        "id"=>$id,
-        "nombres"=>$_POST['nombres'],
-        "apellidos"=>$_POST['apellidos'],
-        "telefono"=>$_POST['telefono'],
-        "direccion"=>$_POST['direccion'],
-        "fecha_nacimiento"=>$_POST['fecha_nacimiento'],
-        "cargo_id"=>$_POST['cargo_id'],
-        "condicion_id"=>$_POST['condicion_id'],
-        "latitud"=>$_POST['latitud'],
-        "longitud"=>$_POST['longitud']
-    ];
-
-    guardarDatos($archivo, $miembros);
-    header("Location: ".$_SERVER['PHP_SELF']);
-}
-
-/* ───────── EDITAR ───────── */
-if (isset($_POST['editar'])) {
-    foreach ($miembros as &$m) {
-        if ($m['id'] == $_POST['id']) {
-            $m['nombres'] = $_POST['nombres'];
-            $m['apellidos'] = $_POST['apellidos'];
-            $m['telefono'] = $_POST['telefono'];
-            $m['direccion'] = $_POST['direccion'];
-            $m['fecha_nacimiento'] = $_POST['fecha_nacimiento'];
-            $m['cargo_id'] = $_POST['cargo_id'];
-            $m['condicion_id'] = $_POST['condicion_id'];
-            $m['latitud'] = $_POST['latitud'];
-            $m['longitud'] = $_POST['longitud'];
-        }
-    }
-
-    guardarDatos($archivo, $miembros);
-    header("Location: ".$_SERVER['PHP_SELF']);
-}
-
-/* ───────── ELIMINAR ───────── */
-if (isset($_GET['eliminar'])){
-    $miembros = array_values(array_filter($miembros, fn($m)=>$m['id'] != $_GET['eliminar']));
-    guardarDatos($archivo,$miembros);
-    header("Location: ".$_SERVER['PHP_SELF']);
-}
-
-/* ───────── ESTADÍSTICAS ───────── */
-$pastores = count(array_filter($miembros, fn($m)=>($m['cargo_id'] ?? 2)==1));
-$discipulos = count($miembros) - $pastores;
-$total = count($miembros);
-
-/* ───────── MAPA CONDICIONES ───────── */
-$condiciones = [
-1=>"Saludable",
-2=>"Enfermo",
-3=>"Hospitalizado",
-4=>"Reposo",
-5=>"Tratamiento"
-];
+$fechaHoy = date('Y-m-d'); 
 ?>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Gestión de Miembros</title>
-
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<link rel="stylesheet" href="css/membresia.css">
-</head>
-
-<body>
-
-<!-- HEADER -->
 <div class="header">
     <h2><i class="fa-solid fa-users"></i> Gestión de Miembros</h2>
     <button class="nuevo" onclick="abrirModal()">
@@ -101,174 +27,153 @@ $condiciones = [
     </button>
 </div>
 
-<!-- CARDS -->
 <div class="cards">
-    <div class="card">
-        <i class="fa-solid fa-users icono"></i>
-        <div>
-            <h3><?= $total ?></h3>
-            <p>Total</p>
-        </div>
+    <div class="card" style="border-left: 5px solid #28a745;">
+        <i class="fa-solid fa-user-check icono" style="color: #28a745;"></i>
+        <div><h3><?= $activos ?></h3><p>Miembros Activos</p></div>
     </div>
-
-    <div class="card">
-        <i class="fa-solid fa-user-tie icono"></i>
-        <div>
-            <h3><?= $pastores ?></h3>
-            <p>Pastores</p>
-        </div>
+    <div class="card" style="border-left: 5px solid #dc3545;">
+        <i class="fa-solid fa-user-xmark icono" style="color: #dc3545;"></i>
+        <div><h3><?= $inactivos ?></h3><p>Miembros Inactivos</p></div>
     </div>
-
-    <div class="card">
-        <i class="fa-solid fa-user icono"></i>
-        <div>
-            <h3><?= $discipulos ?></h3>
-            <p>Discípulos</p>
-        </div>
+    <div class="card" style="border-left: 5px solid #007bff;">
+        <i class="fa-solid fa-user-tie icono" style="color: #007bff;"></i>
+        <div><h3><?= $pastores ?></h3><p>Pastores Activos</p></div>
+    </div>
+    <div class="card" style="border-left: 5px solid #ffc107;">
+        <i class="fa-solid fa-star icono" style="color: #ffc107;"></i>
+        <div><h3><?= $lideres ?></h3><p>Líderes Activos</p></div>
     </div>
 </div>
 
-<!-- BUSCADOR -->
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <h2>Lista de Miembros</h2>
-    <input class="buscador" type="text" id="buscar" onkeyup="buscar()" placeholder="Buscar miembro...">
+<div style="background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+    <div style="flex: 1; min-width: 200px;">
+        <input class="buscador" type="text" id="buscar" onkeyup="filtrarTabla()" placeholder="Buscar por nombre..." style="width: 100%;">
+    </div>
+    
+    <select id="filtroEstado" onchange="filtrarTabla()" style="padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-weight: bold;">
+        <option value="1">Solo Activos</option>
+        <option value="0">Solo Inactivos</option>
+        <option value="">Todos</option>
+    </select>
+
+    <select id="filtroRol" onchange="filtrarTabla()" style="padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <option value="">Todos los Roles</option>
+        <?php foreach($cargos as $c): ?>
+            <option value="<?= htmlspecialchars($c['nombre']) ?>"><?= htmlspecialchars(ucfirst($c['nombre'])) ?></option>
+        <?php endforeach; ?>
+    </select>
+
+    <select id="filtroCondicion" onchange="filtrarTabla()" style="padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <option value="">Todas las Condiciones</option>
+        <?php foreach($condiciones as $con): ?>
+            <option value="<?= htmlspecialchars($con['nombre']) ?>"><?= htmlspecialchars(ucfirst($con['nombre'])) ?></option>
+        <?php endforeach; ?>
+    </select>
 </div>
 
-<!-- TABLA -->
 <table>
-<thead>
-<tr>
-<th>Nombre</th>
-<th>Teléfono</th>
-<th>Dirección</th>
-<th>Fecha</th>
-<th>Rol</th>
-<th>Condición</th>
-<th>Acciones</th>
-</tr>
-</thead>
-
-<tbody>
-<?php foreach($miembros as $m){ ?>
-<tr>
-
-<td><?= htmlspecialchars(($m['nombres'] ?? '')." ".($m['apellidos'] ?? '')) ?></td>
-<td><?= htmlspecialchars($m['telefono'] ?? '') ?></td>
-<td><?= htmlspecialchars($m['direccion'] ?? '') ?></td>
-<td><?= htmlspecialchars($m['fecha_nacimiento'] ?? '') ?></td>
-
-<td>
-<?= (($m['cargo_id'] ?? 2)==1)
-    ? '<span class="badge pastor">Pastor</span>'
-    : '<span class="badge discipulo">Discípulo</span>' ?>
-</td>
-
-<td>
-<?= $condiciones[$m['condicion_id'] ?? 1] ?>
-</td>
-
-<td>
-<button class="btn editar"
-onclick="editar(
-'<?= $m['id'] ?>',
-'<?= addslashes($m['nombres'] ?? '') ?>',
-'<?= addslashes($m['apellidos'] ?? '') ?>',
-'<?= addslashes($m['telefono'] ?? '') ?>',
-'<?= addslashes($m['direccion'] ?? '') ?>',
-'<?= $m['fecha_nacimiento'] ?? '' ?>',
-'<?= $m['cargo_id'] ?? 2 ?>',
-'<?= $m['condicion_id'] ?? 1 ?>',
-'<?= $m['latitud'] ?? '' ?>',
-'<?= $m['longitud'] ?? '' ?>'
-)">
-<i class="fa-solid fa-pen"></i>
-</button>
-
-<a class="btn eliminar"
-href="?eliminar=<?= $m['id'] ?>"
-onclick="return confirm('¿Eliminar este miembro?')">
-<i class="fa-solid fa-trash"></i>
-</a>
-</td>
-
-</tr>
-<?php } ?>
-</tbody>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Rol</th>
+            <th>Condición</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="tablaCuerpo">
+        <?php foreach($miembros as $m): ?>
+        <tr data-estado="<?= $m['estado'] ?>">
+            <td><?= htmlspecialchars(($m['nombres'] ?? '') . " " . ($m['apellidos'] ?? '')) ?></td>
+            <td><?= htmlspecialchars($m['telefono'] ?? '') ?></td>
+            <td class="col-rol">
+                <?php 
+                    // Asignación de clase CSS según el ID del cargo
+                    $claseBadge = 'discipulo'; 
+                    if($m['cargo_id'] == 1) $claseBadge = 'pastor';
+                    if($m['cargo_id'] == 2) $claseBadge = 'lider';
+                    if($m['cargo_id'] == 3) $claseBadge = 'miembro';
+                ?>
+                <span class="badge <?= $claseBadge ?>">
+                    <?= htmlspecialchars($m['cargo_nombre'] ?? 'Miembro') ?>
+                </span>
+            </td>
+            <td class="col-condicion"><?= htmlspecialchars($m['condicion_nombre'] ?? 'saludable') ?></td>
+            <td>
+                <?php if((int)($m['estado'] ?? 1) === 1): ?>
+                    <span style="color: #28a745; font-weight: bold;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Activo</span>
+                <?php else: ?>
+                    <span style="color: #dc3545; font-weight: bold;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Inactivo</span>
+                <?php endif; ?>
+            </td>
+            <td>
+                <button class="btn editar" onclick='editar(<?= json_encode($m) ?>)'>
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                
+                <?php if((int)($m['estado'] ?? 1) === 1): ?>
+                    <a class="btn eliminar" href="dashboard.php?vista=membresia&eliminar=<?= $m['id'] ?>" onclick="return confirm('¿Desactivar miembro?')">
+                        <i class="fa-solid fa-user-slash"></i>
+                    </a>
+                <?php else: ?>
+                    <a class="btn" href="dashboard.php?vista=membresia&activar=<?= $m['id'] ?>" style="background: #28a745; color: white; padding: 5px 8px; border-radius: 4px;">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </a>
+                <?php endif; ?>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
 </table>
 
-<!-- MODAL -->
 <div class="modal" id="modal">
-<div class="modal-box">
+    <div class="modal-box">
+        <h3 id="tituloModal"><i class="fa-solid fa-user-plus"></i> Gestionar Miembro</h3>
+        <form method="POST">
+            <input type="hidden" name="id">
+            <div class="grid">
+                <input type="text" name="nombres" placeholder="Nombres" required>
+                <input type="text" name="apellidos" placeholder="Apellidos" required>
+                <input type="text" name="telefono" placeholder="Teléfono">
+                <input type="date" name="fecha_nacimiento" value="<?= $fechaHoy ?>">
 
-<h3 id="tituloModal">
-<i class="fa-solid fa-user-plus"></i> Nuevo Miembro
-</h3>
+                <select name="cargo_id" required>
+                    <option value="">Seleccione Rol</option>
+                    <?php foreach($cargos as $c): ?>
+                        <option value="<?= $c['id'] ?>"><?= htmlspecialchars(ucfirst($c['nombre'])) ?></option>
+                    <?php endforeach; ?>
+                </select>
 
-<form method="POST">
-<input type="hidden" name="id">
+                <select name="condicion_id" required>
+                    <option value="">Seleccione Condición</option>
+                    <?php foreach($condiciones as $con): ?>
+                        <option value="<?= $con['id'] ?>"><?= htmlspecialchars(ucfirst($con['nombre'])) ?></option>
+                    <?php endforeach; ?>
+                </select>
 
-<div class="grid">
+                <select name="estado" id="inputEstado">
+                    <option value="1">Activo</option>
+                    <option value="0">Inactivo</option>
+                </select>
 
-<input type="text" name="nombres" placeholder="Nombres" required>
-<input type="text" name="apellidos" placeholder="Apellidos" required>
+                <div class="campo-mapa" style="grid-column: span 2;">
+                    <input type="text" name="direccion" placeholder="Dirección" style="width: 100%;">
+                    <button type="button" class="btn-mapa" onclick="abrirMapa()">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </button>
+                </div>
 
-<input type="text" name="telefono" placeholder="Teléfono">
+                <input type="text" name="latitud" id="latitud" placeholder="Latitud (Auto)">
+                <input type="text" name="longitud" id="longitud" placeholder="Longitud (Auto)">
+            </div>
 
-
-
-<input type="date" name="fecha_nacimiento">
-
-<select name="cargo_id">
-<option value="1">Pastor</option>
-<option value="2">Discípulo</option>
-</select>
-
-<select name="condicion_id">
-<option value="1">Saludable</option>
-<option value="2">Enfermo</option>
-<option value="3">Hospitalizado</option>
-<option value="4">Reposo</option>
-<option value="5">Tratamiento</option>
-</select>
-
-
-<div class="campo-mapa">
-
-<input type="text" name="direccion" placeholder="Dirección">
-
-<button type="button" class="btn-mapa" onclick="abrirMapa()">
-    <i class="fa-solid fa-map-location-dot"></i>
-</button>
-
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button type="submit" name="registrar" id="btnAgregar" class="nuevo">Agregar miembro</button>
+                <button type="submit" name="editar" id="btnActualizar" class="nuevo" style="display:none; background:#007bff;">Actualizar</button>
+                <button type="button" onclick="cerrarModal()" style="background:#dee2e6; color:#495057;">Cancelar</button>
+            </div>
+        </form>
+    </div>
 </div>
-
-<div class="coordenadas">
-    <input type="text" name="latitud" placeholder="Latitud">
-    <input type="text" name="longitud" placeholder="Longitud">
-</div>
-
-</div>
-
-<br>
-
-<button name="registrar" id="btnAgregar" class="nuevo">
-<i class="fa-solid fa-user-plus"></i> Agregar miembro
-</button>
-
-<button name="editar" id="btnActualizar" class="nuevo" style="display:none;">
-<i class="fa-solid fa-pen"></i> Actualizar
-</button>
-
-<button type="button" onclick="cerrarModal()">
-Cancelar
-</button>
-
-</form>
-
-</div>
-</div>
-
-<script src="js/membresia.js"></script>
-
-</body>
-</html>

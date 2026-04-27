@@ -34,9 +34,11 @@ $vista = $_GET['vista'] ?? null;
         'recurso_admin'     => 'recurso_admin.css',
         'reguistro_usuario' => 'reguistro_usuario.css',
         'usuarios_admin'    => 'usuarios_admin.css',
+        'gruposDiscipulado' => 'discipulado.css',
+        'listaDiscipulados' => 'discipulado.css',
         'visitasListar'     => 'visitasListar.css',
         'visitasMap'        => 'visitasMap.css',
-        'trasmision'        => 'transmision.css',
+        'transmision'        => 'transmision.css',
     ];
     if ($vista && isset($estilos[$vista])) {
         echo '<link rel="stylesheet" href="admin/css/' . $estilos[$vista] . '">';
@@ -86,6 +88,8 @@ $scripts = [
     'recurso_admin'     => 'recurso_admin.js',
     'reguistro_usuario' => 'reguistro_usuario.js',
     'membresia'         => 'membresia.js',
+    'transmision'        => 'transmision.js',
+    
 ];
 if ($vista && isset($scripts[$vista])) {
     echo '<script src="admin/js/' . $scripts[$vista] . '"></script>';
