@@ -1,0 +1,71 @@
+
+
+/* ========================= */
+/* HEADER */
+/* ========================= */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10000;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 50px;
+
+    background: rgba(255, 255, 255, 0.582);
+    backdrop-filter: blur(10px);
+}
+
+.header .login{
+     padding: 6px 14px;
+    margin-left: 60px;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.301);
+    
+
+    color: #000000;
+    text-decoration: none;
+    margin-left: 25px;
+    font-weight: 500;
+    position: relative;
+}
+
+.login:hover {
+    background: rgba(0, 0, 0, 0.377);
+    transform: translateY(-2px);
+}
+
+.logo img {
+    height: 40px;
+    filter: brightness(0); /* oscurece todo a negro */
+}
+
+
+/* ========================= */
+/* NAV */
+/* ========================= */
+.nav a {
+    color: #000000;
+    text-decoration: none;
+    margin-left: 25px;
+    font-weight: 500;
+    position: relative;
+}
+
+.nav a::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2.5px;
+    background: #fdc269;
+    left: 0;
+    bottom: -5px;
+    transition: 0.3s;
+}
+
+.nav a:hover::after {
+    width: 100%;
+}

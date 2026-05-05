@@ -1,33 +1,35 @@
-<?php
-// aplicacion/vistas/admin/contenidos/gruposDiscipulado.php
-require_once __DIR__ . '/../../../core/Autoload.php'; 
-use aplicacion\controladores\GrupoController;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        h3
+        {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+      <h1>AQUI IRA LO DE GRUPOS DISIPULADO </h1>
 
-$controller = new GrupoController();
-$grupos = $controller->listar();
-?>
+    <p>EL CSS Y JSS SI AGREGAS HASLO EN LA SIGUINETE RUTA public/admin/css/archivo.css</p>
+    <p>o dependiendo de lo que quieras si es js seria algo asi     public/admin/js/archivo.js</p>
 
-<div class="page-header">
-    <div>
-        <h1>Grupos de Discipulado</h1>
-        <p>Administra los grupos y sus discipuladores</p>
-    </div>
-    <button class="btn btn-primary" onclick="abrirModal('modal-nuevo-grupo')">
-        <i class="fa-solid fa-plus"></i> Nuevo Grupo
-    </button>
-</div>
 
-<div class="grupos-grid">
-    <?php if (empty($grupos)): ?>
-        <p>No hay grupos registrados aún.</p>
-    <?php else: ?>
-        <?php foreach ($grupos as $g): ?>
-            <div class="grupo-card" style="border-left: 5px solid <?= $g['color_nivel'] ?>;">
-                <div class="grupo-card-header">
-                    <div class="grupo-nombre"><?= htmlspecialchars($g['nombre']) ?></div>
-                    <span class="badge">Nivel <?= $g['nivel'] ?></span>
-                </div>
-                </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
-</div>
+    <h1> IMPORTANTE!!! crea un nuevo archivo para cada vista, no uses el mismo para todas, 
+        esto es para mantener el orden y la organización del proyecto, 
+        si usas el mismo archivo para todas las vistas se va a volver un caos y 
+        no se va a poder mantener el proyecto con facilidad, a
+        si que por favor crea un nuevo archivo para cada vista y no uses el mismo para todas, 
+        esto es muy importante para mantener el orden y la organización del proyecto.
+    </h1>
+
+
+    <h3>los archivos css ,js ,imagenes  para la parte administrativa estan en::</h3>
+    <h1> public/admin/</h1>
+    <p>no pongas archivos css,js,imagenes en otro lado para la parte administrativa </p>
+
+</body>
+</html>

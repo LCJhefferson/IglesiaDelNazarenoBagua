@@ -1,0 +1,20 @@
+
+  body { font-family:'DM Sans', sans-serif; margin:0; background:#f0f2f7; }
+  header { background:#fff; padding:20px; display:flex; flex-direction:column; gap:22px; }
+  header h1 { font-size:1.5rem; margin:0; color:#1a1f36; }
+  .filtros { display:flex; gap:90px; flex-wrap:wrap; }
+  .contenedor { flex:1; position:relative; }
+  .contenedor label {
+    display:block; font-size:0.85rem; font-weight:600; margin-bottom:6px; color:#444;
+  }
+  .contenedor i {
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    color:#4f6ef7; font-size:0.9rem;
+  }
+  input, select {
+    width:100%; padding:10px 12px 10px 36px;
+    border:1.5px solid #ccc; border-radius:8px;
+    font-size:0.9rem;
+  }
+  select { padding-left:36px; }
+  #map { height:850px; margin:20px; border-radius:12px; }

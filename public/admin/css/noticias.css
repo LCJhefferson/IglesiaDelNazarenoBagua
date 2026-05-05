@@ -1,0 +1,351 @@
+/* =========================================
+   RESET & VARIABLES
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --fondo: #f4f7fa;
+    --blanco: #ffffff;
+    --acento: #4f6ef7;
+    --acento-hover: #3a58e0;
+    --verde: #22c55e;
+    --rojo: #ef4444;
+    --rojo-claro: #fee2e2;
+    --purpura: #8b5cf6;
+    --texto: #1e293b;
+    --suave: #64748b;
+    --borde: #e2e8f0;
+    --sombra: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    padding: 20px;
+}
+
+/* =========================================
+   BARRA SUPERIOR (TOP BAR)
+   ========================================= */
+.top-bar {
+    background: var(--blanco);
+    padding: 15px 25px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 98%;
+    margin: 0 auto 25px auto;
+    box-shadow: var(--sombra);
+    border: 1px solid var(--borde);
+}
+
+.top-bar h2 {
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-nuevo {
+    background: var(--acento);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+}
+
+/* =========================================
+   TABLA Y BUSCADOR
+   ========================================= */
+.contenedor {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 25px;
+    max-width: 98%;
+    margin: 0 auto;
+}
+
+.tabla-header {
+    background: var(--blanco);
+    padding: 15px 20px;
+    border-radius: 15px 15px 0 0;
+    border: 1px solid var(--borde);
+    border-bottom: none;
+}
+
+.buscador-wrapper {
+    position: relative;
+    width: 400px;
+}
+
+.buscador-wrapper i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--suave);
+}
+
+#buscar-noticia {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border-radius: 8px;
+    border: 1px solid var(--borde);
+    background: #f8fafc;
+    outline: none;
+}
+
+.tabla-box {
+    background: var(--blanco);
+    border-radius: 0 0 15px 15px;
+    padding: 10px 20px 20px 20px;
+    border: 1px solid var(--borde);
+    box-shadow: var(--sombra);
+}
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 15px; font-size: 0.75rem; color: var(--suave); background: #f8fafc; }
+td { padding: 15px; border-top: 1px solid var(--borde); font-size: 0.9rem; }
+
+.acciones { display: flex; gap: 6px; justify-content: flex-end; }
+.btn { border: none; width: 32px; height: 32px; border-radius: 8px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.ver { background: var(--verde); }
+.editar { background: var(--acento); }
+.eliminar { background: var(--rojo); }
+.link { background: var(--purpura); }
+
+/* =========================================
+   MODAL Y DISEÑO DE CIERRE (X)
+   ========================================= */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal.active { display: flex; }
+
+.modal-box {
+    background: var(--blanco);
+    width: 800px;
+    max-width: 95%;
+    padding: 30px;
+    border-radius: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--borde);
+}
+
+/* BOTÓN X DE CIERRE MODERNIZADO */
+.cerrar {
+    background: #f1f5f9;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: var(--suave);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid var(--borde);
+}
+
+.cerrar:hover {
+    background: var(--rojo-claro);
+    color: var(--rojo);
+    border-color: #fecaca;
+    transform: rotate(90deg);
+}
+
+/* =========================================
+   CAJAS DE SUBIDA (DROPZONE)
+   ========================================= */
+.upload-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 35px;
+    border: 2px dashed var(--borde);
+    background: #f8fafc;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-align: center;
+}
+
+.upload-box:hover {
+    border-color: var(--acento);
+    background: #f0f4ff;
+}
+
+.upload-box i { font-size: 2rem; color: var(--acento); }
+.upload-box span { font-size: 0.85rem; color: var(--suave); font-weight: 500; }
+
+/* LISTA DE ADJUNTOS CON BOTÓN ELIMINAR */
+.lista-adjuntos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+    list-style: none;
+}
+
+.item-galeria {
+    background: #ffffff;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--borde);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    animation: fadeIn 0.3s ease;
+}
+
+.btn-eliminar-adjunto {
+    background: #ff4d4d; /* Rojo */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    transition: 0.3s;
+}
+
+.btn-eliminar-adjunto:hover {
+    background: #cc0000;
+    transform: scale(1.1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   FORMULARIO Y OTROS
+   ========================================= */
+.form-grid {
+    overflow-y: auto; /* El scroll ahora sucede DENTRO del formulario */
+    padding: 20px;
+    flex: 1;
+}
+.full { grid-column: 1 / 3; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field label { font-weight: 600; font-size: 0.85rem; }
+
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--borde);
+    background: #f8fafc;
+}
+
+.modal-box {
+    max-height: 90vh; /* No permite que el modal sea más alto que la pantalla */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+#form-noticia {
+    overflow-y: auto; /* Crea scroll interno si el formulario es muy largo */
+    padding-right: 10px;
+}
+
+.modal-footer {
+    display: flex !important; /* Fuerza la visibilidad */
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+}
+/* Evita que el formulario oculte el footer */
+#form-noticia {
+    display: flex;
+    flex-direction: column;
+    max-height: 70vh;
+}
+
+#btn-submit-noticia {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    min-width: 150px; /* Para que no se encoja al cambiar el texto */
+}
+.btn-quitar-adjunto {
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    line-height: 1;
+    font-weight: bold;
+}
+
+.guardar { background: var(--acento); color: #fff; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+.cancelar { background: #f1f5f9; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; }
+
+/* PREVIEW LATERAL */
+.preview {
+    background: var(--blanco);
+    border-radius: 15px;
+    border: 1px solid var(--borde);
+    box-shadow: var(--sombra);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+    overflow: hidden;
+}
+
+.card-preview img { width: 100%; height: 200px; object-fit: cover; }
+.card-body { padding: 20px; }
+.btn-leer { margin-top: 15px; width: 100%; padding: 12px; border: none; background: #edf2ff; color: var(--acento); font-weight: 600; border-radius: 8px; cursor: pointer; }
+
+@media (max-width: 1100px) {
+    .contenedor { grid-template-columns: 1fr; }
+    .preview { display: none; }
+}

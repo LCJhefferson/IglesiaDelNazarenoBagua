@@ -1,0 +1,22 @@
+# Evitar que se listen los archivos de las carpetas
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Define la base del proyecto (Ajusta si el nombre de tu carpeta es distinto)
+    RewriteBase /IglesiaDelNazarenoBagua/
+
+    # 1. BLOQUEO: Impedir acceso a carpetas privadas
+     RewriteRule ^(aplicacion|procesos|vendor) - [F,L]
+
+    # 2. REDIRECCIÓN: Si el archivo solicitado NO existe en la raíz...
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # ...enviarlo todo a la carpeta public
+    RewriteRule ^(.*)$ public/$1 [L]
+    
+    # 3. Si entran a la raíz vacía, ir a public/index.php
+    RewriteRule ^$ public/index.php [L]
+</IfModule>
