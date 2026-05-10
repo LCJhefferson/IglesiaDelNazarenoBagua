@@ -32,13 +32,15 @@
             <a href="index.php?vista=dashboard&seccion=noticias" class="menu-title direct-link">Noticias</a>
         </div> 
 
+ <div class="menu-item">
+            <a href="index.php?vista=dashboard&seccion=DiscipuladoGrupos" class="menu-title direct-link">Grupos de Discipulado</a>
+        </div> 
 
         <div class="menu-item">
-            <a href="index.php?vista=dashboard&seccion=listaDiscipulados" class="menu-title direct-link">Lista Discipulado</a>
+            <a href="index.php?vista=dashboard&seccion=DiscipuladoIntegrantes" class="menu-title direct-link">Integrantes del Discipulado</a>
         </div> 
-        <div class="menu-item">
-            <a href="index.php?vista=dashboard&seccion=gruposDiscipulado" class="menu-title direct-link">Grupos de Discipulado</a>
-        </div> 
+     
+    
         
 
         <div class="menu-item">

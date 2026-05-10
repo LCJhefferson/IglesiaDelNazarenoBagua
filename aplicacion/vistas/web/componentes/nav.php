@@ -1,18 +1,18 @@
 <header class="header">
     <div class="logo">
-        <img src="web/imagenes/selloOficial.png" alt="Logo Iglesia">
+        <a href="<?= URL ?>inicio">
+            <img src="<?= URL ?>public/web/imagenes/selloOficial.png" alt="Logo Iglesia">
+        </a>
     </div>
 
     <nav class="nav">
-        <a href="index.php?vista=inicio">Inicio</a>
-        <a href="#">Nosotros</a>
-        <a href="#">Ministerios</a>
-        <a href="#">Contacto</a>
-        
-        <a href="index.php?vista=trasmisionPublica">Transmisión</a>
-        
-        <a href="#">Recursos</a>
+        <a href="<?= URL ?>inicio">Inicio</a>
+        <a href="<?= URL ?>nosotros">Nosotros</a>
+        <a href="<?= URL ?>ministerios">Ministerios</a>
+        <a href="<?= URL ?>contacto">Contacto</a>
+        <a href="<?= URL ?>trasmisionPublica">Transmisión</a>
+        <a href="<?= URL ?>recursos">Recursos</a>
     </nav>
     
-    <a href="index.php?vista=login" class="login">Ingresar</a>
+    <a href="<?php echo URL; ?>login" class="login">Ingresar</a>
 </header>

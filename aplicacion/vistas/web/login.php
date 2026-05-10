@@ -1,11 +1,28 @@
 <?php
-session_start();
-// Redirección si ya está logueado (Ruta relativa al servidor)
+/**
+ * ARCHIVO: aplicacion/vistas/web/login.php
+ */
+
+// 1. Manejo de sesión seguro (evita errores de 'headers already sent')
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. Definir URL si por alguna razón no viene del index
+if (!defined('URL')) {
+    define('URL', '/IglesiaDelNazarenoBagua/');
+}
+
+// 3. Redirección si ya existe sesión
 if (isset($_SESSION['usuario'])) {
-    header("Location: /IglesiaDelNazarenoBagua/index.php?vista=dashboard");
+    header("Location: " . URL . "dashboard");
     exit;
 }
-$error = (int)($_GET['error'] ?? 0);
+
+// 4. Captura de errores de la URL
+$error = isset($_GET['error']) ? (int)$_GET['error'] : 0;
+
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -14,9 +31,7 @@ $error = (int)($_GET['error'] ?? 0);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login — Iglesia del Nazareno Bagua</title>
     
-    <base href="/IglesiaDelNazarenoBagua/public/">
-    
-    <link rel="stylesheet" href="web/css/login.css">
+    <link rel="stylesheet" href="<?php echo URL; ?>public/web/css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
 <body>
@@ -27,13 +42,13 @@ $error = (int)($_GET['error'] ?? 0);
     <div class="login-card">
 
         <div class="login-logo">
-            <img src="web/imagenes/selloOficial.png" alt="Logo Iglesia">
+            <img src="<?php echo URL; ?>public/web/imagenes/selloOficial.png" alt="Logo Iglesia">
         </div>
 
         <h2>Bienvenido</h2>
         <p class="login-subtitulo">Iglesia del Nazareno — Bagua</p>
 
-        <form method="POST" action="index.php?vista=procesar_login">
+        <form method="POST" action="<?php echo URL; ?>procesar_login">
             <div class="form-group">
                 <i class="fa-solid fa-user icono-input"></i>
                 <input type="text" name="usuario" placeholder="Usuario" required autocomplete="username">
@@ -56,7 +71,7 @@ $error = (int)($_GET['error'] ?? 0);
     </div>
 </div>
 
-<script src="admin/js/login.js"></script>
+<script src="<?php echo URL; ?>public/admin/js/login.js"></script>
 
 <script>
     const mensajes = {
@@ -64,13 +79,15 @@ $error = (int)($_GET['error'] ?? 0);
         2: "Credenciales incorrectas ❌",
         3: "Usuario no encontrado ❌"
     };
-    const error = <?= $error ?>;
-    if (error && mensajes[error]) {
-        // Asegúrate de que esta función exista en login.js
+    
+    const errorNum = <?php echo $error; ?>;
+    
+    if (errorNum > 0 && mensajes[errorNum]) {
+        // Intentar usar la función del login.js, si no, usar alert
         if(typeof mostrarAlerta === 'function') {
-            mostrarAlerta(mensajes[error], "error");
+            mostrarAlerta(mensajes[errorNum], "error");
         } else {
-            alert(mensajes[error]);
+            alert(mensajes[errorNum]);
         }
     }
 

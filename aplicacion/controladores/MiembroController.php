@@ -2,6 +2,7 @@
 namespace aplicacion\controladores;
 
 use aplicacion\dao\MiembroDAO;
+use aplicacion\modelos\Miembro;
 
 class MiembroController {
     private $dao;
@@ -11,27 +12,33 @@ class MiembroController {
     }
 
     public function manejarPeticion() {
-        // Registrar Nuevo Miembro
+        // 1. Acción: Registrar
         if (isset($_POST['registrar'])) {
-            $this->dao->registrar($this->mapearDatos());
+            $miembro = new Miembro($_POST);
+            $datos = $miembro->toArray();
+            
+            // IMPORTANTE: Quitamos el ID para el INSERT (evita error en la DB)
+            unset($datos['id']); 
+            
+            $this->dao->registrar($datos, $_POST['cargos'] ?? []);
             $this->redireccionar();
         }
 
-        // Editar Miembro Existente
+        // 2. Acción: Editar
         if (isset($_POST['editar'])) {
-            $datos = $this->mapearDatos();
-            $datos['id'] = $_POST['id'];
-            $this->dao->actualizar($datos);
+            $miembro = new Miembro($_POST);
+            // Aquí SI enviamos el ID porque el UPDATE lo necesita en el WHERE
+            $this->dao->actualizarConCargos($miembro->toArray(), $_POST['cargos'] ?? []);
             $this->redireccionar();
         }
 
-        // Acción: Eliminar (Desactivar - Borrado Lógico)
+        // 3. Acción: Eliminar (Desactivar)
         if (isset($_GET['eliminar'])) {
             $this->dao->eliminar($_GET['eliminar']);
             $this->redireccionar();
         }
 
-        // Acción: Activar (Restaurar miembro inactivo)
+        // 4. Acción: Activar
         if (isset($_GET['activar'])) {
             $this->dao->activar($_GET['activar']);
             $this->redireccionar();
@@ -39,28 +46,14 @@ class MiembroController {
     }
 
     /**
-     * Mapea los datos del formulario POST a un array para el DAO.
-     * Incluimos el campo 'estado' que agregamos a la vista.
+     * Redirección unificada para evitar pantallas de error de ruteo
      */
-    private function mapearDatos() {
-        return [
-            'nombres'          => $_POST['nombres'] ?? '',
-            'apellidos'        => $_POST['apellidos'] ?? '',
-            'telefono'         => $_POST['telefono'] ?? '',
-            'direccion'        => $_POST['direccion'] ?? '',
-            'fecha_nacimiento' => $_POST['fecha_nacimiento'] ?? null,
-            'cargo_id'         => $_POST['cargo_id'] ?? null,
-            'condicion_id'     => $_POST['condicion_id'] ?? null,
-            'latitud'          => !empty($_POST['latitud']) ? $_POST['latitud'] : null,
-            'longitud'         => !empty($_POST['longitud']) ? $_POST['longitud'] : null,
-            'estado'           => $_POST['estado'] ?? 1 // Capturamos el nuevo campo de la vista
-        ];
+    private function redireccionar() {
+        header("Location: index.php?vista=dashboard&seccion=membresia");
+        exit();
     }
 
-    private function redireccionar() {
-        header("Location: dashboard.php?vista=membresia");
-        exit(); // Es buena práctica usar exit después de un redireccionamiento
-    }
+    // --- MÉTODOS DE CONSULTA PARA LA VISTA ---
 
     public function listarMiembros() {
         return $this->dao->listar();
@@ -72,5 +65,9 @@ class MiembroController {
 
     public function obtenerCondiciones() {
         return $this->dao->listarCondiciones();
+    }
+
+    public function obtenerTipos() {
+        return $this->dao->listarTipos(); 
     }
 }

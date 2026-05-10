@@ -1,0 +1,1 @@
+<?php echo "El servidor me encuentra"; ?>

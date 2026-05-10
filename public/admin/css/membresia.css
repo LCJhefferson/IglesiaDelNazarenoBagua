@@ -289,3 +289,105 @@ input:focus,select:focus{
     grid-template-columns:1fr 1fr;
     gap:12px;
 }
+
+
+
+
+
+
+
+
+
+
+
+/* Estilos unificados para Membresía */
+    .buscador-container {
+        background: #fff;
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin: 20px 0;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+    .buscador-container .input-group { flex: 2; }
+    .buscador-container select { flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #e2e8f0; outline: none; }
+    
+    /* MEJORA: Badges de Cargos con Colores */
+    .badge-cargo {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        margin: 2px;
+        display: inline-block;
+        color: white;
+        text-transform: uppercase;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    /* Clases de colores dinámicas */
+    .cargo-pastor { background-color: #4f6ef7; }       /* Indigo */
+    .cargo-maestro { background-color: #10b981; }      /* Esmeralda */
+    .cargo-lider { background-color: #f59e0b; }        /* Ámbar */
+    .cargo-evangelista { background-color: #ec4899; }  /* Rosa */
+    .cargo-discipulador { background-color: #8b5cf6; } /* Violeta */
+    .cargo-miembro { background-color: #64748b; }      /* Gris azulado */
+    .cargo-default { background-color: #94a3b8; }     /* Gris claro */
+
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 5px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: #4b5563; }
+    
+    table { width: 100%; background: #fff; border-radius: 12px; border-collapse: collapse; overflow: hidden; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; text-align: left; padding: 12px; font-size: .75rem; color: #64748b; text-transform: uppercase; }
+    td { padding: 12px; border-top: 1px solid #e2e8f0; font-size: .85rem; }
+    tr:hover { background: #f9faff; }
+
+
+
+
+
+/*estilos para el select2*/
+/* Unificar Select2 con el diseño de los inputs normales */
+.select2-container--default .select2-selection--multiple {
+    background-color: #f8fafc !important; /* Color de fondo suave */
+    border: 1.5px solid #e2e8f0 !important; /* Mismo borde que tus inputs */
+    border-radius: 10px !important; /* Bordes redondeados iguales */
+    min-height: 42px !important; /* Altura alineada con los demás campos */
+    transition: all 0.3s ease;
+}
+
+/* Efecto focus para Select2 */
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: #4f6ef7 !important; /* Color azul de tu tema */
+    box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1);
+}
+
+/* Estilo de los "tags" seleccionados dentro del input */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #4f6ef7 !important; /* Fondo azul para el tag */
+    color: white !important; /* Texto blanco */
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 2px 8px !important;
+    margin-top: 7px !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+}
+
+/* Estilo del botón "X" para eliminar un tag */
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: rgba(255, 255, 255, 0.8) !important;
+    margin-right: 5px !important;
+    border: none !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    background: none !important;
+    color: white !important;
+}
+
+/* Ajuste del placeholder */
+.select2-search__field::placeholder {
+    color: #94a3b8 !important;
+}

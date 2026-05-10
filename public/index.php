@@ -1,38 +1,51 @@
 <?php
-// 1. Carga de recursos básicos
-require_once __DIR__ . '/../aplicacion/core/Autoload.php';
+// 1. Errores activados al máximo para ver qué falla
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// 2. Parámetros de navegación
-$vista = $_GET['vista'] ?? 'inicio';
-$baseVistas = __DIR__ . '/../aplicacion/vistas/';
+// 2. URL para el navegador
+define('URL', '/IglesiaDelNazarenoBagua/');
 
-// --- 3. Lógica de Enrutado ---
-
-// Agregamos el caso especial para procesar el login
-if ($vista === 'procesar_login') {
-    // Subimos un nivel desde public/ y entramos directo a procesos/
-    $archivo = __DIR__ . '/../procesos/auth/procesar_login.php';
-} elseif ($vista === 'inicio' || $vista === 'login' || $vista === 'trasmisionPublica') {
-    // Vistas públicas
-    $archivo = $baseVistas . 'web/' . $vista . '.php';
-
-} elseif ($vista === 'dashboard' || $vista === 'logout') {
-    if ($vista === 'dashboard') {
-        $archivo = $baseVistas . 'admin/dashboard.php';
-    } else {
-        $archivo = __DIR__ . '/../procesos/auth/logout.php'; 
-    }
-} else {
-    // Si la vista no es ninguna de las anteriores, asumimos que es una sección interna del dashboard
-    $archivo = $baseVistas . 'admin/dashboard.php';
+// 3. RUTA DEL SERVIDOR
+$raizProyecto = realpath(__DIR__ . '/../../'); 
+if (strpos($raizProyecto, 'IglesiaDelNazarenoBagua') === false) {
+    $raizProyecto .= DIRECTORY_SEPARATOR . 'IglesiaDelNazarenoBagua';
 }
 
-// 4. Verificación y Ejecución
-if (file_exists($archivo)) {
-    include $archivo;
+// 4. Cargar Autoload
+$autoloadPath = $raizProyecto . '/aplicacion/core/Autoload.php';
+
+if (file_exists($autoloadPath)) {
+    require_once $autoloadPath;
 } else {
-    header("HTTP/1.0 404 Not Found");
-    echo "<h3>Error 404</h3>";
-    echo "No se encontró el recurso: <b>" . htmlspecialchars($vista) . "</b><br>";
-    echo "Ruta de depuración: " . $archivo;
+    die("Error Crítico: No se encontró el Autoload en: " . $autoloadPath);
+}
+
+// 5. Captura de Vista (Limpiando posibles prefijos como 'public/')
+$vista = $_GET['vista'] ?? 'inicio';
+$vista = str_replace('public/', '', $vista); // Si viene 'public/dashboard', lo deja en 'dashboard'
+
+if ($vista === 'procesar_login') {
+    $archivoVista = $raizProyecto . '/procesos/auth/procesar_login.php';
+} else if ($vista === 'dashboard' || $vista === 'admin/dashboard') {
+    // Caso especial para el panel de administración
+    $archivoVista = $raizProyecto . '/aplicacion/vistas/admin/dashboard.php';
+} else {
+    // Vistas públicas (inicio, nosotros, etc.)
+    $archivoVista = $raizProyecto . '/aplicacion/vistas/web/' . $vista . '.php';
+}
+
+// 6. Carga de Archivo sin 404 (Si falla, nos dirá la ruta exacta)
+if (file_exists($archivoVista)) {
+    include $archivoVista;
+} else {
+    // En lugar de incluir un 404, lanzamos un mensaje técnico para arreglar la ruta
+    echo "<div style='background:#fee2e2; color:#b91c1c; padding:20px; border:2px solid #ef4444; font-family:sans-serif;'>";
+    echo "<h3>[Error de Ruteo] El archivo solicitado no existe</h3>";
+    echo "<b>Vista buscada:</b> " . htmlspecialchars($vista) . "<br>";
+    echo "<b>Ruta física:</b> " . htmlspecialchars($archivoVista) . "<br>";
+    echo "<hr><i>Verifica que el archivo exista en esa carpeta o que el nombre coincida exactamente (mayúsculas/minúsculas).</i>";
+    echo "</div>";
+    exit;
 }
