@@ -56,45 +56,43 @@ class RecursoController {
             $this->dao->insertar($datos);
         }
 
-        $exito = $id ? 1 : 1;
-        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=recurso_admin&exito={$exito}");
+        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin&exito=1&pagina=archivos");
         exit;
     }
 
     // ── DESCARGAR ──
     public function descargar(int $id): void {
-        // 1. Obtener el recurso
-        $recursos = $this->dao->listar();
-        $recurso  = null;
-        foreach ($recursos as $r) {
-            if ((int)$r['id'] === $id) { $recurso = $r; break; }
+        $recurso = $this->dao->obtenerPorId($id);
+
+        if (!$recurso) {
+            header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin");
+            exit;
         }
 
-        if (!$recurso || empty($recurso['ruta_archivo'])) {
-            // Si es video de YouTube, redirigir al enlace
+        if (empty($recurso['ruta_archivo'])) {
             if (!empty($recurso['enlace_youtube'])) {
                 $this->dao->incrementarDescargas($id);
                 header('Location: ' . $recurso['enlace_youtube']);
                 exit;
             }
-            header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=recurso_admin");
+            header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin");
             exit;
         }
 
-        // 2. Incrementar contador
-        $this->dao->incrementarDescargas($id);
-
-        // 3. Construir ruta absoluta
         $ruta_abs = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/' . $recurso['ruta_archivo'];
 
         if (!file_exists($ruta_abs)) {
-            header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=recurso_admin");
+            header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin");
             exit;
         }
 
-        // 4. Servir el archivo
+        $this->dao->incrementarDescargas($id);
+
         $nombre_descarga = basename($recurso['ruta_archivo']);
         $mime = mime_content_type($ruta_abs) ?: 'application/octet-stream';
+
+        // Limpiar buffer para no mezclar HTML del dashboard con el archivo
+        while (ob_get_level() > 0) ob_end_clean();
 
         header('Content-Type: '        . $mime);
         header('Content-Disposition: attachment; filename="' . $nombre_descarga . '"');
@@ -107,21 +105,28 @@ class RecursoController {
     // ── MOVER A PAPELERA ──
     public function eliminar(int $id): void {
         $this->dao->moverAPapelera($id);
-        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=recurso_admin&exito=2");
+        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin&exito=2&pagina=archivos");
         exit;
     }
 
     // ── RESTAURAR ──
     public function restaurar(int $id): void {
         $this->dao->restaurar($id);
-        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=recurso_admin&exito=3");
+        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin&exito=3&pagina=papelera");
         exit;
     }
 
     // ── ELIMINAR DEFINITIVO ──
     public function eliminarDefinitivo(int $id): void {
         $this->dao->eliminarDefinitivo($id);
-        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=recurso_admin&exito=4");
+        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin&exito=4&pagina=papelera");
+        exit;
+    }
+
+    // ── VACIAR PAPELERA ──
+    public function vaciarPapelera(): void {
+        $this->dao->vaciarPapelera();
+        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin&exito=5&pagina=papelera");
         exit;
     }
 

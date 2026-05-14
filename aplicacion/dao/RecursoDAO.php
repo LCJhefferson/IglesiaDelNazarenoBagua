@@ -146,6 +146,12 @@ class RecursoDAO {
         return $stmt->execute([':id' => $id]);
     }
 
+    // ── VACIAR PAPELERA COMPLETA ──
+    public function vaciarPapelera(): bool {
+        $stmt = $this->pdo->prepare("DELETE FROM recursos_papelera");
+        return $stmt->execute();
+    }
+
     // ── OBTENER POR ID ──
     public function obtenerPorId(int $id): ?array {
         $sql  = "SELECT * FROM recursos WHERE id = :id LIMIT 1";

@@ -6,7 +6,7 @@ class Conexion {
     private static $host    = "localhost";
     private static $user    = "root";
     private static $pass    = "";
-    private static $db_name = "iglesiadelnazareno";
+    private static $db_name = "iglesiadelnazareno(1)";
 
     // Guarda la única instancia
     private static $instancia = null;

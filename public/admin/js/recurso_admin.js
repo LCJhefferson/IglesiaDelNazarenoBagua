@@ -1,156 +1,321 @@
-const titulos = { publico:'Vista Pública', subir:'Subir Archivo', archivos:'Mis Archivos', papelera:'Papelera' };
+/* ============================================================
+   paneRecursos · Rediseño V2 — Lógica de cliente
+   Command Palette ⌘K + Modales + Toast + Filtros + Form helpers
+   ============================================================ */
 
-    // ── MENÚ ──
-    function alternarMenu() {
-        const panel = document.getElementById('panelMenu');
-        const boton = document.getElementById('btnHamburguesa');
-        const fondo = document.getElementById('fondoOscuro');
-        panel.classList.contains('visible') ? cerrarMenu() : (panel.classList.add('visible'), boton.classList.add('abierto'), fondo.classList.add('visible'));
-    }
-    function cerrarMenu() {
-        document.getElementById('panelMenu').classList.remove('visible');
-        document.getElementById('btnHamburguesa').classList.remove('abierto');
-        document.getElementById('fondoOscuro').classList.remove('visible');
-    }
+/* ------------------------------------------------------------
+   NAVEGACIÓN ENTRE PÁGINAS
+   ------------------------------------------------------------ */
+const TITULOS_PAGINA = {
+    publico:   { titulo: 'Vista Pública',  eyebrow: 'Comunidad · Recursos' },
+    archivos:  { titulo: 'Mis Archivos',   eyebrow: 'Administración' },
+    subir:     { titulo: 'Subir Archivo',  eyebrow: 'Administración' },
+    papelera:  { titulo: 'Papelera',       eyebrow: 'Administración' },
+};
 
-    // ── PÁGINAS ──
-    function mostrarPagina(id) {
-        document.querySelectorAll('.pagina').forEach(p => p.classList.remove('activa'));
-        document.querySelectorAll('.opcion-menu').forEach(op => op.classList.remove('activo'));
-        document.getElementById('pagina-' + id).classList.add('activa');
-        document.getElementById('tituloPagina').textContent = titulos[id] || '';
-        const op = document.getElementById('op-' + id);
-        if (op) op.classList.add('activo');
-        cerrarMenu();
-    }
+function mostrarPagina(nombre) {
+    // Ocultar todas
+    document.querySelectorAll('.pagina').forEach(p => p.classList.remove('activa'));
+    const objetivo = document.getElementById('pagina-' + nombre);
+    if (objetivo) objetivo.classList.add('activa');
 
-    // ── FILTROS ──
-    function filtrarArchivos(consulta) {
-        document.querySelectorAll('#todosArchivos .tarjeta-archivo').forEach(t => {
-            t.style.display = t.querySelector('.nombre-archivo').textContent.toLowerCase().includes(consulta.toLowerCase()) ? '' : 'none';
-        });
-    }
-    function filtrarPorTipo(tipo) {
-        document.querySelectorAll('#todosArchivos .tarjeta-archivo').forEach(t => {
-            if (tipo === 'todos') { t.style.display = ''; return; }
-            const etiqueta = t.querySelector('.etiqueta-archivo');
-            t.style.display = etiqueta && etiqueta.textContent.toLowerCase().includes(tipo) ? '' : 'none';
-        });
+    // Actualizar eyebrow de la barra superior
+    const eyebrow = document.getElementById('eyebrowPagina');
+    if (eyebrow && TITULOS_PAGINA[nombre]) {
+        eyebrow.textContent = TITULOS_PAGINA[nombre].eyebrow;
     }
 
-    // ── VISTA PREVIA FORMULARIO ──
-    function actualizarPrevista() {
-        const titulo = document.getElementById('campoTitulo').value;
-        const desc   = document.getElementById('campoDescripcion').value;
-        document.getElementById('tituloPrevio').textContent      = titulo || 'Título del archivo';
-        document.getElementById('descripcionPrevia').textContent = desc   || 'La descripción aparecerá aquí...';
-    }
-    function manejarSeleccion(campo) { if (campo.files[0]) mostrarArchivoSeleccionado(campo.files[0]); }
-    function manejarSoltado(e) {
-        e.preventDefault();
-        document.getElementById('zonaArrastre').classList.remove('arrastrando');
-        if (e.dataTransfer.files[0]) mostrarArchivoSeleccionado(e.dataTransfer.files[0]);
-    }
-    function mostrarArchivoSeleccionado(archivo) {
-        const zona = document.getElementById('zonaArrastre');
-        const ext  = archivo.name.split('.').pop().toUpperCase();
-        const mb   = (archivo.size / 1024 / 1024).toFixed(2);
-        zona.innerHTML = `
-            <div style="display:flex;align-items:center;gap:12px;text-align:left;">
-                <div style="width:44px;height:44px;border-radius:10px;background:#eaf3de;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem;">📄</div>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${archivo.name}</div>
-                    <div style="font-size:.75rem;color:var(--texto-suave);margin-top:2px;">${mb} MB · ${ext}</div>
-                </div>
-                <div style="display:flex;gap:6px;flex-shrink:0;">
-                    <button type="button" class="boton boton-contorno" style="padding:6px 14px;font-size:.78rem;" onclick="cambiarArchivo()"><i class="fa-solid fa-pen"></i> Cambiar</button>
-                    <button type="button" class="boton" style="padding:6px 10px;font-size:.78rem;background:transparent;border:1.5px solid var(--borde);color:var(--peligro);" onclick="quitarArchivo()"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-            </div>`;
-        zona.style.border = '2px solid var(--exito)';
-        zona.style.background = 'var(--blanco)';
-        zona.style.padding = '16px 18px';
-        zona.style.cursor = 'default';
-        zona.onclick = null;
-    }
-    function cambiarArchivo() { document.getElementById('campoPrincipal').click(); }
-    function quitarArchivo() {
-        const zona = document.getElementById('zonaArrastre');
-        zona.style.border = zona.style.background = zona.style.padding = zona.style.cursor = '';
-        zona.onclick = () => document.getElementById('campoPrincipal').click();
-        zona.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i><p>Arrastra un archivo aquí o <span>selecciona uno</span></p><p style="margin-top:6px;font-size:.75rem">PDF, imágenes, videos — Máx. 50MB</p>`;
-        document.getElementById('campoPrincipal').value = '';
-    }
-    function limpiarFormulario() {
-        document.getElementById('campoId').value = '';
-        document.getElementById('campoTitulo').value = '';
-        document.getElementById('campoDescripcion').value = '';
-        document.getElementById('campoCategoria').value = '';
-        document.getElementById('campoYoutube').value = '';
-        document.getElementById('campoRutaActual').value = '';
-        document.getElementById('campoTipoActual').value = '';
-        document.getElementById('tituloFormulario').textContent = '📤 Subir nuevo archivo';
-        document.getElementById('textoBotonGuardar').textContent = 'Publicar archivo';
-        quitarArchivo();
-        actualizarPrevista();
-    }
-
-    // ── MODAL EDITAR ──
-    // Recibe los datos del archivo directo desde PHP (ya saneados)
-    function abrirModalEditar(id, titulo, descripcion, categoria, tipo, ruta, youtube) {
-        document.getElementById('editarId').value          = id;
-        document.getElementById('editarTitulo').value      = titulo;
-        document.getElementById('editarDescripcion').value = descripcion;
-        document.getElementById('editarCategoria').value   = categoria;
-        document.getElementById('editarTipoActual').value  = tipo;
-        document.getElementById('editarRuta').value        = ruta;
-        document.getElementById('editarYoutube').value     = youtube;
-        document.getElementById('modalEditar').classList.add('abierto');
-    }
-    function cerrarModalEditar() {
-        document.getElementById('modalEditar').classList.remove('abierto');
-    }
-
-    // ── MODAL CONFIRMAR ELIMINAR (a papelera) ──
- function confirmarEliminar(id, nombre) {
-    document.getElementById('textoConfirmarEliminar').innerHTML =
-        `"<strong>${nombre}</strong>" se moverá a la papelera. Podrás restaurarlo después.`;
-    document.getElementById('enlaceConfirmarEliminar').href =
-        '/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=recurso_admin&eliminar=' + id;
-    document.getElementById('modalConfirmarEliminar').classList.add('abierto');
+    // Cerrar paleta si estuviera abierta
+    cerrarPaleta();
+    // Scroll al inicio
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-    function cerrarModalConfirmar() {
-        document.getElementById('modalConfirmarEliminar').classList.remove('abierto');
-    }
 
-    // ── MODAL CONFIRMAR ELIMINAR DEFINITIVO ──
-  function confirmarEliminarDefinitivo(id, nombre) {
-    document.getElementById('textoConfirmarDefinitivo').innerHTML =
-        `"<strong>${nombre}</strong>" será eliminado <strong>permanentemente</strong>. Esta acción no se puede deshacer.`;
-    document.getElementById('enlaceConfirmarDefinitivo').href =
-        '/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=recurso_admin&eliminar_definitivo=' + id;
-    document.getElementById('modalConfirmarDefinitivo').classList.add('abierto');
+/* ------------------------------------------------------------
+   COMMAND PALETTE ⌘K
+   ------------------------------------------------------------ */
+const paleta = {
+    fondo:      null,
+    input:      null,
+    lista:      null,
+    items:      [],   // referencias DOM
+    visibles:   [],   // ítems actualmente visibles tras filtrar
+    indiceSel:  0,
+};
+
+function abrirPaleta() {
+    if (!paleta.fondo) paleta.fondo = document.getElementById('fondoPaleta');
+    if (!paleta.input) paleta.input = document.getElementById('inputPaleta');
+    if (!paleta.lista) paleta.lista = document.getElementById('listaPaleta');
+
+    paleta.fondo.classList.add('activo');
+    paleta.input.value = '';
+    filtrarPaleta('');
+    setTimeout(() => paleta.input.focus(), 50);
 }
-    function cerrarModalDefinitivo() {
-        document.getElementById('modalConfirmarDefinitivo').classList.remove('abierto');
-    }
 
-    // ── TOAST ──
-    function mostrarAviso(mensaje, tipo = 'exito') {
-        const caja = document.getElementById('aviso');
-        document.getElementById('mensajeAviso').textContent = mensaje;
-        caja.className = `aviso ${tipo}`;
-        caja.querySelector('i').className = tipo === 'exito' ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-xmark';
-        caja.classList.add('visible');
-        setTimeout(() => caja.classList.remove('visible'), 3000);
-    }
+function cerrarPaleta() {
+    const fondo = document.getElementById('fondoPaleta');
+    if (fondo) fondo.classList.remove('activo');
+}
 
-    // ── CERRAR MODALES AL HACER CLIC FUERA ──
-    ['modalEditar','modalConfirmarEliminar','modalConfirmarDefinitivo'].forEach(id => {
-        document.getElementById(id).addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.remove('abierto');
-            }
-        });
+function filtrarPaleta(termino) {
+    const t = (termino || '').toLowerCase().trim();
+    paleta.visibles = [];
+
+    paleta.items.forEach(item => {
+        const texto = (item.dataset.label + ' ' + (item.dataset.hint || '')).toLowerCase();
+        const visible = !t || texto.includes(t);
+        item.style.display = visible ? '' : 'none';
+        if (visible) paleta.visibles.push(item);
     });
 
+    // Ocultar secciones que quedaron vacías
+    document.querySelectorAll('.seccion-paleta').forEach(s => {
+        const tieneVisibles = Array.from(s.querySelectorAll('.item-paleta'))
+            .some(i => i.style.display !== 'none');
+        s.style.display = tieneVisibles ? '' : 'none';
+    });
+
+    // Estado vacío
+    const vacio = document.getElementById('paletaVacia');
+    if (vacio) vacio.style.display = paleta.visibles.length === 0 ? 'block' : 'none';
+
+    paleta.indiceSel = 0;
+    aplicarSeleccionPaleta();
+}
+
+function aplicarSeleccionPaleta() {
+    paleta.items.forEach(i => i.classList.remove('seleccionado'));
+    if (paleta.visibles[paleta.indiceSel]) {
+        paleta.visibles[paleta.indiceSel].classList.add('seleccionado');
+        paleta.visibles[paleta.indiceSel].scrollIntoView({ block: 'nearest' });
+    }
+}
+
+function moverSeleccionPaleta(delta) {
+    if (paleta.visibles.length === 0) return;
+    paleta.indiceSel = (paleta.indiceSel + delta + paleta.visibles.length) % paleta.visibles.length;
+    aplicarSeleccionPaleta();
+}
+
+function ejecutarSeleccionPaleta() {
+    const item = paleta.visibles[paleta.indiceSel];
+    if (!item) return;
+    item.click();
+}
+
+function inicializarPaleta() {
+    paleta.items = Array.from(document.querySelectorAll('.item-paleta'));
+    paleta.visibles = paleta.items.slice();
+
+    if (paleta.input) {
+        paleta.input.addEventListener('input', e => filtrarPaleta(e.target.value));
+    }
+}
+
+/* ------------------------------------------------------------
+   ATAJOS DE TECLADO GLOBALES
+   ------------------------------------------------------------ */
+document.addEventListener('keydown', (e) => {
+    const paletaAbierta = document.getElementById('fondoPaleta')?.classList.contains('activo');
+
+    // ⌘K / Ctrl+K — abrir paleta
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        paletaAbierta ? cerrarPaleta() : abrirPaleta();
+        return;
+    }
+
+    // Esc — cerrar todo modal/paleta
+    if (e.key === 'Escape') {
+        cerrarPaleta();
+        cerrarModalEditar();
+        cerrarModalConfirmar();
+        cerrarModalDefinitivo();
+        cerrarModalVaciarPapelera();
+        return;
+    }
+
+    // Navegación dentro de la paleta
+    if (paletaAbierta) {
+        if (e.key === 'ArrowDown') { e.preventDefault(); moverSeleccionPaleta(1); }
+        if (e.key === 'ArrowUp')   { e.preventDefault(); moverSeleccionPaleta(-1); }
+        if (e.key === 'Enter')     { e.preventDefault(); ejecutarSeleccionPaleta(); }
+    }
+});
+
+/* ------------------------------------------------------------
+   MODAL: EDITAR ARCHIVO
+   ------------------------------------------------------------ */
+function abrirModalEditar(id, titulo, descripcion, categoria, tipo, ruta, youtube) {
+    document.getElementById('editarId').value          = id;
+    document.getElementById('editarTitulo').value      = titulo;
+    document.getElementById('editarDescripcion').value = descripcion;
+    document.getElementById('editarCategoria').value   = categoria;
+    document.getElementById('editarTipoActual').value  = tipo;
+    document.getElementById('editarRuta').value        = ruta;
+    document.getElementById('editarYoutube').value     = youtube || '';
+
+    document.getElementById('modalEditar').classList.add('activo');
+}
+function cerrarModalEditar() {
+    document.getElementById('modalEditar')?.classList.remove('activo');
+}
+
+/* ------------------------------------------------------------
+   MODALES DE CONFIRMACIÓN
+   ------------------------------------------------------------ */
+function confirmarEliminar(id, nombre) {
+    document.getElementById('textoConfirmarEliminar').innerHTML =
+        '"<strong>' + nombre + '</strong>" se moverá a la papelera y podrás restaurarlo después.';
+    document.getElementById('enlaceConfirmarEliminar').href =
+        RUTA_RECURSOS + '&eliminar=' + id;
+    document.getElementById('modalConfirmarEliminar').classList.add('activo');
+}
+function cerrarModalConfirmar() {
+    document.getElementById('modalConfirmarEliminar')?.classList.remove('activo');
+}
+
+function confirmarEliminarDefinitivo(id, nombre) {
+    document.getElementById('textoConfirmarDefinitivo').innerHTML =
+        'Esta acción <strong>no se puede deshacer</strong>. "' + nombre + '" se eliminará de forma permanente.';
+    document.getElementById('enlaceConfirmarDefinitivo').href =
+        RUTA_RECURSOS + '&eliminar_definitivo=' + id;
+    document.getElementById('modalConfirmarDefinitivo').classList.add('activo');
+}
+function cerrarModalDefinitivo() {
+    document.getElementById('modalConfirmarDefinitivo')?.classList.remove('activo');
+}
+
+function confirmarVaciarPapelera() {
+    document.getElementById('enlaceVaciarPapelera').href = RUTA_RECURSOS + '&vaciar_papelera=1';
+    document.getElementById('modalVaciarPapelera').classList.add('activo');
+}
+function cerrarModalVaciarPapelera() {
+    document.getElementById('modalVaciarPapelera')?.classList.remove('activo');
+}
+
+/* ------------------------------------------------------------
+   TOAST AVISO
+   ------------------------------------------------------------ */
+function mostrarAviso(mensaje, tipo) {
+    const aviso = document.getElementById('aviso');
+    const texto = document.getElementById('mensajeAviso');
+    if (!aviso || !texto) return;
+
+    texto.textContent = mensaje;
+    aviso.className = 'aviso ' + (tipo || 'exito');
+
+    // Forzar reflow para reiniciar animación
+    void aviso.offsetWidth;
+    aviso.classList.add('visible');
+
+    clearTimeout(window._timerAviso);
+    window._timerAviso = setTimeout(() => {
+        aviso.classList.remove('visible');
+    }, 3500);
+}
+
+/* ------------------------------------------------------------
+   DROPZONE: arrastrar y seleccionar
+   ------------------------------------------------------------ */
+function manejarSoltado(event) {
+    event.preventDefault();
+    const zona = event.currentTarget;
+    zona.classList.remove('arrastrando');
+
+    if (event.dataTransfer.files.length > 0) {
+        const input = document.getElementById('campoPrincipal');
+        input.files = event.dataTransfer.files;
+        actualizarPrevista();
+    }
+}
+
+function manejarSeleccion(input) {
+    if (input.files.length > 0) {
+        actualizarPrevista();
+    }
+}
+
+/* ------------------------------------------------------------
+   PREVIEW DEL FORMULARIO
+   ------------------------------------------------------------ */
+function actualizarPrevista() {
+    const titulo      = document.getElementById('campoTitulo')?.value      || 'Título del archivo';
+    const descripcion = document.getElementById('campoDescripcion')?.value || 'La descripción aparecerá aquí...';
+
+    const tp = document.getElementById('tituloPrevio');
+    const dp = document.getElementById('descripcionPrevia');
+    if (tp) tp.textContent = titulo;
+    if (dp) dp.textContent = descripcion;
+}
+
+function limpiarFormulario() {
+    document.getElementById('campoId').value           = '';
+    document.getElementById('campoTitulo').value       = '';
+    document.getElementById('campoDescripcion').value  = '';
+    document.getElementById('campoCategoria').value    = '';
+    document.getElementById('campoYoutube').value      = '';
+    document.getElementById('campoPrincipal').value    = '';
+    document.getElementById('campoRutaActual').value   = '';
+    document.getElementById('campoTipoActual').value   = '';
+
+    const titulo = document.getElementById('tituloFormulario');
+    const boton  = document.getElementById('textoBotonGuardar');
+    if (titulo) titulo.textContent = '📤 Subir nuevo archivo';
+    if (boton)  boton.textContent  = 'Publicar archivo';
+
+    actualizarPrevista();
+}
+
+/* ------------------------------------------------------------
+   FILTROS DE MIS ARCHIVOS
+   ------------------------------------------------------------ */
+let filtroTexto = '';
+let filtroTipo  = 'todos';
+
+function aplicarFiltros() {
+    const tarjetas = document.querySelectorAll('#todosArchivos .tarjeta-archivo');
+    tarjetas.forEach(t => {
+        const nombre = (t.querySelector('.nombre-archivo')?.textContent || '').toLowerCase();
+        const tipo   = t.dataset.tipo || '';
+
+        const coincideTexto = !filtroTexto || nombre.includes(filtroTexto);
+        const coincideTipo  = filtroTipo === 'todos' || tipo === filtroTipo;
+
+        t.style.display = (coincideTexto && coincideTipo) ? '' : 'none';
+    });
+}
+
+function filtrarArchivos(valor) {
+    filtroTexto = (valor || '').toLowerCase().trim();
+    aplicarFiltros();
+}
+
+function filtrarPorTipo(valor) {
+    filtroTipo = valor;
+    aplicarFiltros();
+}
+
+/* ------------------------------------------------------------
+   FILTRO POR PILLS (categoría)
+   ------------------------------------------------------------ */
+function filtrarPorCategoria(categoria, elemento) {
+    // Marcar pill activa
+    document.querySelectorAll('.barra-pills .pill').forEach(p => p.classList.remove('activa'));
+    if (elemento) elemento.classList.add('activa');
+
+    document.querySelectorAll('.cuadricula-publica .tarjeta-publica').forEach(t => {
+        const cat = t.dataset.categoria || '';
+        t.style.display = (categoria === 'todos' || cat === categoria) ? '' : 'none';
+    });
+}
+
+/* ------------------------------------------------------------
+   INICIALIZACIÓN
+   ------------------------------------------------------------ */
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarPaleta();
+    actualizarPrevista();
+});
