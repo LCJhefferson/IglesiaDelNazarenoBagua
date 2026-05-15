@@ -1,97 +1,100 @@
-/* ───────── INICIALIZACIÓN DE VARIABLES ───────── */
+/* ─────────────────────────────────────────
+   INICIALIZACIÓN
+───────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("modal");
-    const form = document.getElementById("form-noticia");
+    const modal         = document.getElementById("modal");
+    const form          = document.getElementById("form-noticia");
     const listaAdjuntos = document.getElementById("lista-imagenes");
-    const inputPortada = document.getElementById("imagen");
-    const txtPortada = document.getElementById("txt-imagen");
-    const inputMulti = document.getElementById("imagenes");
-    const txtMulti = document.getElementById("txt-multi");
+    const inputPortada  = document.getElementById("imagen");
+    const txtPortada    = document.getElementById("txt-imagen");
+    const inputMulti    = document.getElementById("imagenes");
+    const txtMulti      = document.getElementById("txt-multi");
 
-    let archivosGaleria = []; // Almacena archivos NUEVOS (File objects)
+    let archivosGaleria = [];
 
-    /* ───────── FUNCIONES DEL MODAL ───────── */
+    /* ── Mejora 7: Animación del contador ── */
+    const totalReal = parseInt(document.querySelector(".badge-total-real")?.innerText || "0");
+    animarContador("badge-total", totalReal);
+
+    /* ── Mejora 1: Modo oscuro (recordar preferencia) ── */
+    if (localStorage.getItem("tema-noticias") === "dark") {
+        document.body.classList.add("dark-mode");
+        document.getElementById("icono-tema").className = "fa-solid fa-sun";
+    }
+
+    /* ── SKELETON → mostrar cards después de 600ms ── */
+    setTimeout(() => {
+        const skeleton = document.getElementById("skeleton-grid");
+        const grid     = document.getElementById("contenedor-noticias");
+        if (skeleton) skeleton.style.display = "none";
+        if (grid)     grid.style.display     = "grid";
+    }, 600);
+
+    /* ── MODAL ── */
     window.abrirModal = function(editar = false) {
         modal.classList.add("active");
-        const btnGuardar = document.getElementById("btn-submit-noticia");
+        modal.style.display = "flex";
 
         if (!editar) {
             form.reset();
-            archivosGaleria = []; 
-            document.getElementById("id_noticia").value = "";
+            archivosGaleria = [];
+            document.getElementById("id_noticia").value    = "";
             document.getElementById("imagen_actual").value = "";
-            
-            // Reset visual
-            txtPortada.innerText = "Hacer clic para subir la imagen principal";
-            txtPortada.style.color = "var(--suave)";
-            txtMulti.innerText = "Hacer clic para añadir varias fotos";
+            txtPortada.innerText   = "Arrastra una imagen aquí o haz clic para subir";
+            txtPortada.style.color = "";
+            txtMulti.innerText     = "Arrastra imágenes aquí o haz clic para añadir";
+            txtMulti.style.color   = "";
             listaAdjuntos.innerHTML = "";
-            
+            document.getElementById("char-resumen").innerText = "0 / 150";
+            document.getElementById("char-resumen").className = "char-contador";
             document.getElementById("modal-titulo").innerHTML = '<i class="fa-solid fa-plus"></i> Nueva Noticia';
-            document.getElementById("preview-img").src = "https://via.placeholder.com/400x200";
-            
-            if(btnGuardar) {
-                btnGuardar.innerHTML = '<i class="fa-solid fa-save"></i> Guardar Publicación';
-                btnGuardar.style.backgroundColor = ""; 
-            }
-
             document.getElementById("label-upload").style.display = "flex";
-            if(document.getElementById("contenedor-portada-edit")) {
-                document.getElementById("contenedor-portada-edit").style.display = "none";
-            }
+            document.getElementById("contenedor-portada-edit").style.display = "none";
+            const btn = document.getElementById("btn-submit-noticia");
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-save"></i> <span>Guardar Publicación</span>';
         }
     };
 
     window.cerrarModal = function() {
         modal.classList.remove("active");
+        modal.style.display = "none";
     };
 
     modal.addEventListener("click", (e) => {
         if (e.target === modal) cerrarModal();
     });
 
-    /* ───────── GESTIÓN DE PORTADA ───────── */
+    /* ── PORTADA ── */
     inputPortada.addEventListener("change", function() {
         if (this.files && this.files[0]) {
-            const file = this.files[0];
-            txtPortada.innerText = "Seleccionada: " + file.name;
-            txtPortada.style.color = "var(--verde)";
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById("preview-img").src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            procesarImagenPortada(this.files[0]);
         }
     });
 
-    /* ───────── GESTIÓN DE GALERÍA (Nuevas imágenes) ───────── */
+    /* ── GALERÍA ── */
     inputMulti.addEventListener("change", function() {
-        // Importante: Convertimos a Array para que no se pierdan al seleccionar más después
-        const seleccionados = Array.from(this.files);
-        archivosGaleria = [...archivosGaleria, ...seleccionados];
+        archivosGaleria = [...archivosGaleria, ...Array.from(this.files)];
         renderizarListaGaleria();
     });
 
     window.renderizarListaGaleria = function() {
-        // Esta función NO borra las imágenes que ya están en el servidor, 
-        // solo maneja la previsualización de las NUEVAS antes de subir.
-        const itemsNuevos = document.querySelectorAll(".item-nuevo-temp");
-        itemsNuevos.forEach(el => el.remove());
-
+        document.querySelectorAll(".item-nuevo-temp").forEach(el => el.remove());
+        archivosGaleria.forEach((file, index) => {
+            const li = document.createElement("li");
+            li.className = "item-galeria item-nuevo-temp";
+            li.innerHTML = `
+                <span class="nombre-archivo">
+                    <i class="fa-solid fa-image"></i> ${file.name} (Nuevo)
+                </span>
+                <button type="button" class="btn-eliminar-adjunto" onclick="quitarImagenNueva(${index})">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>`;
+            listaAdjuntos.appendChild(li);
+        });
         if (archivosGaleria.length > 0) {
-            archivosGaleria.forEach((file, index) => {
-                const li = document.createElement("li");
-                li.className = "item-galeria item-nuevo-temp";
-                li.innerHTML = `
-                    <span class="nombre-archivo"><i class="fa-solid fa-image"></i> ${file.name} (Nuevo)</span>
-                    <button type="button" class="btn-eliminar-adjunto" onclick="quitarImagenNueva(${index})">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                `;
-                listaAdjuntos.appendChild(li);
-            });
-            actualizarContadorGaleria();
+            const total = listaAdjuntos.children.length;
+            txtMulti.innerText   = total + " imágenes en total";
+            txtMulti.style.color = "var(--acento)";
         }
     };
 
@@ -100,13 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderizarListaGaleria();
     };
 
-    function actualizarContadorGaleria() {
-        const total = listaAdjuntos.children.length;
-        txtMulti.innerText = total + " imágenes en total";
-        txtMulti.style.color = "var(--acento)";
-    }
-
-    /* ───────── PREVIEW EN TIEMPO REAL ───────── */
+    /* ── Preview en tiempo real ── */
     document.getElementById("f-titulo").addEventListener("input", (e) => {
         document.getElementById("preview-titulo").innerText = e.target.value || "Título de la noticia";
     });
@@ -116,138 +113,284 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-/* ───────── EDITAR NOTICIA ───────── */
+/* ─────────────────────────────────────────
+   Mejora 1: MODO OSCURO
+───────────────────────────────────────── */
+window.toggleTema = function() {
+    const body  = document.body;
+    const icono = document.getElementById("icono-tema");
+    body.classList.toggle("dark-mode");
+    const esDark = body.classList.contains("dark-mode");
+    icono.className = esDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+    localStorage.setItem("tema-noticias", esDark ? "dark" : "light");
+};
+
+/* ─────────────────────────────────────────
+   Mejora 2: MODAL CONFIRMAR ELIMINAR
+───────────────────────────────────────── */
+window.confirmarEliminar = function(id, titulo) {
+    const modalConfirmar = document.getElementById("modal-confirmar");
+    document.getElementById("confirmar-nombre").innerText = titulo;
+    modalConfirmar.style.display = "flex";
+
+    document.getElementById("btn-confirmar-ok").onclick = function() {
+        window.location.href = `/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=noticias&eliminar=${id}`;
+    };
+};
+
+window.cerrarConfirmar = function() {
+    document.getElementById("modal-confirmar").style.display = "none";
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+    const mc = document.getElementById("modal-confirmar");
+    if (mc) mc.addEventListener("click", (e) => { if (e.target === mc) cerrarConfirmar(); });
+});
+
+/* ─────────────────────────────────────────
+   Mejora 3: TOAST NOTIFICATIONS
+───────────────────────────────────────── */
+window.mostrarToast = function(mensaje, tipo = "exito") {
+    const iconos = { exito: "fa-circle-check", error: "fa-circle-xmark", info: "fa-circle-info" };
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = `toast ${tipo}`;
+    toast.innerHTML = `<i class="fa-solid ${iconos[tipo]}"></i> ${mensaje}`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = "toastSalida 0.3s ease forwards";
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+};
+
+/* Mostrar toast si viene de una acción (detectar URL) */
+document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("guardado") === "1")     mostrarToast("✅ Noticia guardada correctamente", "exito");
+    if (params.get("actualizado") === "1")  mostrarToast("✅ Noticia actualizada correctamente", "exito");
+    if (params.get("eliminado") === "1")    mostrarToast("🗑️ Noticia eliminada", "info");
+});
+
+/* ─────────────────────────────────────────
+   Mejora 4: CONTADOR DE CARACTERES
+───────────────────────────────────────── */
+window.contarCaracteres = function(inputId, contadorId, maximo) {
+    const texto    = document.getElementById(inputId).value.length;
+    const contador = document.getElementById(contadorId);
+    contador.innerText = `${texto} / ${maximo}`;
+    contador.className = "char-contador";
+    if (texto >= maximo * 0.85) contador.className += " warning";
+    if (texto >= maximo)        contador.className  = "char-contador danger";
+};
+
+/* ─────────────────────────────────────────
+   Mejora 5: DRAG & DROP
+───────────────────────────────────────── */
+window.dragOver = function(e) {
+    e.preventDefault();
+    e.currentTarget.classList.add("drag-over");
+};
+
+window.dragLeave = function(e) {
+    e.currentTarget.classList.remove("drag-over");
+};
+
+window.dropImagen = function(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove("drag-over");
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) {
+        procesarImagenPortada(file);
+        /* Asignar al input real para que el form lo envíe */
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        document.getElementById("imagen").files = dt.files;
+    }
+};
+
+window.dropGaleria = function(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove("drag-over");
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+    if (files.length > 0) {
+        archivosGaleriaGlobal = [...(window.archivosGaleriaGlobal || []), ...files];
+        const txtMulti = document.getElementById("txt-multi");
+        txtMulti.innerText   = files.length + " imágenes añadidas";
+        txtMulti.style.color = "var(--acento)";
+
+        files.forEach((file, index) => {
+            const li = document.createElement("li");
+            li.className = "item-galeria item-nuevo-temp";
+            li.innerHTML = `
+                <span class="nombre-archivo">
+                    <i class="fa-solid fa-image"></i> ${file.name} (Nuevo)
+                </span>
+                <button type="button" class="btn-eliminar-adjunto" onclick="this.closest('li').remove()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>`;
+            document.getElementById("lista-imagenes").appendChild(li);
+        });
+    }
+};
+
+function procesarImagenPortada(file) {
+    const txtPortada = document.getElementById("txt-imagen");
+    txtPortada.innerText   = "Seleccionada: " + file.name;
+    txtPortada.style.color = "var(--verde)";
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        document.getElementById("preview-img").src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+/* ─────────────────────────────────────────
+   Mejora 6: CARD ACTIVA RESALTADA
+───────────────────────────────────────── */
+window.seleccionarCard = function(cardEl, n) {
+    document.querySelectorAll(".noticia-card").forEach(c => c.classList.remove("activa"));
+    cardEl.classList.add("activa");
+    verNoticia(n);
+};
+
+/* ─────────────────────────────────────────
+   Mejora 7: ANIMACIÓN CONTADOR
+───────────────────────────────────────── */
+window.animarContador = function(elementId, hasta) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    let actual = 0;
+    const paso = Math.ceil(hasta / 20);
+    const intervalo = setInterval(() => {
+        actual += paso;
+        if (actual >= hasta) {
+            actual = hasta;
+            clearInterval(intervalo);
+        }
+        el.innerText = actual + (hasta === 1 ? " noticia" : " noticias");
+    }, 40);
+};
+
+/* ─────────────────────────────────────────
+   VER NOTICIA (actualiza preview lateral)
+───────────────────────────────────────── */
+window.verNoticia = function(n) {
+    const rutaBase = "/IglesiaDelNazarenoBagua/";
+    document.getElementById("preview-titulo").innerText  = n.titulo  || "Sin título";
+    document.getElementById("preview-resumen").innerText = n.resumen || "Sin resumen";
+    document.getElementById("preview-img").src = n.imagen_portada
+        ? rutaBase + n.imagen_portada
+        : "https://via.placeholder.com/400x200";
+};
+
+/* ─────────────────────────────────────────
+   EDITAR NOTICIA
+───────────────────────────────────────── */
 window.editarNoticia = function(n) {
     abrirModal(true);
     const rutaBase = "/IglesiaDelNazarenoBagua/";
 
-    // 1. Campos básicos
-    document.getElementById("id_noticia").value = n.id;
+    document.getElementById("id_noticia").value    = n.id;
     document.getElementById("imagen_actual").value = n.imagen_portada || "";
-    document.getElementById("f-titulo").value = n.titulo;
-    document.getElementById("f-fecha").value = n.fecha_creacion; 
-    document.getElementById("f-resumen").value = n.resumen;
-    document.getElementById("f-contenido").value = n.contenido;
-    document.getElementById("f-video").value = n.video_link;
+    document.getElementById("f-titulo").value      = n.titulo;
+    document.getElementById("f-fecha").value       = n.fecha_creacion;
+    document.getElementById("f-resumen").value     = n.resumen;
+    document.getElementById("f-contenido").value   = n.contenido;
+    document.getElementById("f-video").value       = n.video_link || "";
 
-    // 2. Portada
+    /* Actualizar contador de caracteres */
+    contarCaracteres("f-resumen", "char-resumen", 150);
+
     const contenedorPreview = document.getElementById("contenedor-portada-edit");
-    const labelUpload = document.getElementById("label-upload");
-    const imgPreviewModal = document.getElementById("img-edit-preview");
+    const labelUpload       = document.getElementById("label-upload");
+    const imgPreviewModal   = document.getElementById("img-edit-preview");
 
     if (n.imagen_portada) {
-        const urlImagen = rutaBase + n.imagen_portada;
-        document.getElementById("preview-img").src = urlImagen;
+        const url               = rutaBase + n.imagen_portada;
+        imgPreviewModal.src             = url;
+        document.getElementById("preview-img").src = url;
         contenedorPreview.style.display = "block";
-        imgPreviewModal.src = urlImagen;
-        labelUpload.style.display = "none"; 
+        labelUpload.style.display       = "none";
+    } else {
+        contenedorPreview.style.display = "none";
+        labelUpload.style.display       = "flex";
     }
 
-        // 3. Galería de imágenes existentes
-        const listaAdjuntos = document.getElementById("lista-imagenes");
-        listaAdjuntos.innerHTML = ""; 
+    /* Galería existente */
+    const listaAdjuntos = document.getElementById("lista-imagenes");
+    listaAdjuntos.innerHTML = "";
+    if (n.imagenes_adjuntas && n.imagenes_adjuntas.length > 0) {
+        n.imagenes_adjuntas.forEach(img => {
+            const li = document.createElement("li");
+            li.className = "item-galeria";
+            li.innerHTML = `
+                <span class="nombre-archivo">
+                    <img src="${rutaBase + img.ruta}" style="width:30px; height:30px; object-fit:cover; border-radius:4px;">
+                    ${img.ruta.split('/').pop()}
+                </span>
+                <button type="button" class="btn-eliminar-adjunto" onclick="borrarImagenGaleria(${img.id}, this)">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>`;
+            listaAdjuntos.appendChild(li);
+        });
+    }
 
-        if (n.imagenes_adjuntas && n.imagenes_adjuntas.length > 0) {
-            n.imagenes_adjuntas.forEach(img => {
-                const li = document.createElement("li");
-                li.className = "item-galeria";
-                li.innerHTML = `
-                    <span class="nombre-archivo">
-                        <img src="${rutaBase + img.ruta}" style="width:30px; height:30px; object-fit:cover; border-radius:4px;">
-                        ${img.ruta.split('/').pop()}
-                    </span>
-                    <button type="button" class="btn-eliminar-adjunto" onclick="borrarImagenGaleria(${img.id}, this)">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                `;
-                listaAdjuntos.appendChild(li);
-            });
-        }
-
-    // 4. Cambios visuales del botón
     document.getElementById("modal-titulo").innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Editar Noticia';
-    const btnGuardar = document.getElementById("btn-submit-noticia");
-        if (btnGuardar) {
-            // Forzamos que se vea y cambiamos el contenido
-            btnGuardar.style.display = "inline-flex"; 
-            btnGuardar.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> <span>Actualizar Publicación</span>';
-            btnGuardar.classList.add("modo-edicion"); // Para darle un color distinto si quieres
-        }
+    const btn = document.getElementById("btn-submit-noticia");
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> <span>Actualizar Publicación</span>';
 };
 
-/* ───────── BORRAR IMAGEN DEL SERVIDOR ───────── */
-window.borrarImagenServidor = function(ruta, btn) {
-    if(confirm("¿Deseas eliminar esta imagen de la galería permanentemente?")) {
-        // Aquí llamarías a un fetch o AJAX a un archivo PHP que haga el DELETE
-        // Por ahora, solo lo removemos visualmente
-        btn.parentElement.remove();
-        console.log("Solicitar borrar: " + ruta);
-        // Actualizar contador
-        const txtMulti = document.getElementById("txt-multi");
-        const total = document.getElementById("lista-imagenes").children.length;
-        txtMulti.innerText = total + " imágenes en galería";
-    }
-};
-
+/* ─────────────────────────────────────────
+   QUITAR IMAGEN ACTUAL
+───────────────────────────────────────── */
 window.quitarImagenActual = function() {
     document.getElementById("contenedor-portada-edit").style.display = "none";
-    document.getElementById("imagen_actual").value = ""; 
-    document.getElementById("label-upload").style.display = "flex";
+    document.getElementById("imagen_actual").value                   = "";
+    document.getElementById("label-upload").style.display            = "flex";
     document.getElementById("preview-img").src = "https://via.placeholder.com/400x200";
 };
 
-window.verNoticia = function(n) {
-    document.getElementById("preview-titulo").innerText = n.titulo;
-    document.getElementById("preview-resumen").innerText = n.resumen;
-    const rutaBase = "/IglesiaDelNazarenoBagua/";
-    const foto = n.imagen_portada ? rutaBase + n.imagen_portada : "https://via.placeholder.com/400x200";
-    document.getElementById("preview-img").src = foto;
-};
-
+/* ─────────────────────────────────────────
+   FILTRAR NOTICIAS
+───────────────────────────────────────── */
 window.filtrarNoticias = function() {
-    const textoBusqueda = document.getElementById("buscar-noticia").value.toLowerCase().trim();
-    const filas = document.querySelectorAll(".tabla-box tbody tr");
+    const texto    = document.getElementById("buscar-noticia").value.toLowerCase().trim();
+    const cards    = document.querySelectorAll(".noticia-card");
+    const msgVacio = document.getElementById("msg-sin-busqueda");
+    let   visibles = 0;
 
-    filas.forEach(fila => {
-        // Verificamos que la fila no sea la de "No hay noticias" (que tiene un colspan)
-        if (fila.cells.length > 1) {
-            const titulo = fila.cells[0].textContent.toLowerCase();
-            const resumen = fila.cells[1].textContent.toLowerCase();
-
-            if (titulo.includes(textoBusqueda) || resumen.includes(textoBusqueda)) {
-                fila.style.display = ""; 
-            } else {
-                fila.style.display = "none"; 
-            }
-        }
+    cards.forEach(card => {
+        const titulo  = card.dataset.titulo  || "";
+        const resumen = card.dataset.resumen || "";
+        const coincide = titulo.includes(texto) || resumen.includes(texto);
+        card.style.display = coincide ? "" : "none";
+        if (coincide) visibles++;
     });
+
+    if (msgVacio) {
+        msgVacio.style.display = (visibles === 0 && texto !== "") ? "block" : "none";
+    }
 };
 
+/* ─────────────────────────────────────────
+   BORRAR IMAGEN DE GALERÍA
+───────────────────────────────────────── */
 window.borrarImagenGaleria = function(idImagen, elementoBtn) {
     if (confirm("¿Estás seguro de eliminar esta imagen de la galería?")) {
-        // Usamos la ruta completa al dashboard que procesa la petición
         const url = `/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=noticias&eliminar_foto=${idImagen}`;
-        
         fetch(url)
-            .then(response => {
-                if (response.ok) {
-                    // Si el servidor responde bien, eliminamos el elemento visualmente
-                    // Buscamos el contenedor .item-galeria más cercano al botón
-                    const item = elementoBtn.closest('.item-galeria');
-                    if (item) {
-                        item.remove();
-                        // Actualizamos el contador visual si existe
-                        const txtMulti = document.getElementById("txt-multi");
-                        const total = document.getElementById("lista-imagenes").children.length;
-                        if(txtMulti) txtMulti.innerText = total + " imágenes en total";
-                    }
+            .then(response => response.text())
+            .then(text => {
+                if (text.trim() === "ok") {
+                    const item = elementoBtn.closest(".item-galeria");
+                    if (item) item.remove();
+                    mostrarToast("Imagen eliminada de la galería", "info");
                 } else {
-                    alert("Error al intentar eliminar la imagen del servidor.");
+                    mostrarToast("Error al eliminar la imagen", "error");
                 }
             })
-            .catch(error => {
-                console.error("Error en la petición:", error);
-                alert("No se pudo conectar con el servidor.");
-            });
+            .catch(() => mostrarToast("No se pudo conectar con el servidor", "error"));
     }
 };

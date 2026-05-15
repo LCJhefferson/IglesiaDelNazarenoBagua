@@ -30,16 +30,10 @@
     border-bottom: 1px solid #334155;
 }
 
-/* CERRAR SESIÓN: El imán al fondo */
-.logout-item {
-    margin-top: auto !important; /* Empuja el ítem hasta el final del contenedor .menu */
-    border-top: 1px solid rgba(255,255,255,0.1);
-    background-color: #1a2232; /* Un tono ligeramente distinto para que destaque */
-}
+
 .menu-title {
     padding: 12px 30px;
     cursor: pointer;
-    border-bottom: 1px solid #334155;
 }
 
 .menu-title:hover {

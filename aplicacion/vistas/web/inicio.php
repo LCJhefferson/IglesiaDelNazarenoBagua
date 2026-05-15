@@ -1,3 +1,12 @@
+<?php
+// Consulta inicial para detectar si hay un vivo activo (Estado 1)
+require_once __DIR__ . '/../../../aplicacion/config/Conexion.php';
+use aplicacion\config\Conexion;
+
+$db = Conexion::conectar();
+$stmt = $db->query("SELECT titulo FROM transmisiones WHERE estado_id = 1 LIMIT 1");
+$live = $stmt->fetch(PDO::FETCH_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,13 +16,32 @@
     <link rel="stylesheet" href="<?= URL ?>public/web/css/nav.css">
     <link rel="stylesheet" href="<?= URL ?>public/web/css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 </head>
 <body>
 
+<div id="bannerTransmision" class="banner-vivo" style="<?= $live ? 'display:flex;' : 'display:none;' ?>; position: fixed; bottom: 25px; right: 25px; width: 320px; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; padding: 18px; border-radius: 12px; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.35); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; z-index: 999999; flex-direction: column; gap: 12px; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.1); animation: slideUpFloat 0.4s ease-out;">
+    
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="dot-alerta" style="height: 10px; width: 10px; background-color: #ffffff; border-radius: 50%; display: inline-block; animation: parpadeoAlerta 1.2s infinite; box-shadow: 0 0 8px #ffffff;"></span>
+        <strong style="font-size: 0.9rem; letter-spacing: 0.5px; text-transform: uppercase;">¡Transmisión en Vivo!</strong>
+    </div>
+    
+    <span id="textoBanner" style="font-size: 0.95rem; font-weight: 500; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+        <?= $live ? htmlspecialchars($live['titulo']) : '' ?>
+    </span>
+    
+    <a href="<?= URL ?>trasmisionPublica" class="btn-ver-vivo" style="background: #ffffff; color: #ef4444; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 700; text-align: center; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); transition: all 0.2s ease-in-out;">
+        <i class="fa-solid fa-play" style="margin-right: 5px;"></i> Ver Transmisión
+    </a>
+</div>
+
+
+
 <?php 
-// IMPORTANTE: Aquí usamos la ruta del disco duro para el include
 include __DIR__ . '/componentes/nav.php'; 
 ?>
+
 <section class="hero-slider">
     <div class="slide active">
         <img src="<?= URL ?>public/web/imagenes/1.png" class="slide-img">
@@ -92,7 +120,7 @@ include __DIR__ . '/componentes/nav.php';
                 <a href="#" class="btn-leer">Leer más</a>
             </div>
         </div>
-        </div>
+    </div>
 </section>
 
 <?php 
@@ -100,5 +128,7 @@ include __DIR__ . '/componentes/footer.php';
 ?>
 
 <script src="<?= URL ?>public/web/js/index.js"></script>
+<script src="<?= URL ?>public/web/js/notificaciones_vivo.js"></script>
+
 </body>
 </html>

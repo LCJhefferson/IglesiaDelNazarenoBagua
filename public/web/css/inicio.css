@@ -144,9 +144,9 @@ body {
         font-size: 16px;
     }
 
-    .nav {
+    /* .nav {
         display: none;
-    }
+    } */
 }
 
 
@@ -397,3 +397,28 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+
+
+
+
+
+
+
+
+/* ==========================================================================
+   TRANSMISIÓN EN VIVO
+   ========================================================================== */
+   @keyframes parpadeoAlerta {
+        0% { transform: scale(0.9); opacity: 1; }
+        50% { transform: scale(1.2); opacity: 0.4; }
+        100% { transform: scale(0.9); opacity: 1; }
+    }
+    @keyframes slideUpFloat {
+        from { transform: translateY(50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    #bannerTransmision .btn-ver-vivo:hover {
+        background: #f3f4f6 !important;
+        transform: translateY(-2px);
+    }

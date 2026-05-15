@@ -77,7 +77,11 @@ public function eliminarNoticia($id) {
         }
     }
     
-    header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=noticias");
+// Después de guardar
+    header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=noticias&guardado=1");
+
+// Después de eliminar
+    header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=noticias&eliminado=1");    
     exit();
 }
 

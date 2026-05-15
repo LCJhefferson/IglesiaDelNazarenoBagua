@@ -1,58 +1,62 @@
-
-
-/* ========================= */
-/* HEADER */
-/* ========================= */
+/* ==========================================================================
+   HEADER & NAV PERFECCIONADO
+   ========================================================================== */
 .header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 10000;
-
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 18px 50px;
-
-    background: rgba(255, 255, 255, 0.582);
+    justify-content: space-between; /* Distribución estricta Izquierda / Derecha */
+    padding: 12px 4%;
+    background: rgba(255, 255, 255, 0.92); /* Un toque más opaco para legibilidad */
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-sizing: border-box;
+    height: 70px; /* Altura fija controlada */
 }
 
-.header .login{
-     padding: 6px 14px;
-    margin-left: 60px;
-    border-radius: 20px;
-    background: rgba(0, 0, 0, 0.301);
-    
-
-    color: #000000;
-    text-decoration: none;
-    margin-left: 25px;
-    font-weight: 500;
-    position: relative;
-}
-
-.login:hover {
-    background: rgba(0, 0, 0, 0.377);
-    transform: translateY(-2px);
+.logo {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0; /* Evita que el logo se achique */
 }
 
 .logo img {
-    height: 40px;
-    filter: brightness(0); /* oscurece todo a negro */
+    height: 42px;
+    width: auto;
+    display: block;
+    filter: brightness(0);
 }
 
+/* Agrupador de navegación y botón de login */
+.nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+    flex-grow: 1; /* Ocupa el espacio disponible de manera balanceada */
+}
 
-/* ========================= */
-/* NAV */
-/* ========================= */
+.nav {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
 .nav a {
     color: #000000;
     text-decoration: none;
-    margin-left: 25px;
+    margin-left: 22px;
     font-weight: 500;
+    font-size: 0.95rem;
     position: relative;
+    padding: 6px 0;
+    white-space: nowrap; /* Evita que los textos se partan en dos renglones */
 }
 
 .nav a::after {
@@ -62,10 +66,99 @@
     height: 2.5px;
     background: #fdc269;
     left: 0;
-    bottom: -5px;
+    bottom: 0;
     transition: 0.3s;
 }
 
 .nav a:hover::after {
     width: 100%;
+}
+
+/* Botón de Ingresar Alineado */
+.header .login {
+    padding: 8px 18px;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.08);
+    color: #000000;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    margin-left: 15px;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.header .login:hover {
+    background: rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Botón de menú hamburguesa (Escondido por defecto en PC) */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: #000000;
+    cursor: pointer;
+    padding: 8px;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   MEDIA QUERY: COLAPSO MÓVIL AJUSTADO (Aplica para pantallas de 1024px o menos)
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .menu-toggle {
+        display: block; /* Aparece en la esquina derecha ordenadamente */
+    }
+
+    .nav-container {
+        position: fixed;
+        top: 0;
+        right: -100%; /* Oculto fuera de pantalla */
+        width: 280px;
+        height: 100vh;
+        background: #ffffff;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 90px 30px;
+        gap: 30px;
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 9999;
+    }
+
+    .nav-container.active {
+        right: 0; /* Entra limpiamente */
+    }
+
+    .nav {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 20px;
+    }
+
+    .nav a {
+        margin-left: 0;
+        font-size: 1.1rem;
+        width: 100%;
+        display: block;
+    }
+
+    .header .login {
+        margin-left: 0;
+        width: 100%;
+        text-align: center;
+        background: #000000;
+        color: #ffffff;
+        box-sizing: border-box;
+    }
+    
+    .header .login:hover {
+        background: #333333;
+    }
 }

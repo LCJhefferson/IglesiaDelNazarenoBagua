@@ -9,7 +9,7 @@
     <div class="menu">
 
         <div class="menu-item">
-            <a href="index.php?vista=dashboard&seccion=inicio" class="menu-title direct-link">Inicio</a>
+            <a href="index.php?vista=dashboard&seccion=inicioAdmin" class="menu-title direct-link">Inicio</a>
         </div>
 
         <div class="menu-item">
@@ -52,8 +52,8 @@
 
 
 
-        <div class="menu-item logout-item" style="margin-top: auto; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.1);">
-    <a href="index.php?vista=logout" class="menu-title direct-link" style="color: #ff4d4d; font-weight: bold; display: flex; align-items: center; gap: 10px;">
+        <div class="menu-item " style="margin-top: auto !important; padding: 20px 0;">
+    <a href="index.php?vista=logout" class="menu-title direct-link" style="color: #4d6eff; font-weight: bold; display: flex; align-items: center; gap: 10px;">
         <i class="fas fa-sign-out-alt"></i> Cerrar sesión
     </a>
 </div>

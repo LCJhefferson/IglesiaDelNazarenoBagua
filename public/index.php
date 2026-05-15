@@ -22,19 +22,33 @@ if (file_exists($autoloadPath)) {
     die("Error Crítico: No se encontró el Autoload en: " . $autoloadPath);
 }
 
-// 5. Captura de Vista (Limpiando posibles prefijos como 'public/')
+// 5. Captura de Vista
 $vista = $_GET['vista'] ?? 'inicio';
-$vista = str_replace('public/', '', $vista); // Si viene 'public/dashboard', lo deja en 'dashboard'
+$vista = str_replace('public/', '', $vista);
+
+// Quitamos el .php si el usuario lo puso en la URL para evitar el error .php.php
+$vista = str_replace('.php', '', $vista);
 
 if ($vista === 'procesar_login') {
     $archivoVista = $raizProyecto . '/procesos/auth/procesar_login.php';
-} else if ($vista === 'dashboard' || $vista === 'admin/dashboard') {
-    // Caso especial para el panel de administración
-    $archivoVista = $raizProyecto . '/aplicacion/vistas/admin/dashboard.php';
-} else {
-    // Vistas públicas (inicio, nosotros, etc.)
+} 
+// EXCEPCIÓN PARA EL DASHBOARD Y CONTENIDOS DE ADMIN
+else if (strpos($vista, 'admin/') === 0 || $vista === 'dashboard') {
+    
+    if ($vista === 'dashboard' || $vista === 'admin/dashboard') {
+        $archivoVista = $raizProyecto . '/aplicacion/vistas/admin/dashboard.php';
+    } else {
+        // Para rutas como 'admin/contenidos/procesar_estado'
+        $rutaLimpia = str_replace('admin/', '', $vista);
+        $archivoVista = $raizProyecto . '/aplicacion/vistas/admin/' . $rutaLimpia . '.php';
+    }
+} 
+else {
+    // Vistas públicas
     $archivoVista = $raizProyecto . '/aplicacion/vistas/web/' . $vista . '.php';
 }
+
+
 
 // 6. Carga de Archivo sin 404 (Si falla, nos dirá la ruta exacta)
 if (file_exists($archivoVista)) {

@@ -17,7 +17,7 @@ if (!in_array($_SESSION['rol_id'], [1, 2])) {
 }
 
 // 3. Capturamos la sección actual
-$vista = $_GET['seccion'] ?? 'inicio';
+$vista = $_GET['seccion'] ?? 'inicioAdmin';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -35,7 +35,7 @@ $vista = $_GET['seccion'] ?? 'inicio';
     <?php
     // Mapeo de estilos por sección
     $estilos = [
-        'inicio'                 => 'inicio.css',
+        'inicioAdmin'            => 'inicioAdmin.css',
         'NewUsuarioForm'         => 'NewUsuarioForm.css',
         'noticias'               => 'noticias.css',
         'membresia'              => 'membresia.css',
@@ -111,7 +111,6 @@ $scripts = [
     'reguistro_usuario'      => 'reguistro_usuario.js',
     'membresia'              => 'membresia.js',
     'transmision'            => 'transmision.js',
-    // Nuevos scripts de discipulado
     'DiscipuladoGrupos'      => 'DiscipuladoGrupos.js',
     'DiscipuladoIntegrantes' => 'DiscipuladoIntegrantes.js'
 ];
