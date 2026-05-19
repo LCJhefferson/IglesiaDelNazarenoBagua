@@ -45,9 +45,10 @@ $vista = $_GET['seccion'] ?? 'inicioAdmin';
         'visitasListar'          => 'visitasListar.css',
         'visitasMap'             => 'visitasMap.css',
         'transmision'            => 'transmision.css',
-        // Nuevos estilos de discipulado
         'DiscipuladoGrupos'      => 'DiscipuladoGrupos.css',
-        'DiscipuladoIntegrantes' => 'DiscipuladoIntegrantes.css'
+        'DiscipuladoIntegrantes' => 'DiscipuladoIntegrantes.css',
+        'visitasListar.php'     => 'visitasListar.css',
+        'visitasMap.php'        => 'visitasMap.css'
     ];
 
     if (isset($estilos[$vista])) {
@@ -112,7 +113,9 @@ $scripts = [
     'membresia'              => 'membresia.js',
     'transmision'            => 'transmision.js',
     'DiscipuladoGrupos'      => 'DiscipuladoGrupos.js',
-    'DiscipuladoIntegrantes' => 'DiscipuladoIntegrantes.js'
+    'DiscipuladoIntegrantes' => 'DiscipuladoIntegrantes.js',
+    'visitasListar'          => 'visitasListar.js',
+    'visitasMap'             => 'visitasMap.js'
 ];
 
 if (isset($scripts[$vista])) {

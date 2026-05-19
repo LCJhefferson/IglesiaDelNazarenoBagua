@@ -1,13 +1,14 @@
 <?php
 namespace aplicacion\modelos;
 
-class Visita {
+class VisitaModelo {
     public $id;
     public $miembro_id;
     public $fecha_visita;
     public $motivo;
     public $registrado_por;
     public $estado_id;
+    public $estado;
 
     public function __construct($data = []) {
         $this->id = $data['id'] ?? null;
@@ -16,5 +17,6 @@ class Visita {
         $this->motivo = $data['motivo'] ?? null;
         $this->registrado_por = $data['registrado_por'] ?? null;
         $this->estado_id = $data['estado_id'] ?? null;
+        $this->estado = $data['estado'] ?? null;
     }
 }
