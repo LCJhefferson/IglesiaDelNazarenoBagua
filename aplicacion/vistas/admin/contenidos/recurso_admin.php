@@ -3,7 +3,6 @@ use aplicacion\controladores\RecursoController;
 
 $controller = new RecursoController();
 
-// ── PROCESAR ACCIONES ──
 if (isset($_GET['eliminar']))            $controller->eliminar((int)$_GET['eliminar']);
 if (isset($_GET['restaurar']))           $controller->restaurar((int)$_GET['restaurar']);
 if (isset($_GET['eliminar_definitivo'])) $controller->eliminarDefinitivo((int)$_GET['eliminar_definitivo']);
@@ -11,11 +10,22 @@ if (isset($_GET['vaciar_papelera']))     $controller->vaciarPapelera();
 if (isset($_GET['descargar']))           $controller->descargar((int)$_GET['descargar']);
 if (isset($_POST['guardar']))            $controller->guardar();
 
-// ── OBTENER DATOS DE LA BD ──
 $archivos = $controller->listar();
 $papelera = $controller->listarPapelera();
 
-// ── CONTADORES PARA EL HERO ──
+$pendientes = array_filter($archivos, fn($a) => $a['ruta_thumb'] === null);
+if (!empty($pendientes)) {
+    foreach ($pendientes as $a) {
+        $controller->regenerarUno(
+            (int)$a['id'],
+            $a['ruta_archivo']   ?? '',
+            $a['tipo']           ?? 'doc',
+            $a['enlace_youtube'] ?? ''
+        );
+    }
+    $archivos = $controller->listar();
+}
+
 $total_archivos = count($archivos);
 $total_descargas = 0;
 $descargas_semana = 0;
@@ -30,10 +40,8 @@ foreach ($archivos as $a) {
     if (!empty($a['autor'])) $contribuidores[$a['autor']] = true;
 }
 $total_contribuidores = count($contribuidores);
-// Si no hay campo "autor", al menos mostramos 1
 if ($total_contribuidores === 0 && $total_archivos > 0) $total_contribuidores = 1;
 
-// ── CATEGORÍAS ÚNICAS (para las pills) ──
 $categorias_encontradas = [];
 foreach ($archivos as $a) {
     $cat = $a['categoria'] ?? '';
@@ -42,13 +50,11 @@ foreach ($archivos as $a) {
     $categorias_encontradas[$cat]++;
 }
 
-// ── MAPAS DE TIPO ──
 $icono_tipo    = ['pdf' => '📄', 'img' => '🖼️', 'vid' => '🎬', 'doc' => '📝'];
 $clase_tipo    = ['pdf' => 'pdf', 'img' => 'img', 'vid' => 'vid', 'doc' => 'doc'];
 $etiqueta_tipo = ['pdf' => 'PDF', 'img' => 'IMG', 'vid' => 'VIDEO', 'doc' => 'DOC'];
 $etiqueta_slab = ['pdf' => 'PDF', 'img' => 'IMAGEN', 'vid' => 'VIDEO', 'doc' => 'DOCUMENTO'];
 
-// ── MENSAJE DE ÉXITO ──
 $mensajes_exito = [
     1 => 'Archivo guardado correctamente.',
     2 => 'Archivo movido a la papelera.',
@@ -58,14 +64,11 @@ $mensajes_exito = [
 ];
 $msg_exito = isset($_GET['exito']) ? ($mensajes_exito[(int)$_GET['exito']] ?? '') : '';
 
-// ── PÁGINA ACTIVA tras redirección ──
 $_paginas_validas = ['publico', 'archivos', 'subir', 'papelera'];
 $pagina_activa    = in_array($_GET['pagina'] ?? '', $_paginas_validas) ? $_GET['pagina'] : 'publico';
 
-// ── RUTA BASE para enlaces ──
 $ruta_base = '/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin';
 
-// ── TARJETA ADMIN (Mis Archivos) ──
 function tarjeta_archivo(array $archivo, string $ruta_base): string {
     global $icono_tipo, $clase_tipo, $etiqueta_tipo;
     $tipo     = $archivo['tipo'];
@@ -74,7 +77,17 @@ function tarjeta_archivo(array $archivo, string $ruta_base): string {
     $etiqueta = $etiqueta_tipo[$tipo] ?? strtoupper($tipo);
     $id       = (int)$archivo['id'];
 
-    // Datos para el modal de edición (escapados para JS)
+    $thumb     = $archivo['ruta_thumb'] ?? '';
+    $thumb_url = '';
+    if ($thumb !== '') {
+        $thumb_url = (str_starts_with($thumb, 'http://') || str_starts_with($thumb, 'https://'))
+            ? $thumb
+            : '/IglesiaDelNazarenoBagua/' . $thumb;
+    }
+    $preview_min = $thumb_url !== ''
+        ? '<img class="miniatura-preview" src="' . htmlspecialchars($thumb_url) . '" alt="" loading="lazy" onerror="this.style.display=\'none\'">'
+        : '';
+
     $js_titulo      = addslashes(htmlspecialchars($archivo['titulo'],      ENT_QUOTES));
     $js_descripcion = addslashes(htmlspecialchars($archivo['descripcion'], ENT_QUOTES));
     $js_categoria   = addslashes(htmlspecialchars($archivo['categoria'],   ENT_QUOTES));
@@ -82,10 +95,12 @@ function tarjeta_archivo(array $archivo, string $ruta_base): string {
     $js_ruta        = addslashes($archivo['ruta_archivo']   ?? '');
     $js_youtube     = addslashes($archivo['enlace_youtube'] ?? '');
 
+    $card_extra = $thumb_url !== '' ? ' has-preview' : '';
     return '
-    <div class="tarjeta-archivo" data-tipo="' . htmlspecialchars($tipo) . '">
+    <div class="tarjeta-archivo' . $card_extra . '" data-tipo="' . htmlspecialchars($tipo) . '">
         <div class="miniatura-archivo ' . $clase . '">
-            ' . $icono . '
+            ' . $preview_min . '
+            ' . ($thumb_url === '' ? $icono : '') . '
             <span class="etiqueta-archivo etiqueta-' . $tipo . '">' . $etiqueta . '</span>
         </div>
         <div class="info-archivo">
@@ -119,7 +134,6 @@ function tarjeta_archivo(array $archivo, string $ruta_base): string {
     </div>';
 }
 
-// ── TARJETA PÚBLICA (estilo V2 con slab superior) ──
 function tarjeta_publica(array $archivo, string $ruta_base): string {
     global $icono_tipo, $clase_tipo, $etiqueta_slab;
     $tipo          = $archivo['tipo'];
@@ -134,11 +148,23 @@ function tarjeta_publica(array $archivo, string $ruta_base): string {
         ? '<div class="superposicion-play"><div class="boton-play"><i class="fa-solid fa-play"></i></div></div>'
         : '';
 
+    $thumb     = $archivo['ruta_thumb'] ?? '';
+    $thumb_url = '';
+    if ($thumb !== '') {
+        $thumb_url = (str_starts_with($thumb, 'http://') || str_starts_with($thumb, 'https://'))
+            ? $thumb
+            : '/IglesiaDelNazarenoBagua/' . $thumb;
+    }
+    $preview = $thumb_url !== ''
+        ? '<img class="slab-preview-admin" src="' . htmlspecialchars($thumb_url) . '" alt="" loading="lazy" onerror="this.style.display=\'none\'">'
+        : '';
+
     return '
     <div class="tarjeta-publica" data-categoria="' . $categoria_attr . '">
         <div class="slab-publico ' . $clase . '">
+            ' . $preview . '
             <span class="etiqueta-slab ' . $tipo . '">' . $etiqueta . '</span>
-            ' . $icono . '
+            ' . ($thumb_url === '' ? $icono : '') . '
             ' . $superposicion . '
         </div>
         <div class="cuerpo-publico">
@@ -172,19 +198,49 @@ function tarjeta_publica(array $archivo, string $ruta_base): string {
 </script>
 <?php endif; ?>
 
+<script>
+var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
+    'id'        => (int)$a['id'],
+    'titulo'    => $a['titulo'],
+    'tipo'      => $a['tipo'],
+    'categoria' => $a['categoria'] ?? '',
+], $archivos)) ?>;
+</script>
+
 <header class="barra-superior">
     <div class="eyebrow" id="eyebrowPagina">Comunidad · Recursos</div>
     <div class="relleno"></div>
-    <button class="disparador-paleta" onclick="abrirPaleta()" aria-label="Abrir menú de comandos">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <span>Buscar o navegar…</span>
-        <div style="flex:1"></div>
-        <kbd class="tecla"></kbd>
-    </button>
-    <button class="boton boton-primario" onclick="mostrarPagina('subir')">
-        <i class="fa-solid fa-plus"></i>
-        Subir archivo
-    </button>
+
+    <div class="wrap-busqueda" id="wrapBusqueda">
+        <div class="barra-busqueda-header">
+            <i class="fa-solid fa-magnifying-glass busq-icono"></i>
+            <input
+                type="text"
+                id="inputBusqueda"
+                class="input-busqueda-header"
+                placeholder="Buscar archivos…"
+                autocomplete="off"
+                oninput="buscarRecursos(this.value)"
+                onkeydown="teclasBusqueda(event)"
+            />
+        </div>
+        <div class="dropdown-busqueda" id="dropdownBusqueda" style="display:none;"></div>
+    </div>
+
+    <div class="nav-iconos">
+        <button class="nav-btn" data-pagina="archivos" onclick="mostrarPagina('archivos')" title="Mis Archivos">
+            <i class="fa-solid fa-folder-open"></i>
+        </button>
+        <button class="nav-btn" data-pagina="papelera" onclick="mostrarPagina('papelera')" title="Papelera">
+            <i class="fa-solid fa-trash-can"></i>
+            <?php if (count($papelera) > 0): ?>
+                <span class="nav-badge"><?= count($papelera) ?></span>
+            <?php endif; ?>
+        </button>
+        <button class="nav-btn nav-btn-primario" onclick="abrirModalSubir()" title="Subir archivo">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+        </button>
+    </div>
 </header>
 
 <main class="area-contenido">
@@ -306,112 +362,6 @@ function tarjeta_publica(array $archivo, string $ruta_base): string {
         </div>
     </div>
 
-    <div class="pagina" id="pagina-subir">
-        <div class="envoltorio-hero">
-            <div class="hero-editorial">
-                <svg class="hero-paloma" viewBox="0 0 64 64" fill="none">
-                    <path d="M52 16c-3 0-6 1.5-8 4-2 2-3 5-3 8 0 2 .5 4 1.5 5.5L30 46l-10-2-8 8 12-2 4 6 8-8-2-10 12-13.5C48 23 49 21 49 19c1.5-.5 3-1.5 3-3z" fill="#E5B567"/>
-                </svg>
-                <div class="hero-glow"></div>
-                <div class="hero-contenido">
-                    <div class="hero-eyebrow">
-                        <span class="punto"></span>
-                        Administración
-                    </div>
-                    <h1 class="hero-titulo">Subir Archivo</h1>
-                    <p class="hero-subtitulo">
-                        Carga un nuevo recurso para la comunidad parroquial.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div class="contenedor-subida">
-            <form class="tarjeta-formulario" method="POST" enctype="multipart/form-data">
-                <h2 id="tituloFormulario">📤 Subir nuevo archivo</h2>
-                <input type="hidden" name="id"           id="campoId">
-                <input type="hidden" name="ruta_actual"  id="campoRutaActual">
-                <input type="hidden" name="tipo_actual"  id="campoTipoActual">
-
-                <div class="grupo-formulario">
-                    <label>Título del archivo</label>
-                    <input type="text" name="titulo" id="campoTitulo"
-                           placeholder="Ingrese el título..." oninput="actualizarPrevista()"/>
-                </div>
-
-                <div class="grupo-formulario">
-                    <label>Descripción</label>
-                    <textarea name="descripcion" id="campoDescripcion"
-                              placeholder="Ingrese una descripción..." oninput="actualizarPrevista()"></textarea>
-                </div>
-
-                <div class="grupo-formulario">
-                    <label>Categoría</label>
-                    <select name="categoria" id="campoCategoria">
-                        <option value="">Seleccionar categoría</option>
-                        <option value="documentos">Documentos</option>
-                        <option value="imagenes">Imágenes</option>
-                        <option value="videos">Videos</option>
-                        <option value="recursos">Recursos</option>
-                    </select>
-                </div>
-
-                <div class="grupo-formulario">
-                    <label>
-                        Archivo principal
-                        <span style="font-size:.75rem;color:var(--texto-suave);text-transform:none;letter-spacing:0;font-weight:400;">
-                            (deja vacío para mantener el actual al editar)
-                        </span>
-                    </label>
-                    <div class="zona-arrastre" id="zonaArrastre"
-                         ondragover="event.preventDefault(); this.classList.add('arrastrando')"
-                         ondragleave="this.classList.remove('arrastrando')"
-                         ondrop="manejarSoltado(event)"
-                         onclick="document.getElementById('campoPrincipal').click()">
-                        <div class="icono-circulo">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                        </div>
-                        <p>Arrastra un archivo aquí</p>
-                        <p class="ayuda">
-                            o <span class="enlace">selecciona uno desde tu dispositivo</span>
-                        </p>
-                        <p class="ayuda" style="margin-top:8px;">PDF · DOCX · IMAGEN · VIDEO — hasta 50 MB</p>
-                        <input type="file" id="campoPrincipal" name="archivo_principal"
-                               style="display:none" onchange="manejarSeleccion(this)"/>
-                    </div>
-                </div>
-
-                <div class="grupo-formulario">
-                    <label>Video (link YouTube)</label>
-                    <input type="text" name="enlace_youtube" id="campoYoutube"
-                           placeholder="https://youtube.com/..."/>
-                </div>
-
-                <div style="display:flex;gap:10px;margin-top:8px;">
-                    <button type="submit" name="guardar" class="boton boton-primario"
-                            style="flex:1;justify-content:center;padding:13px;">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                        <span id="textoBotonGuardar">Publicar archivo</span>
-                    </button>
-                    <button type="button" class="boton boton-contorno"
-                            onclick="limpiarFormulario()" title="Limpiar">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            </form>
-
-            <div class="tarjeta-previsualizar">
-                <h3>👁 Vista previa</h3>
-                <div class="miniatura-previa"><i class="fa-solid fa-file"></i></div>
-                <div class="titulo-previo" id="tituloPrevio">Título del archivo</div>
-                <div class="descripcion-previa" id="descripcionPrevia">La descripción aparecerá aquí...</div>
-                <div class="boton-previo">
-                    <i class="fa-solid fa-download" style="margin-right:6px;"></i> DESCARGAR
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="pagina" id="pagina-papelera">
         <div class="envoltorio-hero">
             <div class="hero-editorial">
@@ -460,9 +410,22 @@ function tarjeta_publica(array $archivo, string $ruta_base): string {
                         $tipo_p  = $item['tipo'] ?? 'doc';
                         $icono_p = $icono_tipo[$tipo_p] ?? '📁';
                         $js_nombre_p = addslashes(htmlspecialchars($item['titulo'], ENT_QUOTES));
+                        $thumb_p     = $item['ruta_thumb'] ?? '';
+                        $thumb_url_p = '';
+                        if ($thumb_p !== '') {
+                            $thumb_url_p = (str_starts_with($thumb_p, 'http://') || str_starts_with($thumb_p, 'https://'))
+                                ? $thumb_p
+                                : '/IglesiaDelNazarenoBagua/' . $thumb_p;
+                        }
                     ?>
-                        <div class="tarjeta-papelera">
-                            <div class="icono-papelera"><?= $icono_p ?></div>
+                        <div class="tarjeta-papelera<?= $thumb_url_p !== '' ? ' has-preview' : '' ?>">
+                            <div class="icono-papelera">
+                                <?php if ($thumb_url_p !== ''): ?>
+                                    <img class="miniatura-preview" src="<?= htmlspecialchars($thumb_url_p) ?>" alt="" loading="lazy" onerror="this.style.display='none'">
+                                <?php else: ?>
+                                    <?= $icono_p ?>
+                                <?php endif; ?>
+                            </div>
                             <div>
                                 <div class="nombre-papelera"><?= htmlspecialchars($item['titulo']) ?></div>
                                 <div class="meta-papelera">
@@ -490,70 +453,92 @@ function tarjeta_publica(array $archivo, string $ruta_base): string {
 
 </main>
 
-<div class="fondo-paleta" id="fondoPaleta" onclick="if(event.target===this) cerrarPaleta()">
-    <div class="caja-paleta">
-        <div class="fila-busqueda-paleta">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="inputPaleta" placeholder="Buscar acciones, recursos o navegar…" autocomplete="off"/>
-            <kbd>esc</kbd>
+<div class="overlay-subir" id="overlaySubir" onclick="if(event.target===this) cerrarModalSubir()">
+    <div class="modal-subir" id="modalSubir" role="dialog" aria-modal="true" aria-labelledby="tituloModalSubir">
+
+        <div class="modal-subir-header">
+            <svg class="modal-subir-paloma" viewBox="0 0 64 64" fill="none">
+                <path d="M52 16c-3 0-6 1.5-8 4-2 2-3 5-3 8 0 2 .5 4 1.5 5.5L30 46l-10-2-8 8 12-2 4 6 8-8-2-10 12-13.5C48 23 49 21 49 19c1.5-.5 3-1.5 3-3z" fill="#E5B567"/>
+            </svg>
+            <div class="modal-subir-header-texto">
+                <div class="modal-subir-eyebrow">ADMINISTRACIÓN</div>
+                <div class="modal-subir-titulo" id="tituloModalSubir">Subir Archivo</div>
+            </div>
+            <button class="modal-subir-cerrar" onclick="cerrarModalSubir()" title="Cerrar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
 
-        <div class="lista-paleta">
-            <div class="seccion-paleta">
-                <div class="titulo-seccion-paleta">Navegación</div>
-                <button class="item-paleta" data-label="Vista Pública" data-hint="Página principal de recursos"
-                        onclick="mostrarPagina('publico')">
-                    <div class="item-icono"><i class="fa-solid fa-globe"></i></div>
-                    <div class="item-cuerpo">
-                        <div class="item-label">Vista Pública</div>
-                        <div class="item-hint">Página principal de recursos</div>
-                    </div>
-                    <div class="item-teclas">
-                    </div>
-                </button>
+        <form class="modal-subir-body" method="POST" enctype="multipart/form-data" id="formSubir">
+            <input type="hidden" name="id"          id="subir_campoId">
+            <input type="hidden" name="ruta_actual" id="subir_campoRutaActual">
+            <input type="hidden" name="tipo_actual" id="subir_campoTipoActual">
+
+            <div class="subir-dropzone" id="subir_zonaArrastre"
+                 ondragover="event.preventDefault(); this.classList.add('arrastrando')"
+                 ondragleave="this.classList.remove('arrastrando')"
+                 ondrop="manejarSoltadoSubir(event)"
+                 onclick="document.getElementById('subir_campoPrincipal').click()">
+                <div class="subir-dropzone-circulo">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <p class="subir-dropzone-titulo">Arrastra archivos aquí</p>
+                <p class="subir-dropzone-sub">o <span class="subir-enlace">elige desde tu dispositivo</span></p>
+                <p class="subir-dropzone-hint">PDF · DOCX · MP3 · ZIP · IMAGEN · hasta 100 MB</p>
+                <input type="file" id="subir_campoPrincipal" name="archivo_principal"
+                       style="display:none" onchange="seleccionarArchivoSubir(this)"/>
             </div>
 
-            <div class="seccion-paleta">
-                <div class="titulo-seccion-paleta">Administración</div>
-                <button class="item-paleta" data-label="Subir Archivo" data-hint="Cargar un nuevo recurso a la comunidad"
-                        onclick="mostrarPagina('subir')">
-                    <div class="item-icono"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                    <div class="item-cuerpo">
-                        <div class="item-label">Subir Archivo</div>
-                        <div class="item-hint">Cargar un nuevo recurso a la comunidad</div>
+            <div class="subir-archivo-sel" id="subir_archivoSel" style="display:none;">
+                <i class="fa-solid fa-file subir-archivo-icono"></i>
+                <div class="subir-archivo-info">
+                    <div class="subir-archivo-nombre" id="subir_archivoNombre">archivo.pdf</div>
+                    <div class="subir-barra-wrap">
+                        <div class="subir-barra-prog" id="subir_barraProg" style="width:0%"></div>
                     </div>
-                    <div class="item-teclas">
-                    </div>
-                </button>
-                <button class="item-paleta" data-label="Mis Archivos" data-hint="Recursos cargados por ti"
-                        onclick="mostrarPagina('archivos')">
-                    <div class="item-icono"><i class="fa-solid fa-folder-open"></i></div>
-                    <div class="item-cuerpo">
-                        <div class="item-label">Mis Archivos</div>
-                        <div class="item-hint"><?= $total_archivos ?> recursos cargados</div>
-                    </div>
-                    <div class="item-teclas">
-                    </div>
-                </button>
-                <button class="item-paleta" data-label="Papelera" data-hint="Archivos eliminados recientemente"
-                        onclick="mostrarPagina('papelera')">
-                    <div class="item-icono"><i class="fa-solid fa-trash-can"></i></div>
-                    <div class="item-cuerpo">
-                        <div class="item-label">Papelera</div>
-                        <div class="item-hint">Archivos eliminados recientemente</div>
-                    </div>
-                    <?php if (count($papelera) > 0): ?>
-                        <span class="item-badge"><?= count($papelera) ?></span>
-                    <?php endif; ?>
-                </button>
+                </div>
             </div>
 
-            <div class="paleta-vacia" id="paletaVacia" style="display:none;">
-                Sin resultados para tu búsqueda.
+            <div class="subir-campos">
+                <div class="subir-grupo">
+                    <label>Título</label>
+                    <input type="text" name="titulo" id="subir_titulo" placeholder="Ingresa el título del recurso…" required/>
+                </div>
+                <div class="subir-fila-2">
+                    <div class="subir-grupo">
+                        <label>Categoría</label>
+                        <select name="categoria" id="subir_categoria">
+                            <option value="">Seleccionar…</option>
+                            <option value="documentos">Documentos</option>
+                            <option value="imagenes">Imágenes</option>
+                            <option value="videos">Videos</option>
+                            <option value="recursos">Recursos</option>
+                        </select>
+                    </div>
+                    <div class="subir-grupo">
+                        <label>Enlace YouTube</label>
+                        <input type="text" name="enlace_youtube" id="subir_youtube" placeholder="https://youtube.com/…"/>
+                    </div>
+                </div>
+                <div class="subir-grupo">
+                    <label>Descripción <span style="font-weight:400;font-size:10px;letter-spacing:0;text-transform:none;color:var(--texto-muy-suave);">(opcional)</span></label>
+                    <textarea name="descripcion" id="subir_descripcion" placeholder="Describe el contenido del recurso…"></textarea>
+                </div>
+            </div>
+        </form>
+
+        <div class="modal-subir-footer">
+            <span class="modal-subir-nota">
+                <i class="fa-solid fa-bell" style="color:var(--gold);font-size:11px;"></i>
+                Se publicará para toda la comunidad
+            </span>
+            <div style="display:flex;gap:10px;">
+                <button type="button" class="boton boton-contorno" onclick="cerrarModalSubir()">Cancelar</button>
+                <button type="submit" name="guardar" form="formSubir" class="boton boton-primario">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Publicar recurso
+                </button>
             </div>
         </div>
-
-
     </div>
 </div>
 

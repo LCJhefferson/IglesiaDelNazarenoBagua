@@ -1,153 +1,139 @@
-/* ============================================================
-   paneRecursos · Rediseño V2 — Lógica de cliente
-   Command Palette ⌘K + Modales + Toast + Filtros + Form helpers
-   ============================================================ */
-
-/* ------------------------------------------------------------
-   NAVEGACIÓN ENTRE PÁGINAS
-   ------------------------------------------------------------ */
 const TITULOS_PAGINA = {
-    publico:   { titulo: 'Vista Pública',  eyebrow: 'Comunidad · Recursos' },
-    archivos:  { titulo: 'Mis Archivos',   eyebrow: 'Administración' },
-    subir:     { titulo: 'Subir Archivo',  eyebrow: 'Administración' },
-    papelera:  { titulo: 'Papelera',       eyebrow: 'Administración' },
+    publico:  { eyebrow: 'Comunidad · Recursos' },
+    archivos: { eyebrow: 'Administración' },
+    papelera: { eyebrow: 'Administración' },
 };
 
 function mostrarPagina(nombre) {
-    // Ocultar todas
     document.querySelectorAll('.pagina').forEach(p => p.classList.remove('activa'));
     const objetivo = document.getElementById('pagina-' + nombre);
     if (objetivo) objetivo.classList.add('activa');
 
-    // Actualizar eyebrow de la barra superior
     const eyebrow = document.getElementById('eyebrowPagina');
     if (eyebrow && TITULOS_PAGINA[nombre]) {
         eyebrow.textContent = TITULOS_PAGINA[nombre].eyebrow;
     }
 
-    // Cerrar paleta si estuviera abierta
-    cerrarPaleta();
-    // Scroll al inicio
+    document.querySelectorAll('.nav-btn[data-pagina]').forEach(b => b.classList.remove('activo'));
+    const navBtn = document.querySelector('.nav-btn[data-pagina="' + nombre + '"]');
+    if (navBtn) navBtn.classList.add('activo');
+
+    cerrarDropdownBusqueda();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* ------------------------------------------------------------
-   COMMAND PALETTE ⌘K
-   ------------------------------------------------------------ */
-const paleta = {
-    fondo:      null,
-    input:      null,
-    lista:      null,
-    items:      [],   // referencias DOM
-    visibles:   [],   // ítems actualmente visibles tras filtrar
-    indiceSel:  0,
-};
-
-function abrirPaleta() {
-    if (!paleta.fondo) paleta.fondo = document.getElementById('fondoPaleta');
-    if (!paleta.input) paleta.input = document.getElementById('inputPaleta');
-    if (!paleta.lista) paleta.lista = document.getElementById('listaPaleta');
-
-    paleta.fondo.classList.add('activo');
-    paleta.input.value = '';
-    filtrarPaleta('');
-    setTimeout(() => paleta.input.focus(), 50);
-}
-
-function cerrarPaleta() {
-    const fondo = document.getElementById('fondoPaleta');
-    if (fondo) fondo.classList.remove('activo');
-}
-
-function filtrarPaleta(termino) {
-    const t = (termino || '').toLowerCase().trim();
-    paleta.visibles = [];
-
-    paleta.items.forEach(item => {
-        const texto = (item.dataset.label + ' ' + (item.dataset.hint || '')).toLowerCase();
-        const visible = !t || texto.includes(t);
-        item.style.display = visible ? '' : 'none';
-        if (visible) paleta.visibles.push(item);
-    });
-
-    // Ocultar secciones que quedaron vacías
-    document.querySelectorAll('.seccion-paleta').forEach(s => {
-        const tieneVisibles = Array.from(s.querySelectorAll('.item-paleta'))
-            .some(i => i.style.display !== 'none');
-        s.style.display = tieneVisibles ? '' : 'none';
-    });
-
-    // Estado vacío
-    const vacio = document.getElementById('paletaVacia');
-    if (vacio) vacio.style.display = paleta.visibles.length === 0 ? 'block' : 'none';
-
-    paleta.indiceSel = 0;
-    aplicarSeleccionPaleta();
-}
-
-function aplicarSeleccionPaleta() {
-    paleta.items.forEach(i => i.classList.remove('seleccionado'));
-    if (paleta.visibles[paleta.indiceSel]) {
-        paleta.visibles[paleta.indiceSel].classList.add('seleccionado');
-        paleta.visibles[paleta.indiceSel].scrollIntoView({ block: 'nearest' });
-    }
-}
-
-function moverSeleccionPaleta(delta) {
-    if (paleta.visibles.length === 0) return;
-    paleta.indiceSel = (paleta.indiceSel + delta + paleta.visibles.length) % paleta.visibles.length;
-    aplicarSeleccionPaleta();
-}
-
-function ejecutarSeleccionPaleta() {
-    const item = paleta.visibles[paleta.indiceSel];
-    if (!item) return;
-    item.click();
-}
-
-function inicializarPaleta() {
-    paleta.items = Array.from(document.querySelectorAll('.item-paleta'));
-    paleta.visibles = paleta.items.slice();
-
-    if (paleta.input) {
-        paleta.input.addEventListener('input', e => filtrarPaleta(e.target.value));
-    }
-}
-
-/* ------------------------------------------------------------
-   ATAJOS DE TECLADO GLOBALES
-   ------------------------------------------------------------ */
 document.addEventListener('keydown', (e) => {
-    const paletaAbierta = document.getElementById('fondoPaleta')?.classList.contains('activo');
-
-    // ⌘K / Ctrl+K — abrir paleta
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        paletaAbierta ? cerrarPaleta() : abrirPaleta();
-        return;
-    }
-
-    // Esc — cerrar todo modal/paleta
     if (e.key === 'Escape') {
-        cerrarPaleta();
         cerrarModalEditar();
         cerrarModalConfirmar();
         cerrarModalDefinitivo();
         cerrarModalVaciarPapelera();
-        return;
-    }
-
-    // Navegación dentro de la paleta
-    if (paletaAbierta) {
-        if (e.key === 'ArrowDown') { e.preventDefault(); moverSeleccionPaleta(1); }
-        if (e.key === 'ArrowUp')   { e.preventDefault(); moverSeleccionPaleta(-1); }
-        if (e.key === 'Enter')     { e.preventDefault(); ejecutarSeleccionPaleta(); }
+        cerrarModalSubir();
+        cerrarDropdownBusqueda();
     }
 });
 
-/* ------------------------------------------------------------
-   MODAL: EDITAR ARCHIVO
-   ------------------------------------------------------------ */
+let _busqIndice = -1;
+let _busqTermino = '';
+
+function buscarRecursos(valor) {
+    _busqTermino = (valor || '').trim();
+    const dropdown = document.getElementById('dropdownBusqueda');
+    if (!dropdown) return;
+
+    if (!_busqTermino) {
+        dropdown.style.display = 'none';
+        return;
+    }
+
+    const t    = _busqTermino.toLowerCase();
+    const datos = (typeof ARCHIVOS_DATA !== 'undefined') ? ARCHIVOS_DATA : [];
+    const hits  = datos.filter(a =>
+        a.titulo.toLowerCase().includes(t) || (a.categoria || '').toLowerCase().includes(t)
+    );
+
+    if (hits.length === 0) {
+        dropdown.innerHTML = '<div class="drop-vacio">Sin resultados para "<strong>' + _esc(_busqTermino) + '</strong>"</div>';
+        dropdown.style.display = 'block';
+        _busqIndice = -1;
+        return;
+    }
+
+    const iconos = { pdf: '📄', img: '🖼️', vid: '🎬', doc: '📝' };
+    const max    = Math.min(hits.length, 5);
+    let html = '';
+    for (let i = 0; i < max; i++) {
+        const a = hits[i];
+        html += `<div class="drop-item" data-i="${i}" onmousedown="verTodosResultados('${_esc(a.titulo)}')">
+            <span class="drop-icono">${iconos[a.tipo] || '📁'}</span>
+            <div class="drop-info">
+                <div class="drop-titulo">${_resaltar(a.titulo, _busqTermino)}</div>
+                <div class="drop-cat">${_esc(a.categoria || '')}</div>
+            </div>
+        </div>`;
+    }
+    if (hits.length > max) {
+        html += `<div class="drop-footer" onmousedown="verTodosResultados()">Ver los ${hits.length} resultados →</div>`;
+    }
+    dropdown.innerHTML = html;
+    dropdown.style.display = 'block';
+    _busqIndice = -1;
+}
+
+function _resaltar(texto, termino) {
+    const e   = _esc(texto);
+    const tE  = termino.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return e.replace(new RegExp('(' + tE + ')', 'gi'), '<mark class="drop-match">$1</mark>');
+}
+
+function _esc(str) {
+    return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function teclasBusqueda(e) {
+    const dropdown = document.getElementById('dropdownBusqueda');
+    if (!dropdown || dropdown.style.display === 'none') return;
+    const items = dropdown.querySelectorAll('.drop-item');
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        _busqIndice = Math.min(_busqIndice + 1, items.length - 1);
+        _marcarBusq(items);
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        _busqIndice = Math.max(_busqIndice - 1, -1);
+        _marcarBusq(items);
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        verTodosResultados();
+    } else if (e.key === 'Escape') {
+        cerrarDropdownBusqueda();
+    }
+}
+
+function _marcarBusq(items) {
+    items.forEach((el, i) => el.classList.toggle('activo', i === _busqIndice));
+    if (_busqIndice >= 0) items[_busqIndice]?.scrollIntoView({ block: 'nearest' });
+}
+
+function cerrarDropdownBusqueda() {
+    const dd = document.getElementById('dropdownBusqueda');
+    if (dd) dd.style.display = 'none';
+    const inp = document.getElementById('inputBusqueda');
+    if (inp) { inp.value = ''; _busqTermino = ''; }
+}
+
+function verTodosResultados(titulo) {
+    const termino = titulo || _busqTermino;
+    cerrarDropdownBusqueda();
+    mostrarPagina('archivos');
+    filtrarArchivos(termino);
+    const inp = document.querySelector('.barra-busqueda input[type="text"]');
+    if (inp) inp.value = termino;
+}
+
 function abrirModalEditar(id, titulo, descripcion, categoria, tipo, ruta, youtube) {
     document.getElementById('editarId').value          = id;
     document.getElementById('editarTitulo').value      = titulo;
@@ -156,21 +142,16 @@ function abrirModalEditar(id, titulo, descripcion, categoria, tipo, ruta, youtub
     document.getElementById('editarTipoActual').value  = tipo;
     document.getElementById('editarRuta').value        = ruta;
     document.getElementById('editarYoutube').value     = youtube || '';
-
     document.getElementById('modalEditar').classList.add('activo');
 }
 function cerrarModalEditar() {
     document.getElementById('modalEditar')?.classList.remove('activo');
 }
 
-/* ------------------------------------------------------------
-   MODALES DE CONFIRMACIÓN
-   ------------------------------------------------------------ */
 function confirmarEliminar(id, nombre) {
     document.getElementById('textoConfirmarEliminar').innerHTML =
         '"<strong>' + nombre + '</strong>" se moverá a la papelera y podrás restaurarlo después.';
-    document.getElementById('enlaceConfirmarEliminar').href =
-        RUTA_RECURSOS + '&eliminar=' + id;
+    document.getElementById('enlaceConfirmarEliminar').href = RUTA_RECURSOS + '&eliminar=' + id;
     document.getElementById('modalConfirmarEliminar').classList.add('activo');
 }
 function cerrarModalConfirmar() {
@@ -180,8 +161,7 @@ function cerrarModalConfirmar() {
 function confirmarEliminarDefinitivo(id, nombre) {
     document.getElementById('textoConfirmarDefinitivo').innerHTML =
         'Esta acción <strong>no se puede deshacer</strong>. "' + nombre + '" se eliminará de forma permanente.';
-    document.getElementById('enlaceConfirmarDefinitivo').href =
-        RUTA_RECURSOS + '&eliminar_definitivo=' + id;
+    document.getElementById('enlaceConfirmarDefinitivo').href = RUTA_RECURSOS + '&eliminar_definitivo=' + id;
     document.getElementById('modalConfirmarDefinitivo').classList.add('activo');
 }
 function cerrarModalDefinitivo() {
@@ -196,95 +176,93 @@ function cerrarModalVaciarPapelera() {
     document.getElementById('modalVaciarPapelera')?.classList.remove('activo');
 }
 
-/* ------------------------------------------------------------
-   TOAST AVISO
-   ------------------------------------------------------------ */
 function mostrarAviso(mensaje, tipo) {
     const aviso = document.getElementById('aviso');
     const texto = document.getElementById('mensajeAviso');
     if (!aviso || !texto) return;
-
     texto.textContent = mensaje;
     aviso.className = 'aviso ' + (tipo || 'exito');
-
-    // Forzar reflow para reiniciar animación
     void aviso.offsetWidth;
     aviso.classList.add('visible');
-
     clearTimeout(window._timerAviso);
-    window._timerAviso = setTimeout(() => {
-        aviso.classList.remove('visible');
-    }, 3500);
+    window._timerAviso = setTimeout(() => aviso.classList.remove('visible'), 3500);
 }
 
-/* ------------------------------------------------------------
-   DROPZONE: arrastrar y seleccionar
-   ------------------------------------------------------------ */
-function manejarSoltado(event) {
+let _focusAnteriorSubir = null;
+
+function abrirModalSubir() {
+    _focusAnteriorSubir = document.activeElement;
+    const overlay = document.getElementById('overlaySubir');
+    if (!overlay) return;
+    overlay.classList.add('activo');
+    document.querySelector('.barra-superior')?.classList.add('borrosa');
+    document.querySelector('.area-contenido')?.classList.add('borrosa');
+    limpiarFormSubir();
+    setTimeout(() => document.getElementById('subir_titulo')?.focus(), 60);
+}
+
+function cerrarModalSubir() {
+    document.getElementById('overlaySubir')?.classList.remove('activo');
+    document.querySelector('.barra-superior')?.classList.remove('borrosa');
+    document.querySelector('.area-contenido')?.classList.remove('borrosa');
+    limpiarFormSubir();
+    _focusAnteriorSubir?.focus();
+}
+
+function limpiarFormSubir() {
+    ['subir_campoId','subir_campoRutaActual','subir_campoTipoActual',
+     'subir_titulo','subir_descripcion','subir_youtube'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    const sel = document.getElementById('subir_categoria');
+    if (sel) sel.value = '';
+    const camp = document.getElementById('subir_campoPrincipal');
+    if (camp) camp.value = '';
+    const archivoSel = document.getElementById('subir_archivoSel');
+    if (archivoSel) archivoSel.style.display = 'none';
+}
+
+function manejarSoltadoSubir(event) {
     event.preventDefault();
-    const zona = event.currentTarget;
-    zona.classList.remove('arrastrando');
-
-    if (event.dataTransfer.files.length > 0) {
-        const input = document.getElementById('campoPrincipal');
-        input.files = event.dataTransfer.files;
-        actualizarPrevista();
+    document.getElementById('subir_zonaArrastre')?.classList.remove('arrastrando');
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+        document.getElementById('subir_campoPrincipal').files = files;
+        _mostrarArchivoSel(files[0]);
     }
 }
 
-function manejarSeleccion(input) {
-    if (input.files.length > 0) {
-        actualizarPrevista();
-    }
+function seleccionarArchivoSubir(input) {
+    if (input.files.length > 0) _mostrarArchivoSel(input.files[0]);
 }
 
-/* ------------------------------------------------------------
-   PREVIEW DEL FORMULARIO
-   ------------------------------------------------------------ */
-function actualizarPrevista() {
-    const titulo      = document.getElementById('campoTitulo')?.value      || 'Título del archivo';
-    const descripcion = document.getElementById('campoDescripcion')?.value || 'La descripción aparecerá aquí...';
-
-    const tp = document.getElementById('tituloPrevio');
-    const dp = document.getElementById('descripcionPrevia');
-    if (tp) tp.textContent = titulo;
-    if (dp) dp.textContent = descripcion;
+function _mostrarArchivoSel(file) {
+    document.getElementById('subir_archivoNombre').textContent = file.name;
+    document.getElementById('subir_archivoSel').style.display = 'flex';
+    const barra = document.getElementById('subir_barraProg');
+    if (!barra) return;
+    barra.style.width = '0%';
+    let prog = 0;
+    const iv = setInterval(() => {
+        prog = Math.min(prog + Math.random() * 18, 88);
+        barra.style.width = prog + '%';
+        if (prog >= 88) clearInterval(iv);
+    }, 90);
+    setTimeout(() => { barra.style.width = '100%'; }, 1100);
 }
 
-function limpiarFormulario() {
-    document.getElementById('campoId').value           = '';
-    document.getElementById('campoTitulo').value       = '';
-    document.getElementById('campoDescripcion').value  = '';
-    document.getElementById('campoCategoria').value    = '';
-    document.getElementById('campoYoutube').value      = '';
-    document.getElementById('campoPrincipal').value    = '';
-    document.getElementById('campoRutaActual').value   = '';
-    document.getElementById('campoTipoActual').value   = '';
-
-    const titulo = document.getElementById('tituloFormulario');
-    const boton  = document.getElementById('textoBotonGuardar');
-    if (titulo) titulo.textContent = '📤 Subir nuevo archivo';
-    if (boton)  boton.textContent  = 'Publicar archivo';
-
-    actualizarPrevista();
-}
-
-/* ------------------------------------------------------------
-   FILTROS DE MIS ARCHIVOS
-   ------------------------------------------------------------ */
 let filtroTexto = '';
 let filtroTipo  = 'todos';
 
 function aplicarFiltros() {
-    const tarjetas = document.querySelectorAll('#todosArchivos .tarjeta-archivo');
-    tarjetas.forEach(t => {
+    document.querySelectorAll('#todosArchivos .tarjeta-archivo').forEach(t => {
         const nombre = (t.querySelector('.nombre-archivo')?.textContent || '').toLowerCase();
         const tipo   = t.dataset.tipo || '';
-
-        const coincideTexto = !filtroTexto || nombre.includes(filtroTexto);
-        const coincideTipo  = filtroTipo === 'todos' || tipo === filtroTipo;
-
-        t.style.display = (coincideTexto && coincideTipo) ? '' : 'none';
+        t.style.display = (
+            (!filtroTexto || nombre.includes(filtroTexto)) &&
+            (filtroTipo === 'todos' || tipo === filtroTipo)
+        ) ? '' : 'none';
     });
 }
 
@@ -298,24 +276,32 @@ function filtrarPorTipo(valor) {
     aplicarFiltros();
 }
 
-/* ------------------------------------------------------------
-   FILTRO POR PILLS (categoría)
-   ------------------------------------------------------------ */
 function filtrarPorCategoria(categoria, elemento) {
-    // Marcar pill activa
     document.querySelectorAll('.barra-pills .pill').forEach(p => p.classList.remove('activa'));
     if (elemento) elemento.classList.add('activa');
-
     document.querySelectorAll('.cuadricula-publica .tarjeta-publica').forEach(t => {
-        const cat = t.dataset.categoria || '';
-        t.style.display = (categoria === 'todos' || cat === categoria) ? '' : 'none';
+        t.style.display = (categoria === 'todos' || t.dataset.categoria === categoria) ? '' : 'none';
     });
 }
 
-/* ------------------------------------------------------------
-   INICIALIZACIÓN
-   ------------------------------------------------------------ */
+function _trapTab(e, modalEl) {
+    if (e.key !== 'Tab') return;
+    const foc = modalEl.querySelectorAll('button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])');
+    if (foc.length === 0) return;
+    const first = foc[0], last = foc[foc.length - 1];
+    if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    inicializarPaleta();
-    actualizarPrevista();
+    document.addEventListener('click', (e) => {
+        const wrap = document.getElementById('wrapBusqueda');
+        if (wrap && !wrap.contains(e.target)) cerrarDropdownBusqueda();
+    });
+
+    const modalSubir = document.getElementById('modalSubir');
+    if (modalSubir) modalSubir.addEventListener('keydown', e => _trapTab(e, modalSubir));
 });
