@@ -22,7 +22,6 @@
     --sombra: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
 }
 
-/* Mejora 1: Modo oscuro */
 .dark-mode {
     --fondo: #0f172a;
     --blanco: #1e293b;
@@ -87,7 +86,6 @@ body {
     text-align: center;
 }
 
-/* Mejora 1: Botón modo oscuro */
 .btn-tema {
     background: var(--fondo);
     border: 1px solid var(--borde);
@@ -248,13 +246,11 @@ body {
     box-shadow: 0 8px 30px rgba(0,0,0,0.12);
 }
 
-/* Mejora 6: card activa resaltada */
 .noticia-card.activa {
     border-color: var(--acento);
     box-shadow: 0 0 0 3px rgba(79,110,247,0.15), var(--sombra);
 }
 
-/* Imagen */
 .card-imagen {
     width: 100%;
     height: 150px;
@@ -372,7 +368,6 @@ body {
 .btn-accion.editar   { background: #fefce8; color: #ca8a04; }
 .btn-accion.eliminar { background: #fef2f2; color: var(--rojo); }
 
-/* Tooltips */
 .tooltip {
     visibility: hidden;
     opacity: 0;
@@ -447,7 +442,6 @@ body {
 }
 
 .card-preview img { width: 100%; height: 200px; object-fit: cover; transition: 0.4s; }
-
 .card-body-preview { padding: 20px; }
 .card-body-preview h3 { font-size: 1rem; margin-bottom: 8px; color: var(--texto); }
 .card-body-preview p  { font-size: 0.85rem; color: var(--suave); line-height: 1.5; }
@@ -529,7 +523,7 @@ body {
 }
 
 /* =========================================
-   Mejora 2: MODAL CONFIRMAR ELIMINAR
+   MODAL CONFIRMAR ELIMINAR
    ========================================= */
 .confirmar-box {
     max-width: 400px;
@@ -551,20 +545,8 @@ body {
     color: var(--rojo);
 }
 
-.confirmar-titulo {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-    color: var(--texto);
-}
-
-.confirmar-texto {
-    font-size: 0.9rem;
-    color: var(--suave);
-    margin-bottom: 25px;
-    line-height: 1.5;
-}
-
+.confirmar-titulo { font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; color: var(--texto); }
+.confirmar-texto  { font-size: 0.9rem; color: var(--suave); margin-bottom: 25px; line-height: 1.5; }
 .confirmar-texto strong { color: var(--texto); }
 
 .confirmar-acciones {
@@ -591,7 +573,7 @@ body {
 .btn-confirmar-eliminar:hover { background: #dc2626; transform: translateY(-1px); }
 
 /* =========================================
-   Mejora 3: TOAST NOTIFICATIONS
+   TOAST NOTIFICATIONS
    ========================================= */
 #toast-container {
     position: fixed;
@@ -618,9 +600,9 @@ body {
     font-family: 'DM Sans', sans-serif;
 }
 
-.toast.exito   { background: #16a34a; }
-.toast.error   { background: var(--rojo); }
-.toast.info    { background: var(--acento); }
+.toast.exito { background: #16a34a; }
+.toast.error { background: var(--rojo); }
+.toast.info  { background: var(--acento); }
 
 @keyframes toastEntrada {
     from { opacity: 0; transform: translateX(60px); }
@@ -633,7 +615,7 @@ body {
 }
 
 /* =========================================
-   Mejora 4: CONTADOR DE CARACTERES
+   CONTADOR DE CARACTERES
    ========================================= */
 .char-contador {
     float: right;
@@ -649,7 +631,7 @@ body {
 .char-contador.danger  { color: var(--rojo); background: var(--rojo-claro); }
 
 /* =========================================
-   Mejora 5: DRAG & DROP
+   DRAG & DROP
    ========================================= */
 .upload-box {
     display: flex;
@@ -819,4 +801,3 @@ input:focus, textarea:focus {
     .form-grid  { grid-template-columns: 1fr; }
     .full       { grid-column: 1; }
 }
-

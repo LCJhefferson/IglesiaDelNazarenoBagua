@@ -34,7 +34,6 @@ $fecha_actual = date("Y-m-d\TH:i");
         <span class="badge-total-real" style="display:none"><?= $total ?></span>
     </div>
     <div class="top-bar-right">
-        <!-- Mejora 1: Botón modo oscuro -->
         <button class="btn-tema" id="btn-tema" onclick="toggleTema()" title="Cambiar tema">
             <i class="fa-solid fa-moon" id="icono-tema"></i>
         </button>
@@ -124,9 +123,8 @@ $fecha_actual = date("Y-m-d\TH:i");
                         <i class="fa-solid fa-pen"></i> Editar
                         <span class="tooltip">Editar noticia</span>
                     </button>
-                    <!-- Mejora 2: botón eliminar abre modal propio -->
                     <button class="btn-accion eliminar"
-                        onclick="confirmarEliminar(<?= $n['id'] ?>, '<?= htmlspecialchars($n['titulo'], ENT_QUOTES) ?>')">
+                        onclick="event.stopPropagation(); confirmarEliminar(<?= $n['id'] ?>, '<?= htmlspecialchars($n['titulo'], ENT_QUOTES) ?>')">
                         <i class="fa-solid fa-trash"></i> Eliminar
                         <span class="tooltip">Eliminar noticia</span>
                     </button>
@@ -149,7 +147,7 @@ $fecha_actual = date("Y-m-d\TH:i");
     </div>
 </div>
 
-<!-- Mejora 2: MODAL DE CONFIRMACIÓN ELIMINAR -->
+<!-- MODAL CONFIRMAR ELIMINAR -->
 <div class="modal" id="modal-confirmar" style="display:none;">
     <div class="modal-box confirmar-box">
         <div class="confirmar-icono">
@@ -191,13 +189,12 @@ $fecha_actual = date("Y-m-d\TH:i");
                     <input type="datetime-local" name="fecha" id="f-fecha" value="<?= $fecha_actual ?>">
                 </div>
 
-                <!-- Mejora 4: contador de caracteres en resumen -->
                 <div class="field full">
                     <label for="f-resumen">
                         Resumen corto
                         <span class="char-contador" id="char-resumen">0 / 150</span>
                     </label>
-                    <textarea name="resumen" id="f-resumen" rows="2" 
+                    <textarea name="resumen" id="f-resumen" rows="2"
                               placeholder="Escribe un breve resumen..."
                               maxlength="150"
                               oninput="contarCaracteres('f-resumen','char-resumen',150)"></textarea>
@@ -209,7 +206,6 @@ $fecha_actual = date("Y-m-d\TH:i");
                         <img id="img-edit-preview" src="" style="width:150px; border-radius:8px; border:1px solid #ddd;">
                         <button type="button" onclick="quitarImagenActual()" style="position:absolute; top:-5px; right:-5px; background:var(--rojo); color:white; border-radius:50%; border:none; width:25px; height:25px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-weight:bold;">&times;</button>
                     </div>
-                    <!-- Mejora 5: drag & drop -->
                     <label class="upload-box" for="imagen" id="label-upload"
                            ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropImagen(event)">
                         <input type="file" name="imagen" id="imagen" accept="image/*" hidden>
@@ -250,7 +246,7 @@ $fecha_actual = date("Y-m-d\TH:i");
     </div>
 </div>
 
-<!-- Mejora 3: TOAST NOTIFICATIONS -->
+<!-- TOAST NOTIFICATIONS -->
 <div id="toast-container"></div>
 
 <script src="js/noticias.js"></script>

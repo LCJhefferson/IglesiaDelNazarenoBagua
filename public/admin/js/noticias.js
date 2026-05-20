@@ -12,17 +12,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let archivosGaleria = [];
 
-    /* ── Mejora 7: Animación del contador ── */
+    /* Mejora 7: Animación del contador */
     const totalReal = parseInt(document.querySelector(".badge-total-real")?.innerText || "0");
     animarContador("badge-total", totalReal);
 
-    /* ── Mejora 1: Modo oscuro (recordar preferencia) ── */
+    /* Mejora 1: Modo oscuro */
     if (localStorage.getItem("tema-noticias") === "dark") {
         document.body.classList.add("dark-mode");
         document.getElementById("icono-tema").className = "fa-solid fa-sun";
     }
 
-    /* ── SKELETON → mostrar cards después de 600ms ── */
+    /* Skeleton → mostrar cards después de 600ms */
     setTimeout(() => {
         const skeleton = document.getElementById("skeleton-grid");
         const grid     = document.getElementById("contenedor-noticias");
@@ -92,8 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
             listaAdjuntos.appendChild(li);
         });
         if (archivosGaleria.length > 0) {
-            const total = listaAdjuntos.children.length;
-            txtMulti.innerText   = total + " imágenes en total";
+            txtMulti.innerText   = listaAdjuntos.children.length + " imágenes en total";
             txtMulti.style.color = "var(--acento)";
         }
     };
@@ -103,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderizarListaGaleria();
     };
 
-    /* ── Preview en tiempo real ── */
+    /* Preview en tiempo real */
     document.getElementById("f-titulo").addEventListener("input", (e) => {
         document.getElementById("preview-titulo").innerText = e.target.value || "Título de la noticia";
     });
@@ -111,10 +110,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("f-resumen").addEventListener("input", (e) => {
         document.getElementById("preview-resumen").innerText = e.target.value || "Resumen ejecutivo...";
     });
+
+    /* Modal confirmar: cerrar al clic fuera */
+    const mc = document.getElementById("modal-confirmar");
+    if (mc) mc.addEventListener("click", (e) => { if (e.target === mc) cerrarConfirmar(); });
 });
 
 /* ─────────────────────────────────────────
-   Mejora 1: MODO OSCURO
+   MEJORA 1: MODO OSCURO
 ───────────────────────────────────────── */
 window.toggleTema = function() {
     const body  = document.body;
@@ -126,7 +129,7 @@ window.toggleTema = function() {
 };
 
 /* ─────────────────────────────────────────
-   Mejora 2: MODAL CONFIRMAR ELIMINAR
+   MEJORA 2: MODAL CONFIRMAR ELIMINAR
 ───────────────────────────────────────── */
 window.confirmarEliminar = function(id, titulo) {
     const modalConfirmar = document.getElementById("modal-confirmar");
@@ -142,18 +145,13 @@ window.cerrarConfirmar = function() {
     document.getElementById("modal-confirmar").style.display = "none";
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-    const mc = document.getElementById("modal-confirmar");
-    if (mc) mc.addEventListener("click", (e) => { if (e.target === mc) cerrarConfirmar(); });
-});
-
 /* ─────────────────────────────────────────
-   Mejora 3: TOAST NOTIFICATIONS
+   MEJORA 3: TOAST NOTIFICATIONS
 ───────────────────────────────────────── */
 window.mostrarToast = function(mensaje, tipo = "exito") {
-    const iconos = { exito: "fa-circle-check", error: "fa-circle-xmark", info: "fa-circle-info" };
+    const iconos    = { exito: "fa-circle-check", error: "fa-circle-xmark", info: "fa-circle-info" };
     const container = document.getElementById("toast-container");
-    const toast = document.createElement("div");
+    const toast     = document.createElement("div");
     toast.className = `toast ${tipo}`;
     toast.innerHTML = `<i class="fa-solid ${iconos[tipo]}"></i> ${mensaje}`;
     container.appendChild(toast);
@@ -164,16 +162,15 @@ window.mostrarToast = function(mensaje, tipo = "exito") {
     }, 3000);
 };
 
-/* Mostrar toast si viene de una acción (detectar URL) */
 document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("guardado") === "1")     mostrarToast("✅ Noticia guardada correctamente", "exito");
-    if (params.get("actualizado") === "1")  mostrarToast("✅ Noticia actualizada correctamente", "exito");
-    if (params.get("eliminado") === "1")    mostrarToast("🗑️ Noticia eliminada", "info");
+    if (params.get("guardado")    === "1") mostrarToast("Noticia guardada correctamente", "exito");
+    if (params.get("actualizado") === "1") mostrarToast("Noticia actualizada correctamente", "exito");
+    if (params.get("eliminado")   === "1") mostrarToast("Noticia eliminada", "info");
 });
 
 /* ─────────────────────────────────────────
-   Mejora 4: CONTADOR DE CARACTERES
+   MEJORA 4: CONTADOR DE CARACTERES
 ───────────────────────────────────────── */
 window.contarCaracteres = function(inputId, contadorId, maximo) {
     const texto    = document.getElementById(inputId).value.length;
@@ -185,7 +182,7 @@ window.contarCaracteres = function(inputId, contadorId, maximo) {
 };
 
 /* ─────────────────────────────────────────
-   Mejora 5: DRAG & DROP
+   MEJORA 5: DRAG & DROP
 ───────────────────────────────────────── */
 window.dragOver = function(e) {
     e.preventDefault();
@@ -202,7 +199,6 @@ window.dropImagen = function(e) {
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith("image/")) {
         procesarImagenPortada(file);
-        /* Asignar al input real para que el form lo envíe */
         const dt = new DataTransfer();
         dt.items.add(file);
         document.getElementById("imagen").files = dt.files;
@@ -214,12 +210,10 @@ window.dropGaleria = function(e) {
     e.currentTarget.classList.remove("drag-over");
     const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
     if (files.length > 0) {
-        archivosGaleriaGlobal = [...(window.archivosGaleriaGlobal || []), ...files];
         const txtMulti = document.getElementById("txt-multi");
         txtMulti.innerText   = files.length + " imágenes añadidas";
         txtMulti.style.color = "var(--acento)";
-
-        files.forEach((file, index) => {
+        files.forEach(file => {
             const li = document.createElement("li");
             li.className = "item-galeria item-nuevo-temp";
             li.innerHTML = `
@@ -238,7 +232,6 @@ function procesarImagenPortada(file) {
     const txtPortada = document.getElementById("txt-imagen");
     txtPortada.innerText   = "Seleccionada: " + file.name;
     txtPortada.style.color = "var(--verde)";
-
     const reader = new FileReader();
     reader.onload = (e) => {
         document.getElementById("preview-img").src = e.target.result;
@@ -247,7 +240,7 @@ function procesarImagenPortada(file) {
 }
 
 /* ─────────────────────────────────────────
-   Mejora 6: CARD ACTIVA RESALTADA
+   MEJORA 6: CARD ACTIVA RESALTADA
 ───────────────────────────────────────── */
 window.seleccionarCard = function(cardEl, n) {
     document.querySelectorAll(".noticia-card").forEach(c => c.classList.remove("activa"));
@@ -256,13 +249,13 @@ window.seleccionarCard = function(cardEl, n) {
 };
 
 /* ─────────────────────────────────────────
-   Mejora 7: ANIMACIÓN CONTADOR
+   MEJORA 7: ANIMACIÓN CONTADOR
 ───────────────────────────────────────── */
 window.animarContador = function(elementId, hasta) {
     const el = document.getElementById(elementId);
     if (!el) return;
     let actual = 0;
-    const paso = Math.ceil(hasta / 20);
+    const paso = Math.ceil(hasta / 20) || 1;
     const intervalo = setInterval(() => {
         actual += paso;
         if (actual >= hasta) {
@@ -274,7 +267,7 @@ window.animarContador = function(elementId, hasta) {
 };
 
 /* ─────────────────────────────────────────
-   VER NOTICIA (actualiza preview lateral)
+   VER NOTICIA
 ───────────────────────────────────────── */
 window.verNoticia = function(n) {
     const rutaBase = "/IglesiaDelNazarenoBagua/";
@@ -300,7 +293,6 @@ window.editarNoticia = function(n) {
     document.getElementById("f-contenido").value   = n.contenido;
     document.getElementById("f-video").value       = n.video_link || "";
 
-    /* Actualizar contador de caracteres */
     contarCaracteres("f-resumen", "char-resumen", 150);
 
     const contenedorPreview = document.getElementById("contenedor-portada-edit");
@@ -318,7 +310,6 @@ window.editarNoticia = function(n) {
         labelUpload.style.display       = "flex";
     }
 
-    /* Galería existente */
     const listaAdjuntos = document.getElementById("lista-imagenes");
     listaAdjuntos.innerHTML = "";
     if (n.imagenes_adjuntas && n.imagenes_adjuntas.length > 0) {
@@ -362,8 +353,8 @@ window.filtrarNoticias = function() {
     let   visibles = 0;
 
     cards.forEach(card => {
-        const titulo  = card.dataset.titulo  || "";
-        const resumen = card.dataset.resumen || "";
+        const titulo   = card.dataset.titulo  || "";
+        const resumen  = card.dataset.resumen || "";
         const coincide = titulo.includes(texto) || resumen.includes(texto);
         card.style.display = coincide ? "" : "none";
         if (coincide) visibles++;
