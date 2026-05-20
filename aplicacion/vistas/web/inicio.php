@@ -111,16 +111,63 @@ include __DIR__ . '/componentes/nav.php';
 
 <section class="noticias-section">
     <h2 class="titulo-noticias">NOTICIAS NAZARENAS</h2>
-    <div class="noticias-container">
-        <div class="noticia-card">
-            <img src="<?= URL ?>public/web/imagenes/noticia2.webp" alt="Noticia">
-            <div class="noticia-content">
-                <h3>Evento especial</h3>
-                <p>Un tiempo de bendición y comunión para la familia.</p>
-                <a href="#" class="btn-leer">Leer más</a>
+
+    <?php
+    $stmtNoticias = $db->query("SELECT * FROM noticias WHERE estado = 1 ORDER BY fecha_creacion DESC");
+    $noticiasPublicas = $stmtNoticias->fetchAll(PDO::FETCH_ASSOC);
+    $totalNoticias = count($noticiasPublicas);
+    ?>
+
+    <?php if(empty($noticiasPublicas)): ?>
+        <p style="text-align:center; color:#64748b; padding:40px 0;">
+            No hay noticias disponibles por el momento.
+        </p>
+    <?php else: ?>
+
+    <!-- CARRUSEL -->
+    <div class="carrusel-wrapper">
+        <button class="carrusel-btn prev" onclick="moverCarrusel(-1)">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <div class="carrusel-track-container">
+            <div class="carrusel-track" id="carrusel-track">
+                <?php foreach($noticiasPublicas as $np): ?>
+                <div class="carrusel-item">
+                    <div class="noticia-card">
+                        <?php if(!empty($np['imagen_portada'])): ?>
+                            <img src="<?= URL ?><?= htmlspecialchars($np['imagen_portada']) ?>" alt="<?= htmlspecialchars($np['titulo']) ?>">
+                        <?php else: ?>
+                            <img src="<?= URL ?>public/web/imagenes/noticia2.webp" alt="Noticia">
+                        <?php endif; ?>
+                        <div class="noticia-content">
+                            <span class="noticia-fecha">
+                                <i class="fa-regular fa-calendar"></i>
+                                <?= date("d/m/Y", strtotime($np['fecha_creacion'])) ?>
+                            </span>
+                            <h3><?= htmlspecialchars($np['titulo']) ?></h3>
+                            <p><?= htmlspecialchars(mb_substr($np['resumen'], 0, 80, 'UTF-8')) ?>...</p>
+                            <a href="#" class="btn-leer">Leer más</a>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
             </div>
         </div>
+
+        <button class="carrusel-btn next" onclick="moverCarrusel(1)">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
     </div>
+
+    <!-- PUNTOS INDICADORES -->
+    <div class="carrusel-dots" id="carrusel-dots">
+        <?php foreach($noticiasPublicas as $idx => $np): ?>
+        <span class="dot <?= $idx === 0 ? 'activo' : '' ?>" onclick="irASlide(<?= $idx ?>)"></span>
+        <?php endforeach; ?>
+    </div>
+
+    <?php endif; ?>
 </section>
 
 <?php 
