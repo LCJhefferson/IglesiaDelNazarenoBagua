@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../../../core/Autoload.php';
 use aplicacion\controladores\MiembroController;
 
 $controller = new MiembroController();
@@ -120,7 +119,7 @@ $fechaHoy = date('Y-m-d');
                         elseif(str_contains($slug, 'discipulador')) $claseColor = 'cargo-discipulador';
                         elseif(str_contains($slug, 'miembro')) $claseColor = 'cargo-miembro';
                         
-                        echo "<span class='badge-cargo $claseColor'>$nombreCargo</span>";
+                        echo "<span class='badge-cargo " . htmlspecialchars($claseColor, ENT_QUOTES) . "'>" . htmlspecialchars($nombreCargo, ENT_QUOTES) . "</span>";
                     }
                 } else {
                     // Si no tiene cargos asignados, se muestra como Miembro por defecto
@@ -157,6 +156,7 @@ $fechaHoy = date('Y-m-d');
         <h3 id="tituloModal"><i class="fa-solid fa-user-plus"></i> Gestionar Miembro</h3>
        
         <form method="POST" id="formMiembro" action="index.php?vista=dashboard&seccion=membresia">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <input type="hidden" name="id">
             <div class="grid">
                 <div class="form-group">

@@ -75,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <!-- ─── Formulario de registro ─── -->
         <form method="POST" action="" id="formulario-registro">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
 
             <!-- Nombre y Apellidos en dos columnas -->
             <div class="fila-doble">

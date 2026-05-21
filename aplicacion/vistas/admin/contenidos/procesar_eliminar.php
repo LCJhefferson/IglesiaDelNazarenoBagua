@@ -1,28 +1,24 @@
 <?php
-// 1. Habilitar errores para ver qué falla si se queda en blanco
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+use aplicacion\dao\NoticiaDAO;
 
-require_once "../../../../aplicacion/core/Autoload.php"; 
-
-use dao\NoticiaDAO;
-
-if(isset($_GET['id'])){
+if (isset($_GET['id'])) {
     try {
         $dao = new NoticiaDAO();
-        $id = intval($_GET['id']); // Aseguramos que sea un número
-        
-        if($dao->eliminar($id)) {
-            // Si funciona, regresamos al panel
-            header("Location: ../dashboard.php?vista=noticias&status=success");
-            exit();
+        $id  = (int) $_GET['id'];
+
+        if ($dao->eliminar($id)) {
+            header("Location: /IglesiaDelNazarenoBagua/dashboard?seccion=noticias&status=success");
+            exit;
         } else {
-            echo "Error: No se pudo actualizar el estado en la base de datos.";
+            header("Location: /IglesiaDelNazarenoBagua/dashboard?seccion=noticias&status=error");
+            exit;
         }
-    } catch (Exception $e) {
-        echo "Error técnico: " . $e->getMessage();
+    } catch (\Exception $e) {
+        error_log('procesar_eliminar: ' . $e->getMessage());
+        header("Location: /IglesiaDelNazarenoBagua/dashboard?seccion=noticias&status=error");
+        exit;
     }
 } else {
-    echo "ID no recibido.";
+    header("Location: /IglesiaDelNazarenoBagua/dashboard?seccion=noticias");
+    exit;
 }

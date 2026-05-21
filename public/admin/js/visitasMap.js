@@ -1,6 +1,4 @@
-// ==========================================================================
 // 1. INICIALIZACIÓN DEL MAPA (Con un zoom inicial estándar)
-// ==========================================================================
 const map = L.map('map').setView([-5.637, -78.528], 15);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -16,9 +14,7 @@ setTimeout(() => {
     map.invalidateSize();
 }, 200);
 
-// ==========================================================================
 // 2. CARGA DE DATOS DESDE EL ENDPOINT JSON
-// ==========================================================================
 fetch(URL_BASE_PROYECTO + 'visitasMapJSON')
     .then(response => {
         if (!response.ok) throw new Error('Error al cargar el JSON del mapa');
@@ -31,9 +27,7 @@ fetch(URL_BASE_PROYECTO + 'visitasMapJSON')
     })
     .catch(error => console.error('Error al inicializar Leaflet:', error));
 
-// ==========================================================================
 // 3. FUNCIÓN PARA DIBUJAR MARCADORES CON FILTRO DE PRIORIDAD SEMAFÓRICA CORREGIDO
-// ==========================================================================
 function renderizarMarcadores(miembros) {
     capaMarcadores.clearLayers(); 
     
@@ -58,33 +52,33 @@ function renderizarMarcadores(miembros) {
         const claseBase = miembro.clase_css || '';
         const estadoNombreBase = miembro.estado_nombre || '';
 
-        // 🔴 1. EVALUAR CRÍTICO PRIMERO (Evita que el historial de visitas lo vuelva verde por error)
+        // 1. EVALUAR CRÍTICO 
         if (claseBase.includes('critico') || estadoNombreBase === 'Retrasada') {
             claseColor = 'bg-critico';
             htmlBadgeEstado = `<span style='color:#ef4444; font-weight: 600;'><i class='fa-solid fa-triangle-exclamation'></i> ${miembro.estado_texto || 'Pendiente crítico'}</span>`;
         } 
-        // 🟡 2. EVALUAR PRÓXIMO 
+        // 2. EVALUAR PRÓXIMO 
         else if (claseBase.includes('proximo') || estadoNombreBase === 'Cercano') {
             claseColor = 'bg-proximo';
             htmlBadgeEstado = `<span style='color:#f59e0b; font-weight: 600;'><i class='fa-solid fa-clock'></i> ${miembro.estado_texto || 'Pendiente próximo'}</span>`;
         } 
-        // 🔵 3. EVALUAR INTERMEDIO
+        // 3. EVALUAR INTERMEDIO
         else if (claseBase.includes('intermedio')) {
             claseColor = 'bg-intermedio';
             htmlBadgeEstado = `<span style='color:#3b82f6; font-weight: 600;'><i class='fa-solid fa-user-check'></i> ${miembro.estado_texto || 'Visitado intermedio'}</span>`;
         } 
-        // 🟢 4. EVALUAR RECIENTE
+        // 4. EVALUAR RECIENTE
         else if (claseBase.includes('reciente') || estadoNombreBase === 'Visitado') {
             claseColor = 'bg-reciente';
             htmlBadgeEstado = `<span style='color:#10b981; font-weight: 600;'><i class='fa-solid fa-circle-check'></i> ${miembro.estado_texto || 'Visitado reciente'}</span>`;
         } 
-        // ⚫ 5. MIEMBROS SIN NINGUNA VISITA REGISTRADA
+        // 5. MIEMBROS SIN NINGUNA VISITA REGISTRADA
         else {
             claseColor = 'bg-sin-estado';
             htmlBadgeEstado = "<span style='color:#64748b;'><i class='fa-solid fa-circle-xmark'></i> Sin visitas registradas</span>";
         }
 
-        // --- Crear círculo DivIcon personalizado ---
+        //Crear círculo DivIcon personalizado
         const iconPersonalizado = L.divIcon({
             className: `custom-marker-icon ${claseColor}`,
             html: `<span>${iniciales}</span>`,
@@ -92,7 +86,7 @@ function renderizarMarcadores(miembros) {
             iconAnchor: [20, 20]
         });
 
-        // --- Contenido HTML del Popup ---
+        //Contenido HTML del Popup
         const popupContenido = `
             <div style="font-family: 'Segoe UI', sans-serif; padding: 5px; min-width: 195px;">
                 <strong style="font-size: 1.05rem; color: #1e293b;">${nombre} ${apellido}</strong><br>
@@ -126,9 +120,7 @@ function renderizarMarcadores(miembros) {
     }
 }
 
-// ==========================================================================
 // 4. LÓGICA DE FILTRADO COMBINADO EN TIEMPO REAL (CORREGIDO CON PRIORIDAD)
-// ==========================================================================
 const inputNombre = document.getElementById('buscarNombre');
 const selectEstado = document.getElementById('buscarEstado');
 

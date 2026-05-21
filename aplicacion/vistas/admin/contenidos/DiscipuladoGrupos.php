@@ -85,6 +85,7 @@ $estados = $datos['estados'];
         </div>
 
         <form id="formGrupo" action="dashboard?seccion=DiscipuladoGrupos" method="POST">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <input type="hidden" name="id" id="grupo_id">
             
             <div class="modal-body-unified">

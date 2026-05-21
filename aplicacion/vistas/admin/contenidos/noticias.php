@@ -175,6 +175,7 @@ $fecha_actual = date("Y-m-d\TH:i");
         </div>
 
         <form method="POST" enctype="multipart/form-data" id="form-noticia">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <input type="hidden" name="id" id="id_noticia">
             <input type="hidden" name="imagen_actual" id="imagen_actual">
 

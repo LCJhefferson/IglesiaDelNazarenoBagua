@@ -1,5 +1,10 @@
 {
     "require": {
         "pusher/pusher-php-server": "^7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "aplicacion\\": "aplicacion/"
+        }
     }
 }

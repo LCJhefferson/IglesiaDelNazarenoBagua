@@ -67,6 +67,7 @@ foreach($transmisiones as $t) {
         <div class="card">
             <h3><i class="fa-solid fa-gear"></i> <span id="formActionTitle"><?= $hayVivo ? 'Control de Vivo' : 'Nueva Transmisión' ?></span></h3>
             <form id="formTransmision" method="POST">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
                 <input type="hidden" name="id_transmision" id="formId" value="<?= $preview['id'] ?? '' ?>">
 
                 <div class="form-group">

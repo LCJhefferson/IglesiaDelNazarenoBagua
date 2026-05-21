@@ -1,6 +1,6 @@
 <?php
 // 1. Incluir el autoload para la conexión y clases
-require_once __DIR__ . '/../../../../aplicacion/core/Autoload.php';
+require_once __DIR__ . '/../../../../vendor/autoload.php';
 use aplicacion\config\Conexion;
 
 // 2. Establecer cabecera JSON

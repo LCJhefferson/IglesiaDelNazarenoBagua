@@ -1,6 +1,4 @@
-// =========================================================================
 // 0. PERSISTENCIA DE FILTROS (Mantiene los filtros activos tras recargar)
-// =========================================================================
 document.addEventListener("DOMContentLoaded", function() {
     // Al cargar la página, verificamos si había filtros guardados en la memoria
     if (localStorage.getItem('v_filtroNombre') !== null) {
@@ -20,9 +18,7 @@ document.addEventListener("DOMContentLoaded", function() {
     filtrarVisitas();
 });
 
-// =========================================================================
 // 1. MÓDULO MODAL: REGISTRAR VISITA PASTORAL
-// =========================================================================
 function abrirModalVisita(id, nombre) {
     document.getElementById('modalMiembroId').value = id;
     document.getElementById('modalNombreMiembro').innerText = nombre;
@@ -87,9 +83,7 @@ function procesarGuardarVisita(event) {
     });
 }
 
-// =========================================================================
 // 2. MÓDULO MODAL: AJUSTES DE RANGOS DE TIEMPO
-// =========================================================================
 function abrirModalAjustes() {
     document.getElementById('modalAjustes').style.display = 'flex';
 }
@@ -122,9 +116,7 @@ function procesarGuardarAjustes(event) {
     });
 }
 
-// =========================================================================
 // 3. MÓDULO MODAL: ELIMINACIÓN LÓGICA
-// =========================================================================
 function abrirModalEliminar(visitaId, nombreMiembro) {
     document.getElementById('modalEliminarVisitaId').value = visitaId;
     document.getElementById('eliminarNombreMiembro').textContent = nombreMiembro;
@@ -158,9 +150,7 @@ function procesarEliminacionLogica() {
     });
 }
 
-// =========================================================================
 // 4. MÓDULO: FILTROS DINÁMICOS POR AJAX (ACTUALIZADO CON MEMORIA)
-// =========================================================================
 function filtrarVisitas() {
     const nombre = document.getElementById('filtroNombre').value;
     const motivo = document.getElementById('filtroMotivo').value;

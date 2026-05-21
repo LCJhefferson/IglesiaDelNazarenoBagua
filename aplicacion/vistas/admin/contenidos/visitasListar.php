@@ -1,20 +1,19 @@
 <?php
 $visitaDAO = new \aplicacion\dao\VisitaDAO();
 
-// 1. Capturar filtros (Soporta GET y POST para mayor flexibilidad)
+
 $filtroNombre = $_REQUEST['nombre'] ?? '';
 $filtroMotivo = $_REQUEST['motivo'] ?? '';
 $filtroEstado = $_REQUEST['estado'] ?? '';
 $filtroModo   = $_REQUEST['modo'] ?? 'ultimo'; 
 
-// 2. Traer la lista base desde la base de datos
 $miembrosTodos = $visitaDAO->listarConDetalles($filtroModo);
 $mesesLimiteActual = $visitaDAO->obtenerMesesLimite();
 
 $miembrosFiltrados = [];
 $conteo = ['reciente' => 0, 'intermedio' => 0, 'proximo' => 0, 'critico' => 0];
 
-// 3. Procesar datos y estadísticas en tiempo real
+//filtros 
 foreach ($miembrosTodos as $m) {
     if ($m['clase_css'] === 'estado-verde-reciente') $conteo['reciente']++;
     elseif ($m['clase_css'] === 'estado-azul-intermedio') $conteo['intermedio']++;
@@ -44,9 +43,8 @@ foreach ($miembrosTodos as $m) {
     $miembrosFiltrados[] = $m;
 }
 
-// =====================================================================
+
 // 🟢 RESPUESTA AJAX: Envoltura válida para evitar que DOMParser falle
-// =====================================================================
 if (isset($_GET['ajax']) && $_GET['ajax'] == '1'):
 ?>
     <div id="ajax-stats-bridge">
@@ -191,6 +189,7 @@ endif;
             Miembro: <strong id="modalNombreMiembro" style="color:#1e293b;">-</strong>
         </p>
         <form id="formRegistrarVisita" action="<?= URL ?>index.php?vista=admin/guardarVisita" onsubmit="procesarGuardarVisita(event)">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <input type="hidden" name="miembro_id" id="modalMiembroId">
             <div class="campo">
                 <label for="txtFechaVisita">Fecha de la Visita</label>
@@ -224,6 +223,7 @@ endif;
             Modifica la frecuencia máxima tolerada (en meses) para recalcular los estados dinámicos.
         </p>
         <form id="formAjustesVisita" action="<?= URL ?>index.php?vista=admin/guardarAjustesVisita" onsubmit="procesarGuardarAjustes(event)">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <div class="campo">
                 <label for="numMeses">Frecuencia Máxima (Meses)</label>
                 <input type="number" id="numMeses" name="meses_limite" value="<?= $mesesLimiteActual ?>" min="1" max="24" required>
@@ -247,6 +247,7 @@ endif;
             <strong id="eliminarNombreMiembro" style="color:#0f172a;">-</strong>?
         </p>
         <form id="formEliminarVisita" action="<?= URL ?>index.php?vista=admin/eliminarVisita" onsubmit="event.preventDefault();">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <input type="hidden" name="visita_id" id="modalEliminarVisitaId">
             <div class="modal-acciones" style="display:flex; justify-content:center; gap:15px;">
                 <button type="button" class="btn-accion" onclick="cerrarModalEliminar()">Cancelar</button>

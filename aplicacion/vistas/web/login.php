@@ -19,6 +19,8 @@ if (isset($_SESSION['usuario'])) {
     exit;
 }
 
+$csrfToken = \aplicacion\core\Middleware::csrfGenerate();
+
 // 4. Captura de errores de la URL
 $error = isset($_GET['error']) ? (int)$_GET['error'] : 0;
 
@@ -49,6 +51,7 @@ $error = isset($_GET['error']) ? (int)$_GET['error'] : 0;
         <p class="login-subtitulo">Iglesia del Nazareno — Bagua</p>
 
         <form method="POST" action="<?php echo URL; ?>procesar_login">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <div class="form-group">
                 <i class="fa-solid fa-user icono-input"></i>
                 <input type="text" name="usuario" placeholder="Usuario" required autocomplete="username">

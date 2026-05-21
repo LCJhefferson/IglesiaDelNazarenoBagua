@@ -22,11 +22,11 @@
             <i class="fa-solid fa-traffic-light"></i>
             <select id="buscarEstado">
                 <option value="todos">Todos los estados</option>
-                <option value="reciente">🟢 Visitado reciente</option>
-                <option value="intermedio">🔵 Visitado intermedio</option>
-                <option value="proximo">🟡 Pendiente próximo</option>
-                <option value="critico">🔴 Pendiente crítico</option>
-                <option value="ninguno">⚫ Sin visitas registrados (Gris)</option>
+                <option value="reciente">Visitado reciente</option>
+                <option value="intermedio">Visitado intermedio</option>
+                <option value="proximo">Pendiente próximo</option>
+                <option value="critico">Pendiente crítico</option>
+                <option value="ninguno">Sin visitas registrados</option>
             </select>
         </div>
     </div>

@@ -1,7 +1,7 @@
 <?php
 namespace aplicacion\modelos;
 
-class userLogin {
+class UserLogin {
     private $id;
     private $username;
     private $password;
