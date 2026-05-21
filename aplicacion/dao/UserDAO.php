@@ -1,7 +1,7 @@
 <?php
 namespace aplicacion\dao;
 
-use aplicacion\modelos\userLogin;
+use aplicacion\modelos\UserLogin;
 use aplicacion\config\Conexion;
 
 class UserDAO {

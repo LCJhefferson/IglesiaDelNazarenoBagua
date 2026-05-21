@@ -125,7 +125,7 @@ $label_btn   = ['vid' => 'Ver recurso'];
 
 
 <?php
-$items = ['PREDICAR', 'ENSEÑAR', 'SANAR', 'LIBRE ACCESO', 'RECURSOS ADVENTISTAS', 'COMPARTE EL CONOCIMIENTO', 'PARA TODA LA COMUNIDAD', 'EDUCA TU FE'];
+$items = ['PREDICAR', 'ENSEÑAR', 'SANAR', 'LIBRE ACCESO', 'RECURSOS NAZARENOS', 'COMPARTE EL CONOCIMIENTO', 'PARA TODA LA COMUNIDAD', 'EDUCA TU FE'];
 $all   = array_merge($items, $items, $items, $items);
 ?>
 <div class="rec-marquee-wrap" aria-hidden="true">

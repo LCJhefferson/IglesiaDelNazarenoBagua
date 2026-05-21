@@ -124,6 +124,7 @@ $total_integrantes = count($integrantes);
         </div>
 
         <form method="POST" action="dashboard?seccion=DiscipuladoIntegrantes">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <div class="modal-body-unified">
                 <div class="form-group">
                     <label><i class="fas fa-users"></i> 1. Busque y Seleccione los Miembros</label>

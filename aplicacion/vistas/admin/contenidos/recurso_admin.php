@@ -470,6 +470,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
         </div>
 
         <form class="modal-subir-body" method="POST" enctype="multipart/form-data" id="formSubir">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <input type="hidden" name="id"          id="subir_campoId">
             <input type="hidden" name="ruta_actual" id="subir_campoRutaActual">
             <input type="hidden" name="tipo_actual" id="subir_campoTipoActual">
@@ -549,6 +550,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
         </button>
         <h3>✏️ Editar archivo</h3>
         <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <input type="hidden" name="id"          id="editarId">
             <input type="hidden" name="ruta_actual" id="editarRuta">
             <input type="hidden" name="tipo_actual" id="editarTipoActual">

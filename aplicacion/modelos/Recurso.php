@@ -1,7 +1,12 @@
 <?php
 namespace aplicacion\modelos;
 
-class Recurso {
+use aplicacion\core\Model;
+
+class Recurso extends Model {
+
+    protected static string $tabla = 'recursos';
+
     private $id;
     private $titulo;
     private $descripcion;

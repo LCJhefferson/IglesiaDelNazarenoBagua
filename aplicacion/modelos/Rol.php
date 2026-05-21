@@ -1,5 +1,5 @@
 <?php
-namespace modelos;
+namespace aplicacion\modelos;
 
 class Rol {
     public $id;

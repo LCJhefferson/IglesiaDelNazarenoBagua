@@ -3,7 +3,7 @@ ini_set('session.cookie_lifetime', 0);
 session_start();
 
 // 1. Carga del Autoload
-require_once __DIR__ . '/../../core/Autoload.php';
+require_once __DIR__ . '/../../../vendor/autoload.php';
 
 // 2. Control de Acceso
 if (!isset($_SESSION['usuario'])) {
@@ -16,7 +16,13 @@ if (!in_array($_SESSION['rol_id'], [1, 2])) {
     exit;
 }
 
-// 3. Capturamos la sección actual
+// 3. CSRF — generar token y verificar en cada POST al dashboard
+$csrfToken = \aplicacion\core\Middleware::csrfGenerate();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    \aplicacion\core\Middleware::csrfVerify();
+}
+
+// 4. Capturamos la sección actual
 $vista = $_GET['seccion'] ?? 'inicioAdmin';
 ?>
 <!DOCTYPE html>
@@ -56,6 +62,7 @@ $vista = $_GET['seccion'] ?? 'inicioAdmin';
         echo '<link rel="stylesheet" href="admin/css/' . $estilos[$vista] . '?v=' . time() . '">';
     }
     ?>
+    <script>const CSRF_TOKEN = '<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>';</script>
 </head>
 <body>
 
@@ -115,7 +122,6 @@ $scripts = [
     'DiscipuladoGrupos'      => 'DiscipuladoGrupos.js',
     'DiscipuladoIntegrantes' => 'DiscipuladoIntegrantes.js',
     'visitasListar'          => 'visitasListar.js',
-    'visitasMap'             => 'visitasMap.js'
 ];
 
 if (isset($scripts[$vista])) {

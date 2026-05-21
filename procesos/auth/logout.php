@@ -1,8 +1,3 @@
 <?php
-session_start();
-session_unset();
-session_destroy();
-
-// Redirigir siempre al index.php de la carpeta public
-header("Location: /IglesiaDelNazarenoBagua/public/index.php?vista=login");
-exit;
+require_once __DIR__ . '/../../vendor/autoload.php';
+(new \aplicacion\controladores\AuthController())->logout();

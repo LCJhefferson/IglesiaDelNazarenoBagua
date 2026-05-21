@@ -1,6 +1,6 @@
 <?php
 use aplicacion\controladores\RegistroController;
-use aplicacion\dao\userDAO;
+use aplicacion\dao\UserDAO;
 
 // ── PROCESAR REGISTRO ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
@@ -12,15 +12,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
         $_POST['estado']
     );
     if ($resultado) {
-        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=usuarios_admin&exito=1");
+        header("Location: /IglesiaDelNazarenoBagua/dashboard?seccion=usuarios_admin&exito=1");
     } else {
-        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=usuarios_admin&error=1");
+        header("Location: /IglesiaDelNazarenoBagua/dashboard?seccion=usuarios_admin&error=1");
     }
     exit;
 }
 
 // ── OBTENER USUARIOS DE LA BD ──
-$dao      = new userDAO();
+$dao      = new UserDAO();
 $usuarios = $dao->listar();
 
 // ── CONTADORES ──
@@ -214,6 +214,7 @@ $color_avatar = [
         <button class="cerrar-modal" onclick="cerrarModalCrear()">✕</button>
         <h3>👤 Nuevo Usuario</h3>
         <form method="POST" action="">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <div class="grupo-formulario">
                 <label>Username</label>
                 <input type="text" id="crearUsername" name="username" placeholder="Ej: carlos123" required/>
@@ -253,6 +254,7 @@ $color_avatar = [
         <button class="cerrar-modal" onclick="cerrarModalEditar()">✕</button>
         <h3>✏️ Editar Usuario</h3>
         <form method="POST" action="/IglesiaDelNazarenoBagua/actualizar_usuario.php">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <input type="hidden" id="editarId" name="id"/>
             <div class="grupo-formulario">
                 <label>Username</label>

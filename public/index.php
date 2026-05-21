@@ -14,7 +14,7 @@ if (strpos($raizProyecto, 'IglesiaDelNazarenoBagua') === false) {
 }
 
 // 4. Cargar Autoload
-$autoloadPath = $raizProyecto . '/aplicacion/core/Autoload.php';
+$autoloadPath = $raizProyecto . '/vendor/autoload.php';
 
 if (file_exists($autoloadPath)) {
     require_once $autoloadPath;
@@ -22,10 +22,27 @@ if (file_exists($autoloadPath)) {
     die("Error Crítico: No se encontró el Autoload en: " . $autoloadPath);
 }
 
+// ── ENRUTAMIENTO API ────────────────────────────────────────────────────────
+$_uriActual = strtok($_SERVER['REQUEST_URI'], '?');
+if (str_starts_with($_uriActual, '/IglesiaDelNazarenoBagua/api/')) {
+    $router = new \aplicacion\core\Router();
+    $router->get('/api/recursos',         [\aplicacion\controladores\api\RecursoApiController::class, 'index']);
+    $router->get('/api/recursos/{id}',    [\aplicacion\controladores\api\RecursoApiController::class, 'show']);
+    $router->post('/api/recursos',        [\aplicacion\controladores\api\RecursoApiController::class, 'store']);
+    $router->put('/api/recursos/{id}',    [\aplicacion\controladores\api\RecursoApiController::class, 'update']);
+    $router->delete('/api/recursos/{id}', [\aplicacion\controladores\api\RecursoApiController::class, 'destroy']);
+    $router->dispatch();
+}
+
 // 5. Captura de Vista
 $vista = $_GET['vista'] ?? 'inicio';
 $vista = str_replace('public/', '', $vista);
 $vista = str_replace('.php', '', $vista);
+
+// ── Logout ──────────────────────────────────────────────────────────────────
+if ($vista === 'logout') {
+    (new \aplicacion\controladores\AuthController())->logout();
+}
 
 // =========================================================================
 // 🟢 EXCEPCIONES INTERNAS (ENDPOINTS VIRTUALES DEL SISTEMA)
@@ -40,6 +57,7 @@ if ($vista === 'visitasMapJSON') {
 
 // B. Procesar Guardar Registro de Visita -> Respuesta asíncrona limpia
 if ($vista === 'admin/guardarVisita') {
+    \aplicacion\core\Middleware::csrfVerify();
     $controller = new \aplicacion\controladores\VisitaController();
     $controller->guardarVisita();
     header('Content-Type: application/json');
@@ -49,6 +67,7 @@ if ($vista === 'admin/guardarVisita') {
 
 // C. Procesar Ajustes de Rangos -> Respuesta asíncrona limpia
 if ($vista === 'admin/guardarAjustesVisita') {
+    \aplicacion\core\Middleware::csrfVerify();
     $controller = new \aplicacion\controladores\VisitaController();
     $controller->guardarAjustesVisita();
     header('Content-Type: application/json');
@@ -58,6 +77,7 @@ if ($vista === 'admin/guardarAjustesVisita') {
 
 // D. Procesar Eliminación (Suprimir) de Visita -> Respuesta asíncrona limpia
 if ($vista === 'admin/eliminarVisita') {
+    \aplicacion\core\Middleware::csrfVerify();
     $controller = new \aplicacion\controladores\VisitaController();
     $controller->eliminarVisita();
     header('Content-Type: application/json');
