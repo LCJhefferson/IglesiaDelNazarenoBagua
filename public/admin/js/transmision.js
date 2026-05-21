@@ -159,8 +159,9 @@ function ejecutarEnvio() {
     }
 }
 
+
 /**
- * FINALIZACIÓN RÁPIDA DESDE TABLA
+ * FINALIZACIÓN RÁPIDA DESDE TABLA 
  */
 function abrirModalFinalizar(id, titulo) {
     const modal = document.getElementById('modalConfirmar');
@@ -172,15 +173,22 @@ function abrirModalFinalizar(id, titulo) {
     btnConfirmar.onclick = () => {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '';
+        form.action = ''; // Recarga la misma URL del módulo actual
 
+        // 1. CAPTURAR EL TOKEN CSRF DEL FORMULARIO EXISTENTE EN LA VISTA
+        const csrfInputExistente = document.querySelector('input[name="csrf_token"]');
+        const tokenValor = csrfInputExistente ? csrfInputExistente.value : '';
+
+        // 2. AGREGAR EL CSRF_TOKEN AL OBJETO DE PARÁMETROS
         const params = {
+            'csrf_token': tokenValor, // ◄ LLAVE DE SEGURIDAD VITAL INYECTADA
             'id_transmision': id,
             'estado_id': '2', // Finalizado
             'titulo': titulo,
             'mensaje_pusher': 'Fin de la transmisión'
         };
 
+        // 3. CONSTRUIR E INYECTAR LOS CAMPOS EN EL FORMULARIO DINÁMICO
         for (const key in params) {
             const input = document.createElement('input');
             input.type = 'hidden';
@@ -190,7 +198,7 @@ function abrirModalFinalizar(id, titulo) {
         }
 
         document.body.appendChild(form);
-        form.submit();
+        form.submit(); // Envío seguro de la mutación de estado
     };
     
     modal.style.display = 'flex';

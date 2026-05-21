@@ -1,20 +1,19 @@
 <?php
 $visitaDAO = new \aplicacion\dao\VisitaDAO();
 
-// 1. Capturar filtros (Soporta GET y POST para mayor flexibilidad)
+
 $filtroNombre = $_REQUEST['nombre'] ?? '';
 $filtroMotivo = $_REQUEST['motivo'] ?? '';
 $filtroEstado = $_REQUEST['estado'] ?? '';
 $filtroModo   = $_REQUEST['modo'] ?? 'ultimo'; 
 
-// 2. Traer la lista base desde la base de datos
 $miembrosTodos = $visitaDAO->listarConDetalles($filtroModo);
 $mesesLimiteActual = $visitaDAO->obtenerMesesLimite();
 
 $miembrosFiltrados = [];
 $conteo = ['reciente' => 0, 'intermedio' => 0, 'proximo' => 0, 'critico' => 0];
 
-// 3. Procesar datos y estadísticas en tiempo real
+//filtros 
 foreach ($miembrosTodos as $m) {
     if ($m['clase_css'] === 'estado-verde-reciente') $conteo['reciente']++;
     elseif ($m['clase_css'] === 'estado-azul-intermedio') $conteo['intermedio']++;
@@ -44,9 +43,8 @@ foreach ($miembrosTodos as $m) {
     $miembrosFiltrados[] = $m;
 }
 
-// =====================================================================
+
 // 🟢 RESPUESTA AJAX: Envoltura válida para evitar que DOMParser falle
-// =====================================================================
 if (isset($_GET['ajax']) && $_GET['ajax'] == '1'):
 ?>
     <div id="ajax-stats-bridge">

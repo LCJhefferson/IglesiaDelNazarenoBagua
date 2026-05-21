@@ -22,7 +22,7 @@ if (file_exists($autoloadPath)) {
     die("Error Crítico: No se encontró el Autoload en: " . $autoloadPath);
 }
 
-// ── ENRUTAMIENTO API ────────────────────────────────────────────────────────
+//ENRUTAMIENTO API
 $_uriActual = strtok($_SERVER['REQUEST_URI'], '?');
 if (str_starts_with($_uriActual, '/IglesiaDelNazarenoBagua/api/')) {
     $router = new \aplicacion\core\Router();
@@ -39,15 +39,12 @@ $vista = $_GET['vista'] ?? 'inicio';
 $vista = str_replace('public/', '', $vista);
 $vista = str_replace('.php', '', $vista);
 
-// ── Logout ──────────────────────────────────────────────────────────────────
+//Logout
 if ($vista === 'logout') {
     (new \aplicacion\controladores\AuthController())->logout();
 }
 
-// =========================================================================
-// 🟢 EXCEPCIONES INTERNAS (ENDPOINTS VIRTUALES DEL SISTEMA)
-// =========================================================================
-
+//EXCEPCIONES INTERNAS 
 // A. Endpoint JSON para el Mapa (visitasMap.js) -> INTACTO
 if ($vista === 'visitasMapJSON') {
     $controller = new \aplicacion\controladores\VisitaController();
@@ -85,9 +82,7 @@ if ($vista === 'admin/eliminarVisita') {
     exit;
 }
 
-// =========================================================================
 // CARGA DE VISTAS FÍSICAS (.php standard)
-// =========================================================================
 if ($vista === 'procesar_login') {
     $archivoVista = $raizProyecto . '/procesos/auth/procesar_login.php';
 } 
