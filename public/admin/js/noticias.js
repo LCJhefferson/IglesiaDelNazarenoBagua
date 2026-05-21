@@ -137,7 +137,8 @@ window.confirmarEliminar = function(id, titulo) {
     modalConfirmar.style.display = "flex";
 
     document.getElementById("btn-confirmar-ok").onclick = function() {
-        window.location.href = `/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=noticias&eliminar=${id}`;
+        
+        window.location.href = `/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=noticias&eliminar=${id}`;
     };
 };
 
@@ -370,7 +371,8 @@ window.filtrarNoticias = function() {
 ───────────────────────────────────────── */
 window.borrarImagenGaleria = function(idImagen, elementoBtn) {
     if (confirm("¿Estás seguro de eliminar esta imagen de la galería?")) {
-        const url = `/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?vista=noticias&eliminar_foto=${idImagen}`;
+        
+        const url = `/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=noticias&eliminar_foto=${idImagen}`;
         fetch(url)
             .then(response => response.text())
             .then(text => {
