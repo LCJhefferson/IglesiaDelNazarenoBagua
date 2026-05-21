@@ -2,6 +2,7 @@
 namespace aplicacion\controladores\api;
 
 use aplicacion\core\Middleware;
+use aplicacion\core\QueryBuilder;
 use aplicacion\core\Response;
 use aplicacion\core\Validator;
 use aplicacion\dao\RecursoDAO;
@@ -15,23 +16,94 @@ class RecursoApiController {
         $this->dao = new RecursoDAO();
     }
 
-    // GET /api/recursos
+    // ── GET /api/recursos ─────────────────────────────────────────────────────
+    // Soporta: ?q=texto  ?tipo=pdf  ?tipos=pdf,vid  ?categoria=predica
+    //          ?page=1   ?per_page=15
     public function index(array $params = []): void {
         Middleware::apiAuth();
-        Response::success(Recurso::all());
+
+        $qb = (new QueryBuilder())
+            ->table('recursos')
+            ->leftJoin('usuarios', 'recursos.creado_por', '=', 'usuarios.id')
+            ->select('recursos.*, usuarios.username AS creado_por_nombre');
+
+        // Búsqueda libre en título O descripción
+        if (!empty($_GET['q'])) {
+            $q = '%' . trim($_GET['q']) . '%';
+            $qb->where('recursos.titulo', 'LIKE', $q)
+               ->orWhere('recursos.descripcion', 'LIKE', $q);
+        }
+
+        // Filtro por tipo (uno o varios: ?tipos=pdf,vid)
+        if (!empty($_GET['tipos'])) {
+            $qb->whereIn('recursos.tipo', explode(',', $_GET['tipos']));
+        } elseif (!empty($_GET['tipo'])) {
+            $qb->where('recursos.tipo', '=', $_GET['tipo']);
+        }
+
+        // Filtro por categoría
+        if (!empty($_GET['categoria'])) {
+            $qb->where('recursos.categoria', '=', trim($_GET['categoria']));
+        }
+
+        // Paginación
+        if (isset($_GET['page'])) {
+            $page    = max(1, (int) $_GET['page']);
+            $perPage = max(1, min(100, (int) ($_GET['per_page'] ?? 15)));
+            Response::success($qb->paginate($page, $perPage));
+        }
+
+        Response::success($qb->get());
     }
 
-    // GET /api/recursos/{id}
+    // ── GET /api/recursos/{id} ────────────────────────────────────────────────
+    // Incluye join con usuarios para mostrar quién lo creó
     public function show(array $params): void {
         Middleware::apiAuth();
-        $recurso = Recurso::find((int) $params['id']);
+
+        $recurso = (new QueryBuilder())
+            ->table('recursos')
+            ->leftJoin('usuarios', 'recursos.creado_por', '=', 'usuarios.id')
+            ->select('recursos.*, usuarios.username AS creado_por_nombre')
+            ->where('recursos.id', '=', (int) $params['id'])
+            ->first();
+
         if (!$recurso) {
             Response::notFound('Recurso no encontrado');
         }
+
         Response::success($recurso);
     }
 
-    // POST /api/recursos
+    // ── GET /api/recursos/stats ───────────────────────────────────────────────
+    // Total de descargas + conteo por tipo + conteo por categoría
+    public function stats(array $params = []): void {
+        Middleware::apiAuth();
+
+        $totalDescargas = Recurso::sum('descargas');
+        $totalRecursos  = Recurso::count();
+
+        $porTipo = (new QueryBuilder())
+            ->table('recursos')
+            ->select('tipo, COUNT(*) AS total')
+            ->groupBy('tipo')
+            ->get();
+
+        $porCategoria = (new QueryBuilder())
+            ->table('recursos')
+            ->select('categoria, COUNT(*) AS total')
+            ->groupBy('categoria')
+            ->get();
+
+        Response::success([
+            'total_recursos'   => $totalRecursos,
+            'total_descargas'  => $totalDescargas,
+            'por_tipo'         => $porTipo,
+            'por_categoria'    => $porCategoria,
+        ]);
+    }
+
+    // ── POST /api/recursos ────────────────────────────────────────────────────
     public function store(array $params = []): void {
         Middleware::apiAuth();
 
@@ -60,7 +132,7 @@ class RecursoApiController {
         Response::created(Recurso::find($id));
     }
 
-    // PUT /api/recursos/{id}
+    // ── PUT /api/recursos/{id} ────────────────────────────────────────────────
     public function update(array $params): void {
         Middleware::apiAuth();
 
@@ -96,7 +168,7 @@ class RecursoApiController {
         Response::success(Recurso::find((int) $params['id']));
     }
 
-    // DELETE /api/recursos/{id}  — soft delete: mueve a papelera
+    // ── DELETE /api/recursos/{id}  (soft-delete → papelera) ──────────────────
     public function destroy(array $params): void {
         Middleware::apiAuth();
 
@@ -109,7 +181,7 @@ class RecursoApiController {
         Response::success(['id' => $id, 'mensaje' => 'Recurso movido a papelera']);
     }
 
-    // ── Helpers ─────────────────────────────────────────────────────────────
+    // ── Helpers ──────────────────────────────────────────────────────────────
 
     private function parseBody(): array {
         $contentType = $_SERVER['CONTENT_TYPE'] ?? '';

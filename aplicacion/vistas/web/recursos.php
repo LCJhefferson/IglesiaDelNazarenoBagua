@@ -1,5 +1,7 @@
 <?php
+use aplicacion\core\QueryBuilder;
 use aplicacion\dao\RecursoDAO;
+use aplicacion\modelos\Recurso;
 
 $dao = new RecursoDAO();
 
@@ -44,14 +46,16 @@ if (!empty($pendientes)) {
     $recursos = $dao->listar();
 }
 
-$total_des = array_sum(array_column($recursos, 'descargas'));
+// Total de descargas — agregado SQL en lugar de PHP
+$total_des = Recurso::sum('descargas');
 
-$categorias = [];
-foreach ($recursos as $r) {
-    $cat = trim($r['categoria'] ?? '');
-    if ($cat === '') continue;
-    $categorias[$cat] = ($categorias[$cat] ?? 0) + 1;
-}
+// Conteo por categoría — GROUP BY en BD en lugar de foreach en PHP
+$cats_raw   = (new QueryBuilder())
+    ->table('recursos')
+    ->select('categoria, COUNT(*) AS total')
+    ->groupBy('categoria')
+    ->get();
+$categorias = array_column($cats_raw, 'total', 'categoria');
 
 $icono_tipo  = ['pdf' => '📄', 'img' => '🖼️', 'vid' => '🎬', 'doc' => '📝'];
 $clase_slab  = ['pdf' => 'slab-pdf', 'img' => 'slab-img', 'vid' => 'slab-vid', 'doc' => 'slab-doc'];

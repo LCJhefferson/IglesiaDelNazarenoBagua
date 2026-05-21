@@ -25,7 +25,12 @@
       "PowerShell(& \"c:\\\\xampp\\\\php\\\\php.exe\" -r \"echo extension_loaded\\('gd'\\) ? 'GD loaded' : 'GD NOT loaded'; echo PHP_EOL; echo function_exists\\('imagejpeg'\\) ? 'imagejpeg OK' : 'imagejpeg MISSING';\" 2>&1)",
       "PowerShell(Invoke-WebRequest -Uri \"http://localhost/IglesiaDelNazarenoBagua/test_gd.php\" -UseBasicParsing)",
       "Bash(php composer.phar dump-autoload -o)",
-      "Bash(git mv *)"
+      "Bash(git mv *)",
+      "Bash(php -l aplicacion/core/QueryBuilder.php)",
+      "Bash(php -l aplicacion/core/Model.php)",
+      "Bash(php -l aplicacion/controladores/api/RecursoApiController.php)",
+      "Bash(php -l aplicacion/vistas/web/recursos.php)",
+      "Bash(php -l public/index.php)"
     ]
   }
 }

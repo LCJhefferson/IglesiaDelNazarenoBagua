@@ -26,11 +26,12 @@ if (file_exists($autoloadPath)) {
 $_uriActual = strtok($_SERVER['REQUEST_URI'], '?');
 if (str_starts_with($_uriActual, '/IglesiaDelNazarenoBagua/api/')) {
     $router = new \aplicacion\core\Router();
-    $router->get('/api/recursos',         [\aplicacion\controladores\api\RecursoApiController::class, 'index']);
-    $router->get('/api/recursos/{id}',    [\aplicacion\controladores\api\RecursoApiController::class, 'show']);
-    $router->post('/api/recursos',        [\aplicacion\controladores\api\RecursoApiController::class, 'store']);
-    $router->put('/api/recursos/{id}',    [\aplicacion\controladores\api\RecursoApiController::class, 'update']);
-    $router->delete('/api/recursos/{id}', [\aplicacion\controladores\api\RecursoApiController::class, 'destroy']);
+    $router->get('/api/recursos',          [\aplicacion\controladores\api\RecursoApiController::class, 'index']);
+    $router->get('/api/recursos/stats',    [\aplicacion\controladores\api\RecursoApiController::class, 'stats']);
+    $router->get('/api/recursos/{id}',     [\aplicacion\controladores\api\RecursoApiController::class, 'show']);
+    $router->post('/api/recursos',         [\aplicacion\controladores\api\RecursoApiController::class, 'store']);
+    $router->put('/api/recursos/{id}',     [\aplicacion\controladores\api\RecursoApiController::class, 'update']);
+    $router->delete('/api/recursos/{id}',  [\aplicacion\controladores\api\RecursoApiController::class, 'destroy']);
     $router->dispatch();
 }
 

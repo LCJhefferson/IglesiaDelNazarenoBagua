@@ -67,7 +67,7 @@ $msg_exito = isset($_GET['exito']) ? ($mensajes_exito[(int)$_GET['exito']] ?? ''
 $_paginas_validas = ['publico', 'archivos', 'subir', 'papelera'];
 $pagina_activa    = in_array($_GET['pagina'] ?? '', $_paginas_validas) ? $_GET['pagina'] : 'publico';
 
-$ruta_base = '/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin';
+$ruta_base = '/IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin';
 
 function tarjeta_archivo(array $archivo, string $ruta_base): string {
     global $icono_tipo, $clase_tipo, $etiqueta_tipo;

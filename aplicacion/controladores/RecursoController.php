@@ -54,7 +54,7 @@ class RecursoController {
             $this->dao->generarYGuardarThumb($nuevoId, $rutaArchivo, $tipoArchivo, $datos['enlace_youtube']);
         }
 
-        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin&exito=1&pagina=archivos");
+        header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin&exito=1&pagina=archivos");
         exit;
     }
 
@@ -62,7 +62,7 @@ class RecursoController {
         $recurso = $this->dao->obtenerPorId($id);
 
         if (!$recurso) {
-            header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin");
+            header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin");
             exit;
         }
 
@@ -72,14 +72,14 @@ class RecursoController {
                 header('Location: ' . $recurso['enlace_youtube']);
                 exit;
             }
-            header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin");
+            header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin");
             exit;
         }
 
         $ruta_abs = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/' . $recurso['ruta_archivo'];
 
         if (!file_exists($ruta_abs)) {
-            header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin");
+            header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin");
             exit;
         }
 
@@ -100,25 +100,25 @@ class RecursoController {
 
     public function eliminar(int $id): void {
         $this->dao->moverAPapelera($id);
-        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin&exito=2&pagina=archivos");
+        header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin&exito=2&pagina=archivos");
         exit;
     }
 
     public function restaurar(int $id): void {
         $this->dao->restaurar($id);
-        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin&exito=3&pagina=papelera");
+        header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin&exito=3&pagina=papelera");
         exit;
     }
 
     public function eliminarDefinitivo(int $id): void {
         $this->dao->eliminarDefinitivo($id);
-        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin&exito=4&pagina=papelera");
+        header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin&exito=4&pagina=papelera");
         exit;
     }
 
     public function vaciarPapelera(): void {
         $this->dao->vaciarPapelera();
-        header("Location: /IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=recurso_admin&exito=5&pagina=papelera");
+        header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin&exito=5&pagina=papelera");
         exit;
     }
 

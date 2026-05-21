@@ -13,7 +13,7 @@ class UserDAO {
     }
 
     // ── REGISTRAR ──
-    public function registrar(userLogin $userLogin): bool {
+    public function registrar(UserLogin $userLogin): bool {
         $sql  = "INSERT INTO usuarios (username, password, id_rol, estado)
                  VALUES (:username, :password, :id_rol, :estado)";
         $stmt = $this->pdo->prepare($sql);
