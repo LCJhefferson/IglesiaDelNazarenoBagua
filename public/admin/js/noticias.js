@@ -12,17 +12,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let archivosGaleria = [];
 
-    /* Mejora 7: Animación del contador */
+   
     const totalReal = parseInt(document.querySelector(".badge-total-real")?.innerText || "0");
     animarContador("badge-total", totalReal);
 
-    /* Mejora 1: Modo oscuro */
+    
     if (localStorage.getItem("tema-noticias") === "dark") {
         document.body.classList.add("dark-mode");
         document.getElementById("icono-tema").className = "fa-solid fa-sun";
     }
 
-    /* Skeleton → mostrar cards después de 600ms */
     setTimeout(() => {
         const skeleton = document.getElementById("skeleton-grid");
         const grid     = document.getElementById("contenedor-noticias");
@@ -137,8 +136,8 @@ window.confirmarEliminar = function(id, titulo) {
     modalConfirmar.style.display = "flex";
 
     document.getElementById("btn-confirmar-ok").onclick = function() {
-        
-        window.location.href = `/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=noticias&eliminar=${id}`;
+        // ✅ URL correcta
+        window.location.href = `/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&eliminar=${id}`;
     };
 };
 
@@ -241,7 +240,7 @@ function procesarImagenPortada(file) {
 }
 
 /* ─────────────────────────────────────────
-   MEJORA 6: CARD ACTIVA RESALTADA
+    CARD ACTIVA RESALTADA
 ───────────────────────────────────────── */
 window.seleccionarCard = function(cardEl, n) {
     document.querySelectorAll(".noticia-card").forEach(c => c.classList.remove("activa"));
@@ -250,7 +249,7 @@ window.seleccionarCard = function(cardEl, n) {
 };
 
 /* ─────────────────────────────────────────
-   MEJORA 7: ANIMACIÓN CONTADOR
+    ANIMACIÓN CONTADOR
 ───────────────────────────────────────── */
 window.animarContador = function(elementId, hasta) {
     const el = document.getElementById(elementId);
@@ -372,7 +371,7 @@ window.filtrarNoticias = function() {
 window.borrarImagenGaleria = function(idImagen, elementoBtn) {
     if (confirm("¿Estás seguro de eliminar esta imagen de la galería?")) {
         
-        const url = `/IglesiaDelNazarenoBagua/aplicacion/vistas/admin/dashboard.php?seccion=noticias&eliminar_foto=${idImagen}`;
+        const url = `/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&eliminar_foto=${idImagen}`;
         fetch(url)
             .then(response => response.text())
             .then(text => {
