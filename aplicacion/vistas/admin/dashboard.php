@@ -1,6 +1,7 @@
 <?php
-ini_set('session.cookie_lifetime', 0);
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // 1. Carga del Autoload
 require_once __DIR__ . '/../../../vendor/autoload.php';
