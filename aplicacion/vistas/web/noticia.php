@@ -24,7 +24,7 @@ $stmtImg = $db->prepare("SELECT imagen as ruta FROM noticia_imagenes WHERE notic
 $stmtImg->execute([':id' => $id]);
 $galeria = $stmtImg->fetchAll(PDO::FETCH_ASSOC);
 
-// Noticias relacionadas (últimas 3, excluyendo la actual)
+// Noticias relacionadas 
 $stmtRel = $db->prepare("SELECT id, titulo, resumen, imagen_portada, fecha_creacion 
                           FROM noticias 
                           WHERE estado = 1 AND id != :id 
@@ -55,8 +55,15 @@ $relacionadas = $stmtRel->fetchAll(PDO::FETCH_ASSOC);
      <?php endif; ?>>
     <div class="noticia-hero-overlay"></div>
     <div class="noticia-hero-content">
-        <a href="<?= URL ?>public/index.php?vista=inicio#noticias" class="btn-volver">
-            <i class="fa-solid fa-arrow-left"></i> Volver a Noticias
+       <?php
+$origen = isset($_GET['origen']) ? $_GET['origen'] : 'web';
+$urlVolver = ($origen === 'admin')
+    ? URL . "public/index.php?vista=dashboard&seccion=noticias"
+    : URL . "public/index.php?vista=inicio#noticias";
+?>
+<a href="<?= $urlVolver ?>" class="btn-volver">
+    <i class="fa-solid fa-arrow-left"></i> Volver a Noticias
+</a>
         </a>
         <div class="noticia-hero-meta">
             <span class="noticia-hero-fecha">
@@ -91,13 +98,29 @@ $relacionadas = $stmtRel->fetchAll(PDO::FETCH_ASSOC);
         <div class="noticia-video">
             <h3><i class="fa-brands fa-youtube"></i> Video relacionado</h3>
             <?php
-            $videoUrl = $noticia['video_link'];
-            if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $videoUrl, $m)) {
-                $videoId  = $m[1];
-                $embedUrl = "https://www.youtube.com/embed/{$videoId}";
-            } else {
-                $embedUrl = $videoUrl;
-            }
+            $videoUrl = trim($noticia['video_link']);
+$videoId  = null;
+
+// youtube.com/watch?v=ID (con o sin &si= u otros parámetros)
+if (preg_match('/youtube\.com\/watch\?(?:[^#]*&)?v=([a-zA-Z0-9_-]{11})/', $videoUrl, $m)) {
+    $videoId = $m[1];
+}
+// youtu.be/ID (links cortos compartidos desde móvil con ?si=...)
+elseif (preg_match('/youtu\.be\/([a-zA-Z0-9_-]{11})/', $videoUrl, $m)) {
+    $videoId = $m[1];
+}
+// youtube.com/embed/ID (ya está en formato embed)
+elseif (preg_match('/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/', $videoUrl, $m)) {
+    $videoId = $m[1];
+}
+// youtube.com/shorts/ID
+elseif (preg_match('/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/', $videoUrl, $m)) {
+    $videoId = $m[1];
+}
+
+$embedUrl = $videoId
+    ? "https://www.youtube.com/embed/{$videoId}"
+    : $videoUrl; // fallback para Vimeo u otro
             ?>
             <div class="video-wrapper">
                 <iframe src="<?= htmlspecialchars($embedUrl) ?>" 

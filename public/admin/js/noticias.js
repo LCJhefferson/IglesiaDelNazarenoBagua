@@ -136,7 +136,6 @@ window.confirmarEliminar = function(id, titulo) {
     modalConfirmar.style.display = "flex";
 
     document.getElementById("btn-confirmar-ok").onclick = function() {
-        // ✅ URL correcta
         window.location.href = `/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&eliminar=${id}`;
     };
 };
@@ -146,7 +145,7 @@ window.cerrarConfirmar = function() {
 };
 
 /* ─────────────────────────────────────────
-   MEJORA 3: TOAST NOTIFICATIONS
+    TOAST NOTIFICATIONS
 ───────────────────────────────────────── */
 window.mostrarToast = function(mensaje, tipo = "exito") {
     const iconos    = { exito: "fa-circle-check", error: "fa-circle-xmark", info: "fa-circle-info" };
@@ -170,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ─────────────────────────────────────────
-   MEJORA 4: CONTADOR DE CARACTERES
+ CONTADOR DE CARACTERES
 ───────────────────────────────────────── */
 window.contarCaracteres = function(inputId, contadorId, maximo) {
     const texto    = document.getElementById(inputId).value.length;
@@ -182,7 +181,7 @@ window.contarCaracteres = function(inputId, contadorId, maximo) {
 };
 
 /* ─────────────────────────────────────────
-   MEJORA 5: DRAG & DROP
+    DRAG & DROP
 ───────────────────────────────────────── */
 window.dragOver = function(e) {
     e.preventDefault();
@@ -271,12 +270,22 @@ window.animarContador = function(elementId, hasta) {
 ───────────────────────────────────────── */
 window.verNoticia = function(n) {
     const rutaBase = "/IglesiaDelNazarenoBagua/";
+    console.log("Noticia seleccionada:", n); // ← agrega esta línea
     document.getElementById("preview-titulo").innerText  = n.titulo  || "Sin título";
     document.getElementById("preview-resumen").innerText = n.resumen || "Sin resumen";
     document.getElementById("preview-img").src = n.imagen_portada
         ? rutaBase + n.imagen_portada
         : "https://via.placeholder.com/400x200";
+
+    const btnLeer = document.querySelector(".btn-leer");
+    if (btnLeer) {
+        btnLeer.onclick = function() {
+            window.open(rutaBase + "public/index.php?vista=noticia&id=" + n.id + "&origen=admin", "_blank");
+        };
+    }
 };
+
+
 
 /* ─────────────────────────────────────────
    EDITAR NOTICIA

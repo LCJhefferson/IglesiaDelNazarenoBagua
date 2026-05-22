@@ -19,7 +19,7 @@ class NoticiaController {
 
     public function eliminarNoticia($id) {
         if($this->dao->eliminar($id)) {
-            header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=noticias&eliminado=1");
+            header("Location: /IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&eliminado=1");
             exit();
         }
     }
@@ -82,9 +82,7 @@ class NoticiaController {
             }
         }
 
-
-        header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=noticias&{$param}");
-
+        header("Location: /IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&{$param}");
         exit();
     }
 

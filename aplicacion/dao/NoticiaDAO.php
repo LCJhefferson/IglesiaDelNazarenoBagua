@@ -7,7 +7,6 @@ class NoticiaDAO {
     private $db;
 
     public function __construct() {
-        // 1. Cambiamos nucleo por config
         $this->db = Conexion::conectar();
     }
 
@@ -36,20 +35,17 @@ class NoticiaDAO {
     }
 
     public function eliminar($id) {
-        // IMPORTANTE: Tu tabla debe tener la columna 'estado'
         $sql  = "UPDATE noticias SET estado = 0 WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([':id' => $id]);
     }
 
     public function listarTodas() {
-        // Y modifica el listarTodas para que NO muestre las eliminadas
         $sql = "SELECT * FROM noticias WHERE estado = 1 ORDER BY fecha_creacion DESC";
         return $this->db->query($sql)->fetchAll();
     }
 
     public function actualizar($datos) {
-        // IMPORTANTE: Los nombres después de los dos puntos deben coincidir con el array del controlador
         $sql = "UPDATE noticias SET 
                     titulo          = :titulo, 
                     resumen         = :resumen, 
@@ -64,11 +60,9 @@ class NoticiaDAO {
     }
 
     public function obtenerImagenesAdjuntas($id_noticia) {
-        // Agregamos el ID a la consulta
         $sql  = "SELECT id, imagen as ruta FROM noticia_imagenes WHERE noticia_id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id' => $id_noticia]);
-        // Quitamos el FETCH_COLUMN para que devuelva el objeto completo
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -78,7 +72,6 @@ class NoticiaDAO {
         return $stmt->execute([':id' => $idFoto]);
     }
 
-    // Método nuevo: obtener imagen por ID antes de eliminarla físicamente
     public function obtenerImagenPorId($id) {
         $sql  = "SELECT id, imagen as ruta FROM noticia_imagenes WHERE id = :id";
         $stmt = $this->db->prepare($sql);
