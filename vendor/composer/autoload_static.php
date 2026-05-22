@@ -230,6 +230,7 @@ class ComposerStaticInit5a9cdac556bc224b8f4676ac39920f7b
         'aplicacion\\controladores\\RegistroController' => __DIR__ . '/../..' . '/aplicacion/controladores/RegistroController.php',
         'aplicacion\\controladores\\TransmisionController' => __DIR__ . '/../..' . '/aplicacion/controladores/TransmisionController.php',
         'aplicacion\\controladores\\VisitaController' => __DIR__ . '/../..' . '/aplicacion/controladores/VisitaController.php',
+        'aplicacion\\controladores\\api\\AuthApiController' => __DIR__ . '/../..' . '/aplicacion/controladores/api/AuthApiController.php',
         'aplicacion\\controladores\\api\\RecursoApiController' => __DIR__ . '/../..' . '/aplicacion/controladores/api/RecursoApiController.php',
         'aplicacion\\core\\Middleware' => __DIR__ . '/../..' . '/aplicacion/core/Middleware.php',
         'aplicacion\\core\\Model' => __DIR__ . '/../..' . '/aplicacion/core/Model.php',
@@ -242,7 +243,6 @@ class ComposerStaticInit5a9cdac556bc224b8f4676ac39920f7b
         'aplicacion\\dao\\InicioDAO' => __DIR__ . '/../..' . '/aplicacion/dao/InicioDAO.php',
         'aplicacion\\dao\\MiembroDAO' => __DIR__ . '/../..' . '/aplicacion/dao/MiembroDAO.php',
         'aplicacion\\dao\\NoticiaDAO' => __DIR__ . '/../..' . '/aplicacion/dao/NoticiaDAO.php',
-        'aplicacion\\dao\\RecursoDAO' => __DIR__ . '/../..' . '/aplicacion/dao/RecursoDAO.php',
         'aplicacion\\dao\\TransmisionDAO' => __DIR__ . '/../..' . '/aplicacion/dao/TransmisionDAO.php',
         'aplicacion\\dao\\UserDAO' => __DIR__ . '/../..' . '/aplicacion/dao/UserDAO.php',
         'aplicacion\\dao\\VisitaDAO' => __DIR__ . '/../..' . '/aplicacion/dao/VisitaDAO.php',
@@ -250,10 +250,12 @@ class ComposerStaticInit5a9cdac556bc224b8f4676ac39920f7b
         'aplicacion\\modelos\\GrupoDiscipulado' => __DIR__ . '/../..' . '/aplicacion/modelos/GrupoDiscipulado.php',
         'aplicacion\\modelos\\Miembro' => __DIR__ . '/../..' . '/aplicacion/modelos/Miembro.php',
         'aplicacion\\modelos\\Recurso' => __DIR__ . '/../..' . '/aplicacion/modelos/Recurso.php',
+        'aplicacion\\modelos\\RecursoPapelera' => __DIR__ . '/../..' . '/aplicacion/modelos/RecursoPapelera.php',
         'aplicacion\\modelos\\Rol' => __DIR__ . '/../..' . '/aplicacion/modelos/Rol.php',
         'aplicacion\\modelos\\TransmisionModelo' => __DIR__ . '/../..' . '/aplicacion/modelos/TransmisionModelo.php',
         'aplicacion\\modelos\\UserLogin' => __DIR__ . '/../..' . '/aplicacion/modelos/UserLogin.php',
         'aplicacion\\modelos\\VisitaModelo' => __DIR__ . '/../..' . '/aplicacion/modelos/VisitaModelo.php',
+        'aplicacion\\services\\RecursoThumbService' => __DIR__ . '/../..' . '/aplicacion/services/RecursoThumbService.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

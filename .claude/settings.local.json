@@ -30,7 +30,16 @@
       "Bash(php -l aplicacion/core/Model.php)",
       "Bash(php -l aplicacion/controladores/api/RecursoApiController.php)",
       "Bash(php -l aplicacion/vistas/web/recursos.php)",
-      "Bash(php -l public/index.php)"
+      "Bash(php -l public/index.php)",
+      "Bash(php -l \"c:\\\\xampp\\\\htdocs\\\\IglesiaDelNazarenoBagua\\\\aplicacion\\\\modelos\\\\Recurso.php\")",
+      "Bash(php -l \"c:\\\\xampp\\\\htdocs\\\\IglesiaDelNazarenoBagua\\\\aplicacion\\\\modelos\\\\RecursoPapelera.php\")",
+      "Bash(php -l \"c:\\\\xampp\\\\htdocs\\\\IglesiaDelNazarenoBagua\\\\aplicacion\\\\services\\\\RecursoThumbService.php\")",
+      "Bash(php -l \"c:\\\\xampp\\\\htdocs\\\\IglesiaDelNazarenoBagua\\\\aplicacion\\\\controladores\\\\RecursoController.php\")",
+      "Bash(php -l \"c:\\\\xampp\\\\htdocs\\\\IglesiaDelNazarenoBagua\\\\aplicacion\\\\controladores\\\\api\\\\RecursoApiController.php\")",
+      "Bash(php -l \"c:\\\\xampp\\\\htdocs\\\\IglesiaDelNazarenoBagua\\\\aplicacion\\\\vistas\\\\web\\\\recursos.php\")",
+      "Bash(del \"c:\\\\xampp\\\\htdocs\\\\IglesiaDelNazarenoBagua\\\\aplicacion\\\\dao\\\\RecursoDAO.php\")",
+      "PowerShell(Remove-Item \"c:\\\\xampp\\\\htdocs\\\\IglesiaDelNazarenoBagua\\\\aplicacion\\\\dao\\\\RecursoDAO.php\" -Force; if \\(-not \\(Test-Path \"c:\\\\xampp\\\\htdocs\\\\IglesiaDelNazarenoBagua\\\\aplicacion\\\\dao\\\\RecursoDAO.php\"\\)\\) { \"ELIMINADO OK\" } else { \"ERROR: archivo sigue existiendo\" })",
+      "Bash(composer dump-autoload *)"
     ]
   }
 }

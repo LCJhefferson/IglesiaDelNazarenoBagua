@@ -9,7 +9,7 @@ class QueryBuilder {
     private \PDO   $pdo;
     private string $table      = '';
     private string $columns    = '*';
-    private array  $conditions = [];   // [['AND'|'OR', 'clause']]
+    private array  $conditions = [];   
     private array  $bindings   = [];
     private array  $joins      = [];
     private ?string $orderByClause = null;
@@ -20,32 +20,21 @@ class QueryBuilder {
     public function __construct() {
         $this->pdo = Conexion::conectar();
     }
-
-    // ── TABLA ────────────────────────────────────────────────────────────────
-
     public function table(string $table): static {
         $this->table = $table;
         return $this;
     }
-
     public function select(string $columns): static {
         $this->columns = $columns;
         return $this;
     }
-
-    // ── JOINS ────────────────────────────────────────────────────────────────
-
     public function join(string $table, string $first, string $operator, string $second, string $type = 'INNER'): static {
         $this->joins[] = "$type JOIN $table ON $first $operator $second";
         return $this;
     }
-
     public function leftJoin(string $table, string $first, string $operator, string $second): static {
         return $this->join($table, $first, $operator, $second, 'LEFT');
     }
-
-    // ── CONDICIONES ──────────────────────────────────────────────────────────
-
     public function where(string $column, string $operator, mixed $value): static {
         $placeholder = ':' . preg_replace('/\W/', '_', $column) . count($this->bindings);
         $this->conditions[]           = ['AND', "$column $operator $placeholder"];
@@ -70,9 +59,6 @@ class QueryBuilder {
         $this->conditions[] = ['AND', "$column IN (" . implode(', ', $placeholders) . ")"];
         return $this;
     }
-
-    // ── ORDEN / AGRUPACIÓN / PAGINACIÓN ─────────────────────────────────────
-
     public function orderBy(string $column, string $direction = 'ASC'): static {
         $this->orderByClause = "$column $direction";
         return $this;
@@ -92,8 +78,6 @@ class QueryBuilder {
         $this->offsetVal = $n;
         return $this;
     }
-
-    // ── CONSTRUCCIÓN SQL ─────────────────────────────────────────────────────
 
     private function buildWhere(): string {
         if (empty($this->conditions)) return '';
@@ -125,7 +109,7 @@ class QueryBuilder {
         return $sql;
     }
 
-    // ── EJECUCIÓN SELECT ─────────────────────────────────────────────────────
+
 
     public function get(): array {
         $stmt = $this->pdo->prepare($this->buildSql());
@@ -139,7 +123,7 @@ class QueryBuilder {
         return $result[0] ?? null;
     }
 
-    // ── AGREGADOS ────────────────────────────────────────────────────────────
+
 
     public function count(string $column = '*'): int {
         [$savedCols, $savedLimit, $savedOffset] = [$this->columns, $this->limitVal, $this->offsetVal];
@@ -175,7 +159,6 @@ class QueryBuilder {
         ];
     }
 
-    // ── ESCRITURA ────────────────────────────────────────────────────────────
 
     public function insert(string $table, array $data): int {
         $cols  = implode(', ', array_keys($data));

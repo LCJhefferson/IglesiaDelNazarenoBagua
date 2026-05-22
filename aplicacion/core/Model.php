@@ -9,8 +9,6 @@ abstract class Model {
         return (new QueryBuilder())->table(static::$tabla);
     }
 
-    // ── LECTURA ──────────────────────────────────────────────────────────────
-
     public static function all(): array {
         return static::qb()->get();
     }
@@ -35,8 +33,6 @@ abstract class Model {
         return static::qb()->leftJoin($tabla, $primero, $operador, $segundo);
     }
 
-    // ── AGREGADOS ────────────────────────────────────────────────────────────
-
     public static function count(string $columna = '*'): int {
         return static::qb()->count($columna);
     }
@@ -48,8 +44,6 @@ abstract class Model {
     public static function paginate(int $page = 1, int $perPage = 15): array {
         return static::qb()->paginate($page, $perPage);
     }
-
-    // ── ESCRITURA ────────────────────────────────────────────────────────────
 
     public static function create(array $data): int {
         return (new QueryBuilder())->insert(static::$tabla, $data);

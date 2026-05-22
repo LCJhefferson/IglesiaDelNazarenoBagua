@@ -1,14 +1,12 @@
 <?php
 use aplicacion\core\QueryBuilder;
-use aplicacion\dao\RecursoDAO;
 use aplicacion\modelos\Recurso;
-
-$dao = new RecursoDAO();
+use aplicacion\services\RecursoThumbService;
 
 if (!empty($_GET['descargar'])) {
-    $recurso = $dao->obtenerPorId((int)$_GET['descargar']);
+    $recurso = Recurso::find((int)$_GET['descargar']);
     if ($recurso) {
-        $dao->incrementarDescargas((int)$_GET['descargar']);
+        Recurso::incrementarDescargas((int)$_GET['descargar']);
         if (!empty($recurso['enlace_youtube'])) {
             header('Location: ' . $recurso['enlace_youtube']);
             exit;
@@ -31,19 +29,19 @@ if (!empty($_GET['descargar'])) {
     exit;
 }
 
-$recursos  = $dao->listar();
+$recursos = Recurso::listar();
 
 $pendientes = array_filter($recursos, fn($r) => $r['ruta_thumb'] === null);
 if (!empty($pendientes)) {
     foreach ($pendientes as $r) {
-        $dao->generarYGuardarThumb(
+        RecursoThumbService::generar(
             (int)$r['id'],
             $r['ruta_archivo']   ?? '',
             $r['tipo']           ?? 'doc',
             $r['enlace_youtube'] ?? ''
         );
     }
-    $recursos = $dao->listar();
+    $recursos = Recurso::listar();
 }
 
 // Total de descargas — agregado SQL en lugar de PHP
