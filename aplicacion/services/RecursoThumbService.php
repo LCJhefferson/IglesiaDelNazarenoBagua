@@ -1,72 +1,20 @@
 <?php
-namespace aplicacion\dao;
+namespace aplicacion\services;
 
-use aplicacion\config\Conexion;
+use aplicacion\modelos\Recurso;
 
-class RecursoDAO {
+/**
+ * Servicio de generación de thumbnails para recursos.
+ * Extraído de RecursoDAO — lógica intacta, convertida a métodos estáticos.
+ * Guarda la ruta resultante usando Recurso::update() en lugar de SQL directo.
+ */
+class RecursoThumbService {
 
-    private $pdo;
-
-    public function __construct() {
-        $this->pdo = Conexion::conectar();
-        $this->_migrarRutaThumb();
-        $this->_migrarRutaThumbPapelera();
-    }
-
-    private function _migrarRutaThumb(): void {
-        try {
-            $this->pdo->query("SELECT ruta_thumb FROM recursos LIMIT 1");
-        } catch (\PDOException $e) {
-            $this->pdo->exec("ALTER TABLE recursos ADD COLUMN ruta_thumb VARCHAR(500) DEFAULT NULL");
-        }
-    }
-
-    private function _migrarRutaThumbPapelera(): void {
-        try {
-            $this->pdo->query("SELECT ruta_thumb FROM recursos_papelera LIMIT 1");
-        } catch (\PDOException $e) {
-            $this->pdo->exec("ALTER TABLE recursos_papelera ADD COLUMN ruta_thumb VARCHAR(500) DEFAULT NULL");
-        }
-    }
-
-    public function listar(): array {
-        $sql  = "SELECT r.*, u.username AS creado_por_nombre
-                 FROM recursos r
-                 LEFT JOIN usuarios u ON r.creado_por = u.id
-                 ORDER BY r.fecha_creacion DESC";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll();
-    }
-
-    public function insertar(array $datos): int {
-        $sql  = "INSERT INTO recursos
-                    (titulo, descripcion, categoria, tipo, ruta_archivo, enlace_youtube, creado_por)
-                 VALUES
-                    (:titulo, :descripcion, :categoria, :tipo, :ruta_archivo, :enlace_youtube, :creado_por)";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
-            ':titulo'         => $datos['titulo'],
-            ':descripcion'    => $datos['descripcion'],
-            ':categoria'      => $datos['categoria'],
-            ':tipo'           => $datos['tipo'],
-            ':ruta_archivo'   => $datos['ruta_archivo'],
-            ':enlace_youtube' => $datos['enlace_youtube'],
-            ':creado_por'     => $datos['creado_por'],
-        ]);
-        return (int)$this->pdo->lastInsertId();
-    }
-
-    public function guardarThumb(int $id, string $ruta): bool {
-        $stmt = $this->pdo->prepare("UPDATE recursos SET ruta_thumb = :ruta WHERE id = :id");
-        return $stmt->execute([':ruta' => $ruta, ':id' => $id]);
-    }
-
-    public function generarYGuardarThumb(int $id, string $ruta_archivo, string $tipo, string $enlace_youtube = ''): void {
+    public static function generar(int $id, string $ruta_archivo, string $tipo, string $enlace_youtube = ''): void {
         $thumb = null;
 
         if (!empty($enlace_youtube)) {
-            $thumb = $this->_thumbYoutube($enlace_youtube);
+            $thumb = self::thumbYoutube($enlace_youtube);
         }
 
         if ($thumb === null) {
@@ -76,32 +24,32 @@ class RecursoDAO {
 
             switch ($tipo) {
                 case 'img':
-                    $resized = !empty($abs) ? $this->_thumbImg($abs, $id) : null;
+                    $resized = !empty($abs) ? self::thumbImg($abs, $id) : null;
                     $thumb   = $resized ?? (!empty($ruta_archivo) ? $ruta_archivo : null);
                     break;
                 case 'pdf':
-                    $thumb = !empty($abs) ? $this->_thumbPdf($abs, $id) : null;
+                    $thumb = !empty($abs) ? self::thumbPdf($abs, $id) : null;
                     break;
                 case 'doc':
-                    $thumb = !empty($abs) ? $this->_thumbDoc($abs, $id) : null;
+                    $thumb = !empty($abs) ? self::thumbDoc($abs, $id) : null;
                     break;
                 case 'vid':
-                    $thumb = !empty($abs) ? $this->_thumbVid($abs, $id) : null;
+                    $thumb = !empty($abs) ? self::thumbVid($abs, $id) : null;
                     break;
             }
         }
 
-        $this->guardarThumb($id, $thumb ?? '');
+        Recurso::update(['ruta_thumb' => $thumb ?? ''], ['id' => $id]);
     }
 
-    private function _thumbYoutube(string $url): ?string {
+    private static function thumbYoutube(string $url): ?string {
         if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s#]+)/', $url, $m)) {
             return 'https://img.youtube.com/vi/' . $m[1] . '/mqdefault.jpg';
         }
         return null;
     }
 
-    private function _thumbPdf(string $abs, int $id): ?string {
+    private static function thumbPdf(string $abs, int $id): ?string {
         $dir  = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/public/web/imagenes/thumbs/';
         if (!is_dir($dir)) mkdir($dir, 0777, true);
         $dest = $dir . 'thumb_' . $id . '.jpg';
@@ -132,17 +80,17 @@ class RecursoDAO {
         }
 
         if (extension_loaded('gd')) {
-            $texto = $this->_extraerTextoPdf($abs);
+            $texto = self::extraerTextoPdf($abs);
             if ($texto === '') {
                 $texto = str_replace(['_', '-'], ' ', pathinfo($abs, PATHINFO_FILENAME));
             }
-            return $this->_textoAImagen($texto, $dir, $id, 'pdf');
+            return self::textoAImagen($texto, $dir, $id, 'pdf');
         }
 
         return null;
     }
 
-    private function _extraerTextoPdf(string $abs): string {
+    private static function extraerTextoPdf(string $abs): string {
         $raw = @file_get_contents($abs, false, null, 0, 65536);
         if (!$raw) return '';
         $text = '';
@@ -158,7 +106,7 @@ class RecursoDAO {
         return mb_substr(trim($text), 0, 400);
     }
 
-    private function _thumbDoc(string $abs, int $id): ?string {
+    private static function thumbDoc(string $abs, int $id): ?string {
         $dir = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/public/web/imagenes/thumbs/';
         if (!is_dir($dir)) mkdir($dir, 0777, true);
 
@@ -175,21 +123,21 @@ class RecursoDAO {
 
         $ext = strtolower(pathinfo($abs, PATHINFO_EXTENSION));
         if (in_array($ext, ['docx', 'odt', 'xlsx', 'pptx']) && class_exists('ZipArchive') && extension_loaded('gd')) {
-            $texto = $this->_extraerTextoDocx($abs);
+            $texto = self::extraerTextoDocx($abs);
             if ($texto !== '') {
-                return $this->_textoAImagen($texto, $dir, $id, $ext);
+                return self::textoAImagen($texto, $dir, $id, $ext);
             }
         }
 
         if (extension_loaded('gd')) {
             $texto = str_replace(['_', '-'], ' ', pathinfo($abs, PATHINFO_FILENAME));
-            return $this->_textoAImagen($texto, $dir, $id, $ext ?: 'doc');
+            return self::textoAImagen($texto, $dir, $id, $ext ?: 'doc');
         }
 
         return null;
     }
 
-    private function _extraerTextoDocx(string $abs): string {
+    private static function extraerTextoDocx(string $abs): string {
         $zip = new \ZipArchive();
         if ($zip->open($abs) !== true) return '';
 
@@ -226,7 +174,7 @@ class RecursoDAO {
         return mb_substr($text, 0, 400);
     }
 
-    private function _textoAImagen(string $texto, string $dir, int $id, string $ext = 'doc'): ?string {
+    private static function textoAImagen(string $texto, string $dir, int $id, string $ext = 'doc'): ?string {
         if (!extension_loaded('gd')) return null;
         $w = 400; $h = 280;
         $img    = imagecreatetruecolor($w, $h);
@@ -260,7 +208,7 @@ class RecursoDAO {
         return file_exists($dest) ? 'public/web/imagenes/thumbs/thumb_' . $id . '.jpg' : null;
     }
 
-    private function _thumbImg(string $abs, int $id): ?string {
+    private static function thumbImg(string $abs, int $id): ?string {
         if (!extension_loaded('gd') || !file_exists($abs)) return null;
         $info = @getimagesize($abs);
         if (!$info || $info[0] <= 600) return null;
@@ -289,7 +237,7 @@ class RecursoDAO {
         return file_exists($dest) ? 'public/web/imagenes/thumbs/thumb_' . $id . '.jpg' : null;
     }
 
-    private function _thumbVid(string $abs, int $id): ?string {
+    private static function thumbVid(string $abs, int $id): ?string {
         $dir  = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/public/web/imagenes/thumbs/';
         if (!is_dir($dir)) mkdir($dir, 0777, true);
         $dest = $dir . 'thumb_' . $id . '.jpg';
@@ -300,116 +248,4 @@ class RecursoDAO {
         }
         return null;
     }
-
-    public function actualizar(array $datos): bool {
-        $sql  = "UPDATE recursos SET
-                    titulo         = :titulo,
-                    descripcion    = :descripcion,
-                    categoria      = :categoria,
-                    tipo           = :tipo,
-                    ruta_archivo   = :ruta_archivo,
-                    enlace_youtube = :enlace_youtube
-                 WHERE id = :id";
-        $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute([
-            ':titulo'         => $datos['titulo'],
-            ':descripcion'    => $datos['descripcion'],
-            ':categoria'      => $datos['categoria'],
-            ':tipo'           => $datos['tipo'],
-            ':ruta_archivo'   => $datos['ruta_archivo'],
-            ':enlace_youtube' => $datos['enlace_youtube'],
-            ':id'             => $datos['id'],
-        ]);
-    }
-
-    public function moverAPapelera(int $id): bool {
-        $sql  = "SELECT * FROM recursos WHERE id = :id";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':id' => $id]);
-        $recurso = $stmt->fetch();
-
-        if (!$recurso) return false;
-
-        $sql2 = "INSERT INTO recursos_papelera
-                    (recurso_id, titulo, descripcion, categoria, tipo, ruta_archivo, enlace_youtube, eliminado_por, ruta_thumb)
-                 VALUES
-                    (:recurso_id, :titulo, :descripcion, :categoria, :tipo, :ruta_archivo, :enlace_youtube, :eliminado_por, :ruta_thumb)";
-        $stmt2 = $this->pdo->prepare($sql2);
-        $stmt2->execute([
-            ':recurso_id'    => $recurso['id'],
-            ':titulo'        => $recurso['titulo'],
-            ':descripcion'   => $recurso['descripcion'],
-            ':categoria'     => $recurso['categoria'],
-            ':tipo'          => $recurso['tipo'],
-            ':ruta_archivo'  => $recurso['ruta_archivo'],
-            ':enlace_youtube'=> $recurso['enlace_youtube'],
-            ':eliminado_por' => $_SESSION['usuario_id'] ?? null,
-            ':ruta_thumb'    => $recurso['ruta_thumb'] ?? null,
-        ]);
-
-        $sql3 = "DELETE FROM recursos WHERE id = :id";
-        $stmt3 = $this->pdo->prepare($sql3);
-        return $stmt3->execute([':id' => $id]);
-    }
-
-    public function listarPapelera(): array {
-        $sql  = "SELECT * FROM recursos_papelera ORDER BY fecha_eliminacion DESC";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll();
-    }
-
-    public function restaurar(int $id): bool {
-        $sql  = "SELECT * FROM recursos_papelera WHERE id = :id";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':id' => $id]);
-        $recurso = $stmt->fetch();
-
-        if (!$recurso) return false;
-
-        $sql2 = "INSERT INTO recursos
-                    (titulo, descripcion, categoria, tipo, ruta_archivo, enlace_youtube, creado_por)
-                 VALUES
-                    (:titulo, :descripcion, :categoria, :tipo, :ruta_archivo, :enlace_youtube, :creado_por)";
-        $stmt2 = $this->pdo->prepare($sql2);
-        $stmt2->execute([
-            ':titulo'         => $recurso['titulo'],
-            ':descripcion'    => $recurso['descripcion'],
-            ':categoria'      => $recurso['categoria'],
-            ':tipo'           => $recurso['tipo'],
-            ':ruta_archivo'   => $recurso['ruta_archivo'],
-            ':enlace_youtube' => $recurso['enlace_youtube'],
-            ':creado_por'     => $recurso['eliminado_por'],
-        ]);
-
-        $sql3 = "DELETE FROM recursos_papelera WHERE id = :id";
-        $stmt3 = $this->pdo->prepare($sql3);
-        return $stmt3->execute([':id' => $id]);
-    }
-
-    public function eliminarDefinitivo(int $id): bool {
-        $sql  = "DELETE FROM recursos_papelera WHERE id = :id";
-        $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute([':id' => $id]);
-    }
-
-    public function incrementarDescargas(int $id): bool {
-        $sql  = "UPDATE recursos SET descargas = descargas + 1 WHERE id = :id";
-        $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute([':id' => $id]);
-    }
-
-    public function vaciarPapelera(): bool {
-        $stmt = $this->pdo->prepare("DELETE FROM recursos_papelera");
-        return $stmt->execute();
-    }
-
-    public function obtenerPorId(int $id): ?array {
-        $sql  = "SELECT * FROM recursos WHERE id = :id LIMIT 1";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':id' => $id]);
-        $resultado = $stmt->fetch();
-        return $resultado ?: null;
-    }
-
 }

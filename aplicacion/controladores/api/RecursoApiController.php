@@ -5,16 +5,9 @@ use aplicacion\core\Middleware;
 use aplicacion\core\QueryBuilder;
 use aplicacion\core\Response;
 use aplicacion\core\Validator;
-use aplicacion\dao\RecursoDAO;
 use aplicacion\modelos\Recurso;
 
 class RecursoApiController {
-
-    private RecursoDAO $dao;
-
-    public function __construct() {
-        $this->dao = new RecursoDAO();
-    }
 
     // ── GET /api/recursos ─────────────────────────────────────────────────────
     // Soporta: ?q=texto  ?tipo=pdf  ?tipos=pdf,vid  ?categoria=predica
@@ -177,7 +170,7 @@ class RecursoApiController {
             Response::notFound('Recurso no encontrado');
         }
 
-        $this->dao->moverAPapelera($id);
+        Recurso::moverAPapelera($id, $_SESSION['usuario_id'] ?? null);
         Response::success(['id' => $id, 'mensaje' => 'Recurso movido a papelera']);
     }
 
