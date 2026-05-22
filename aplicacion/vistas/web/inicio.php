@@ -147,8 +147,8 @@ include __DIR__ . '/componentes/nav.php';
                             </span>
                             <h3><?= htmlspecialchars($np['titulo']) ?></h3>
                             <p><?= htmlspecialchars(mb_substr($np['resumen'], 0, 80, 'UTF-8')) ?>...</p>
-                            <a href="<?= URL ?>index.php?vista=noticia&id=<?= $np['id'] ?>" class="btn-leer">Leer más →</a>
-                        </div>
+                            <a href="<?= URL ?>public/index.php?vista=noticia&id=<?= $np['id'] ?>&origen=web" class="btn-leer">Leer más →</a>
+
                     </div>
                 </div>
                 <?php endforeach; ?>
