@@ -58,8 +58,8 @@ $relacionadas = $stmtRel->fetchAll(PDO::FETCH_ASSOC);
        <?php
 $origen = isset($_GET['origen']) ? $_GET['origen'] : 'web';
 $urlVolver = ($origen === 'admin')
-    ? URL . "public/index.php?vista=dashboard&seccion=noticias"
-    : URL . "public/index.php?vista=inicio#noticias";
+    ? URL . "index.php?vista=dashboard&seccion=noticias"
+    : URL . "index.php?vista=inicio#noticias-section";
 ?>
 <a href="<?= $urlVolver ?>" class="btn-volver">
     <i class="fa-solid fa-arrow-left"></i> Volver a Noticias
