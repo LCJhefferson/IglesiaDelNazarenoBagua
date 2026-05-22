@@ -17,6 +17,7 @@ $live = $stmt->fetch(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="<?= URL ?>public/web/css/nav.css">
     <link rel="stylesheet" href="<?= URL ?>public/web/css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     
     <style>

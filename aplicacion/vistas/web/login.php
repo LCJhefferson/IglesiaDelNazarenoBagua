@@ -35,8 +35,10 @@ $error = isset($_GET['error']) ? (int)$_GET['error'] : 0;
     
     <link rel="stylesheet" href="<?php echo URL; ?>public/web/css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="<?= URL ?>public/web/css/nav.css">
 </head>
 <body>
+    <?php include 'componentes/nav.php'; ?>
 
 <div id="alerta" class="alerta"></div>
 
