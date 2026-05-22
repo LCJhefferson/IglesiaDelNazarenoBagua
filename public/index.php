@@ -37,6 +37,17 @@ if (str_starts_with($_uriActual, '/IglesiaDelNazarenoBagua/api/')) {
     $router->dispatch();
 }
 
+// 🔐 BYPASS TEMPORAL PARA PRUEBAS EN POSTMAN
+// =========================================================================
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+// Forzamos que la sesión exista para que el sistema crea que ya nos logueamos como Admin
+$_SESSION['usuario']    = 'luis';
+$_SESSION['rol_id']     = 1;
+$_SESSION['rol_nombre'] = 'Admin';
+// 
+
 // 5. Captura de Vista
 $vista = $_GET['vista'] ?? 'inicio';
 $vista = str_replace('public/', '', $vista);
