@@ -382,16 +382,15 @@ body {
 .carrusel-track {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 24px;
-    transition: transform 0.4s ease;
+    flex-wrap: nowrap !important; /* ¡OBLIGA a que sea horizontal! */
+    gap: 22px;
 }
 
 /* CADA ITEM */
 .carrusel-item {
     display: flex;
-    flex: 0 0 auto;
-    width: 300px;
+    flex: 0 0 auto; /* Evita que las tarjetas se aplasten o cambien de tamaño */
+    width: 300px; /* Ancho de la tarjeta. Puedes subir o bajar este número si las quieres más grandes o delgadas */
     height: auto; 
 }
 
@@ -427,7 +426,7 @@ body {
     display: flex;
     flex-direction: column;
     
-    /* TEXTOS RAROS NO SE SALGAN */
+    /* MAGIA PARA QUE LOS TEXTOS RAROS NO SE SALGAN */
     word-wrap: break-word; 
     overflow-wrap: break-word;
     word-break: break-word;
@@ -456,7 +455,7 @@ body {
     color: #8a9bb0;
     margin-bottom: 18px;
     line-height: 1.6;
-    flex: 1; 
+    flex: 1; /* Empuja el botón "Leer más" siempre hasta abajo */
 }
 
 /* BOTON LEER MAS */
@@ -490,7 +489,6 @@ body {
 .btn-leer:hover::after {
     transform: translateX(3px);
 }
-
 /* PUNTOS INDICADORES */
 .carrusel-dots {
     display: flex;
@@ -527,6 +525,11 @@ body {
     .noticias-section { padding: 60px 4% 70px; }
     .carrusel-btn { width: 36px; height: 36px; font-size: 0.8rem; }
 }
+
+
+
+
+
 
 
 /* ==========================================================================
