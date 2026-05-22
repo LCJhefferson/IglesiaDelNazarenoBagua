@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Salvación</title>
-    <link rel="stylesheet" href="css/car_salvacion.css">
-    <link rel="stylesheet" href="css/nav.css">
-    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="<?= URL ?>public/web/css/car_salvacion.css">
+    <link rel="stylesheet" href="<?= URL ?>public/web/css/nav.css">
+    <link rel="stylesheet" href="<?= URL ?>public/web/css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>

@@ -20,15 +20,12 @@ foreach ($miembrosTodos as $m) {
     elseif ($m['clase_css'] === 'estado-amarillo-proximo') $conteo['proximo']++;
     elseif ($m['clase_css'] === 'estado-rojo-critico') $conteo['critico']++;
 
-    // Filtro: Nombre
     if ($filtroNombre !== '' && stripos($m['miembro_nombre'], $filtroNombre) === false) {
         continue;
     }
-    // Filtro: Motivo
     if ($filtroMotivo !== '' && ($m['ultimo_motivo'] ?? '') !== $filtroMotivo) {
         continue;
     }
-    // Filtro: Estado Semafórico
     if ($filtroEstado !== '') {
         $claseEsperada = match($filtroEstado) {
             'reciente' => 'estado-verde-reciente',
@@ -44,7 +41,7 @@ foreach ($miembrosTodos as $m) {
 }
 
 
-// 🟢 RESPUESTA AJAX: Envoltura válida para evitar que DOMParser falle
+//RESPUESTA AJAX
 if (isset($_GET['ajax']) && $_GET['ajax'] == '1'):
 ?>
     <div id="ajax-stats-bridge">
@@ -89,7 +86,9 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1'):
 <?php 
 exit; 
 endif; 
-// =====================================================================
+
+
+
 ?>
 
 <div class="header-seccion">

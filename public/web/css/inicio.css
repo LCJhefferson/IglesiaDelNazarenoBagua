@@ -9,15 +9,15 @@
 body {
     min-height: 100vh;
     overflow-x: hidden;
+    background-color: #fcfcfc;
 }
 
-
 /* ========================= */
-/* CARRUSEL FADE */
+/* CARRUSEL FADE (Optimizado el tamaño) */
 /* ========================= */
 .hero-slider {
     position: relative;
-    height: 100vh;
+    height: 70vh; /* Bajado de 100vh a 70vh para que no trague toda la pantalla */
     overflow: hidden;
 }
 
@@ -25,13 +25,13 @@ body {
     position: absolute;
     inset: 0;
     opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 1s ease, transform 1s ease;
+    transform: scale(1.02); /* Efecto más sutil que el desplazamiento brusco */
+    transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
 .slide.active {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1);
     z-index: 1;
 }
 
@@ -41,10 +41,12 @@ body {
     object-fit: cover;
 }
 
-.overlay {
+/* Oscurece la imagen de fondo sutilmente para que se lea el texto blanco */
+.overlay-slider {
     position: absolute;
     inset: 0;
-    /*background: rgba(0,0,0,0.45); */
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
 }
 
 .slide-content {
@@ -55,283 +57,194 @@ body {
     text-align: center;
     color: white;
     z-index: 2;
+    width: 90%;
+    max-width: 800px;
 }
 
-
-
-/* ========================= */
-/* HERO */
-/* ========================= */
-.hero {
-    height: 70%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    text-align: left;
-    color: #fff;
-    margin-left: 40px;
+.slide-content h1 {
+    font-size: 48px; /* Ajustado de 60px */
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
-.titulo {
-    font-size: 60px;
+.slide-content h2 {
+    font-size: 32px;
+    font-weight: 400;
+    margin-bottom: 10px;
+}
+
+.slide-content p {
+    font-size: 18px;
+    letter-spacing: 1px;
     font-weight: 300;
-    letter-spacing: 3px;
-    animation: fadeDown 1.5s ease;
+    opacity: 0.9;
 }
-
-.subtitulo {
-    font-size: 42px;
-    font-weight: 600;
-    margin-top: 10px;
-    animation: fadeDown 2s ease;
-}
-
-.mensaje {
-    margin-top: 30px;
-    font-size: 22px;
-    letter-spacing: 2px;
-    opacity: 0;
-    animation: fadeUp 1.5s ease forwards;
-    animation-delay: 2.2s;
-}
-
-/* ========================= */
-/* ANIMACIONES */
-/* ========================= */
-@keyframes fadeDown {
-    from {
-        opacity: 0;
-        transform: translateY(-40px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(40px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* ========================= */
-/* RESPONSIVE */
-/* ========================= */
-@media (max-width: 768px) {
-    .hero {
-        align-items: center;
-        text-align: center;
-        margin-left: 0;
-        padding: 0 20px;
-    }
-
-    .titulo {
-        font-size: 38px;
-    }
-
-    .subtitulo {
-        font-size: 28px;
-    }
-
-    .mensaje {
-        font-size: 16px;
-    }
-
-    /* .nav {
-        display: none;
-    } */
-}
-
 
 /* ========================= */
 /* SECCIÓN TARJETA SALVACIÓN */
 /* ========================= */
 .card-section {
-    
-    padding: 120px 20px;
+    padding: 60px 20px; /* Reducido de 120px */
     display: flex;
     justify-content: center;
-    background:#adadad;
+    background: #f0f2f5; /* Un gris claro limpio en vez del gris #adadad tosco */
 }
 
 .card-salvacion {
-    max-width: 520px;
+    max-width: 500px;
     background: #ffffff;
-    padding: 45px 35px;
-    border-radius: 14px;
+    padding: 35px 30px;
+    border-radius: 12px;
     text-align: center;
-
-    /* sombra fuerte tipo glow */
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-
-    transition: 0.3s;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Sombra elegante y suave, no un glow negro */
+    transition: 0.3s ease;
+    border: 1px solid #e3e8ee;
 }
 
 .card-salvacion:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 25px 80px rgba(255, 255, 255, 0.404); 
+    transform: translateY(-4px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
 }
 
 .card-salvacion h2 {
-    font-size: 32px;
-    margin-bottom: 20px;
-    letter-spacing: 2px;
-    color: #2b2b2b;
+    font-size: 24px; /* Más estilizado */
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+    color: #1e293b;
 }
 
 .card-salvacion p {
-    font-size: 17px;
-    color: #555;
-    margin-bottom: 35px;
-    line-height: 1.6;
+    font-size: 15px;
+    color: #64748b;
+    margin-bottom: 25px;
+    line-height: 1.5;
 }
 
 .btn-descubre {
     display: inline-block;
-    padding: 14px 36px;
-    background: #000000; /* dorado */
+    padding: 10px 28px;
+    background: #0f172a; /* Azul pizarra oscuro elegante */
     color: #ffffff;
     text-decoration: none;
-    border-radius: 30px;
-    font-size: 15px;
-    transition: 0.3s;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.2s;
 }
 
 .btn-descubre:hover {
-    background: #868686;
+    background: #334155;
 }
 
-
-
 /* ========================= */
-/* CARDS INFORMACIÓN */
+/* CARDS INFORMACIÓN (CONÓCENOS) */
 /* ========================= */
 .info-section {
-    padding: 90px 10%;
-    background: #f8f8f8;
+    padding: 70px 5%;
+    background: #ffffff;
     text-align: center;
 }
 
 .titulo-seccion {
-    font-size: 32px;
-    margin-bottom: 40px;
-    color: #222;
+    font-size: 28px;
+    margin-bottom: 35px;
+    color: #1e293b;
+    font-weight: 700;
 }
 
 /* CONTENEDOR */
 .cards-container {
     display: flex;
-    gap: 70px;
+    gap: 30px; /* Reducido el espacio gigante de 70px */
     justify-content: center;
     flex-wrap: wrap;
 }
 
-/* CARD BASE */
+/* CARD BASE (Haciendo las tarjetas más estilizadas y horizontales/proporcionales) */
 .card {
     position: relative;
-    width: 450px;
-    height: 350px;
-    border-radius: 12px;
+    width: 350px; /* Reducido de 450px */
+    height: 240px; /* Reducido de 350px para romper el aspecto gigante */
+    border-radius: 10px;
     overflow: hidden;
     text-decoration: none;
     display: block;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* IMAGEN DE FONDO */
-.card-fe {
-    background: url('../imagenes/fe.jpg') center/cover no-repeat;
-}
+.card-fe { background: url('../imagenes/fe.jpg') center/cover no-repeat; }
+.card-mision { background: url('../imagenes/mision.png') center/cover no-repeat; }
+.card-valores { background: url('../imagenes/valores.jpg') center/cover no-repeat; }
 
-.card-mision {
-    background: url('../imagenes/mision.png') center/cover no-repeat;
-}
-
-.card-valores {
-    background: url('../imagenes/valores.jpg') center/cover no-repeat;
-}
-
-/* OVERLAY (oscuro) */
-.overlay {
+/* OVERLAY (Sofisticado desde el inicio) */
+.card .overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0);
-    transition: 0.4s;
+    background: rgba(15, 23, 42, 0.4); /* Capa azul oscuro transparente permanente para leer texto */
+    transition: 0.3s ease;
 }
 
-/* CONTENIDO (oculto al inicio) */
+/* CONTENIDO */
 .card-content {
     position: absolute;
-    bottom: 50px;
-    left: 20px;
-    right: 20px;
-
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 25px 20px;
     color: #fff;
-
-    opacity: 0;
-    transform: translateY(20px);
-    transition: 0.4s;
+    text-align: left;
+    z-index: 2;
 }
 
-/* HOVER */
-.card:hover .overlay {
-    background: rgba(0,0,0,0.6);
+.card-content h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 5px;
 }
 
-.card:hover .card-content {
-    opacity: 1;
-    transform: translateY(0);
+.card-content p {
+    font-size: 14px;
+    opacity: 0.85;
+    line-height: 1.4;
 }
 
-/* EFECTO EXTRA (zoom imagen) */
+/* HOVER CARDS CONÓCENOS */
 .card:hover {
-    transform: scale(1.03);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(15, 23, 42, 0.15);
+}
+
+.card:hover .overlay {
+    background: rgba(15, 23, 42, 0.6); /* Se oscurece un pelín más al pasar el mouse */
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ========================= */
-/* SECCIÓN NOTICIAS         */
-/* ========================= */
+/* ==========================================================================
+   SECCIÓN NOTICIAS (REDISEÑADA A COLORES CLAROS / SIN DORADOS)
+   ========================================================================== */
 .noticias-section {
-    padding: 80px 5% 90px;
-    background: linear-gradient(160deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    padding: 70px 5% 80px;
+    background: #f8fafc; /* Fondo gris/azul muy claro y limpio */
     text-align: center;
+    border-top: 1px solid #e2e8f0;
 }
 
 .titulo-noticias {
     display: inline-block;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 4px;
+    letter-spacing: 2px;
     text-transform: uppercase;
-    color: #c9a75d;
-    padding: 8px 22px;
-    border: 1px solid rgba(201,167,93,0.4);
-    border-radius: 30px;
-    margin-bottom: 48px;
-    background: rgba(201,167,93,0.08);
+    color: #0284c7; /* Azul corporativo limpio */
+    padding: 6px 18px;
+    border: 1px solid rgba(2, 132, 199, 0.2);
+    border-radius: 20px;
+    margin-bottom: 40px;
+    background: rgba(2, 132, 199, 0.05);
 }
 
 /* CARRUSEL WRAPPER */
@@ -344,32 +257,35 @@ body {
 
 /* BOTONES PREV / NEXT */
 .carrusel-btn {
-    background: rgba(255,255,255,0.08);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.15);
-    width: 46px;
-    height: 46px;
+    background: #ffffff;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     cursor: pointer;
     flex-shrink: 0;
-    transition: background 0.3s, border-color 0.3s, opacity 0.3s;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 2;
-    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .carrusel-btn:hover {
-    background: #c9a75d;
-    border-color: #c9a75d;
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #0284c7;
 }
 
 .carrusel-btn:disabled {
-    opacity: 0.2;
+    opacity: 0.3;
     cursor: default;
-    background: rgba(255,255,255,0.04);
+    background: #f1f5f9;
+    color: #94a3b8;
+    border-color: #e2e8f0;
 }
 
 /* CONTENEDOR VISIBLE */
@@ -380,99 +296,88 @@ body {
 
 /* PISTA QUE SE MUEVE */
 .carrusel-track {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important; /* ¡OBLIGA a que sea horizontal! */
-    gap: 22px;
+    display: flex;
+    gap: 20px;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* CADA ITEM */
 .carrusel-item {
-    display: flex;
-    flex: 0 0 auto; /* Evita que las tarjetas se aplasten o cambien de tamaño */
-    width: 300px; /* Ancho de la tarjeta. Puedes subir o bajar este número si las quieres más grandes o delgadas */
-    height: auto; 
+    flex-shrink: 0;
 }
 
-/* UNIFICAMOS NOTICIA CARD */
+/* CARD DE NOTICIA CLARA */
 .noticia-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
-    height: 100%; 
-    width: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
     display: flex;
     flex-direction: column;
     text-align: left;
-    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 }
 
 .noticia-card:hover {
-    transform: translateY(-7px);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
-    border-color: rgba(201,167,93,0.35);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+    border-color: #cbd5e1;
 }
 
-.noticia-card:hover img {
-    transform: scale(1.05);
+.noticia-card img {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    display: block;
 }
 
-/* CONTENIDO Y TEXTOS LARGOS */
 .noticia-content {
-    padding: 22px 20px 20px;
+    padding: 18px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    
-    /* MAGIA PARA QUE LOS TEXTOS RAROS NO SE SALGAN */
-    word-wrap: break-word; 
-    overflow-wrap: break-word;
-    word-break: break-word;
 }
 
 .noticia-fecha {
     font-size: 0.72rem;
-    color: #c9a75d;
+    color: #64748b;
     display: flex;
     align-items: center;
     gap: 5px;
-    margin-bottom: 10px;
-    letter-spacing: 0.3px;
+    margin-bottom: 8px;
 }
 
 .noticia-content h3 {
     font-size: 0.95rem;
     font-weight: 600;
-    margin-bottom: 10px;
-    color: #eee;
-    line-height: 1.45;
+    margin-bottom: 8px;
+    color: #1e293b;
+    line-height: 1.4;
 }
 
 .noticia-content p {
     font-size: 0.82rem;
-    color: #8a9bb0;
-    margin-bottom: 18px;
-    line-height: 1.6;
-    flex: 1; /* Empuja el botón "Leer más" siempre hasta abajo */
+    color: #64748b;
+    margin-bottom: 15px;
+    line-height: 1.5;
+    flex: 1;
 }
 
-/* BOTON LEER MAS */
 .btn-leer {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 9px 18px;
+    padding: 8px 16px;
     background: transparent;
-    color: #c9a75d;
-    border: 1px solid #c9a75d;
+    color: #0284c7;
+    border: 1px solid #0284c7;
     text-decoration: none;
     font-size: 0.78rem;
     font-weight: 600;
-    letter-spacing: 0.5px;
-    border-radius: 6px;
-    transition: background 0.25s, color 0.25s;
+    border-radius: 4px;
+    transition: all 0.2s;
     align-self: flex-start;
 }
 
@@ -482,69 +387,62 @@ body {
 }
 
 .btn-leer:hover {
-    background: #c9a75d;
-    color: #1a1a2e;
+    background: #0284c7;
+    color: #ffffff;
 }
 
 .btn-leer:hover::after {
     transform: translateX(3px);
 }
-/* PUNTOS INDICADORES */
+
+/* PUNTOS INDICADORES CLAROS */
 .carrusel-dots {
     display: flex;
     justify-content: center;
     gap: 8px;
-    margin-top: 30px;
-    flex-wrap: wrap;
+    margin-top: 25px;
 }
 
 .dot {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.2);
+    background: #cbd5e1;
     cursor: pointer;
-    transition: background 0.3s, transform 0.2s, width 0.3s;
-    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.3s;
 }
 
 .dot.activo {
-    background: #c9a75d;
-    transform: scale(1.2);
-    width: 24px;
+    background: #0284c7;
+    transform: scale(1.1);
+    width: 20px;
     border-radius: 4px;
-    border-color: #c9a75d;
 }
-
-/* RESPONSIVE */
-@media (max-width: 1200px) {
-    .carrusel-btn { width: 40px; height: 40px; font-size: 0.85rem; }
-}
-
-@media (max-width: 640px) {
-    .noticias-section { padding: 60px 4% 70px; }
-    .carrusel-btn { width: 36px; height: 36px; font-size: 0.8rem; }
-}
-
-
-
-
-
 
 
 /* ==========================================================================
-   TRANSMISIÓN EN VIVO
+   TRANSMISIÓN EN VIVO & RESPONSIVE
    ========================================================================== */
-   @keyframes parpadeoAlerta {
-        0% { transform: scale(0.9); opacity: 1; }
-        50% { transform: scale(1.2); opacity: 0.4; }
-        100% { transform: scale(0.9); opacity: 1; }
-    }
-    @keyframes slideUpFloat {
-        from { transform: translateY(50px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
-    #bannerTransmision .btn-ver-vivo:hover {
-        background: #f3f4f6 !important;
-        transform: translateY(-2px);
-    }
+@keyframes parpadeoAlerta {
+    0% { transform: scale(0.9); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.4; }
+    100% { transform: scale(0.9); opacity: 1; }
+}
+@keyframes slideUpFloat {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+#bannerTransmision .btn-ver-vivo:hover {
+    background: #f3f4f6 !important;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .hero-slider { height: 50vh; }
+    .slide-content h1 { font-size: 32px; }
+    .slide-content h2 { font-size: 22px; }
+    .slide-content p { font-size: 15px; }
+    .card-section { padding: 40px 15px; }
+    .info-section { padding: 45px 20px; }
+    .card { width: 100%; height: 200px; }
+}

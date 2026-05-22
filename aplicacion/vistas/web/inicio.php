@@ -45,8 +45,7 @@ include __DIR__ . '/componentes/nav.php';
 <section class="hero-slider">
     <div class="slide active">
         <img src="<?= URL ?>public/web/imagenes/1.png" class="slide-img">
-        <div class="overlay"></div>
-        <div class="slide-content">
+        <div class="overlay-slider"></div> <div class="slide-content">
             <h1>Iglesia del Nazareno</h1>
             <h2>Bagua</h2>
             <p>Llamados a Santidad</p>
@@ -55,8 +54,7 @@ include __DIR__ . '/componentes/nav.php';
 
     <div class="slide">
         <img src="<?= URL ?>public/web/imagenes/2.png" class="slide-img">
-        <div class="overlay"></div>
-        <div class="slide-content">
+        <div class="overlay-slider"></div> <div class="slide-content">
             <h1>Una Familia en Cristo</h1>
             <p>Unidos en amor y fe</p>
         </div>
@@ -64,8 +62,7 @@ include __DIR__ . '/componentes/nav.php';
 
     <div class="slide">
         <img src="<?= URL ?>public/web/imagenes/3.png" class="slide-img">
-        <div class="overlay"></div>
-        <div class="slide-content">
+        <div class="overlay-slider"></div> <div class="slide-content">
             <h1>Bienvenido</h1>
             <p>Este es tu hogar</p>
         </div>
@@ -83,7 +80,7 @@ include __DIR__ . '/componentes/nav.php';
 <section class="info-section">
     <h2 class="titulo-seccion">Conócenos</h2>
     <div class="cards-container">
-        <a href="<?= URL ?>fe" class="card card-fe">
+        <a href="<?= URL ?>articulos-fe" class="card card-fe">
             <div class="overlay"></div>
             <div class="card-content">
                 <h3>Artículos de Fe</h3>

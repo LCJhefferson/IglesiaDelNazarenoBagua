@@ -11,10 +11,7 @@ class VisitaDAO {
     public function __construct() {
         $this->db = Conexion::conectar();
     }
-
-    // =========================================================================
-    // 1. CONFIGURACIÓN DINÁMICA
-    // =========================================================================
+    
     public function obtenerMesesLimite() {
         $sql = "SELECT valor FROM configuracion_sistema WHERE clave = 'meses_limite_visita' LIMIT 1";
         try {
@@ -26,9 +23,6 @@ class VisitaDAO {
         }
     }
 
-    // =========================================================================
-    // 2. LISTADO DE VISITAS CON MODOS (ÚLTIMO VS TODOS) - CÁLCULO POR DÍAS
-    // =========================================================================
     public function listarConDetalles($modo = 'ultimo') {
         
         if ($modo === 'todos') {
@@ -61,8 +55,7 @@ class VisitaDAO {
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Convertimos el límite de meses de la configuración a días totales (ej: 1 mes = 30 días, 3 meses = 90 días)
+ 
         $mesesLimite = $this->obtenerMesesLimite();
         $diasLimiteTotal = ($mesesLimite > 0 ? $mesesLimite : 1) * 30; 
         
@@ -72,12 +65,12 @@ class VisitaDAO {
             if (!empty($r['fecha_real'])) {
                 $r['ultima_fecha_formateada'] = date('d/m/Y', strtotime($r['fecha_real']));
                 
-                // Calculamos los DÍAS exactos transcurridos en lugar de meses
+               
                 $fechaVisita = new DateTime($r['fecha_real']);
                 $intervalo = $hoy->diff($fechaVisita);
-                $diasTranscurridos = $intervalo->days; // Obtiene el total neto de días de diferencia
+                $diasTranscurridos = $intervalo->days; 
 
-                // Porcentaje basado en el total de días
+               
                 $porcentajeTranscurrido = ($diasTranscurridos / $diasLimiteTotal) * 100;
 
                 // Asignación de rangos exactos solicitados
@@ -109,9 +102,6 @@ class VisitaDAO {
         return $resultados;
     }
 
-    // =========================================================================
-    // 3. ELIMINACIÓN LÓGICA DE VISITAS
-    // =========================================================================
     public function eliminarVisitaLogica($visita_id) {
         try {
             $sql = "UPDATE visitas SET estado = 0 WHERE id = :id";
@@ -122,9 +112,6 @@ class VisitaDAO {
         }
     }
 
-    // =========================================================================
-    // 4. REGISTRO DE NUEVAS VISITAS
-    // =========================================================================
     public function registrarNuevaVisita($miembro_id, $motivo, $usuario_id, $fecha_visita) {
         $sql = "INSERT INTO visitas (miembro_id, fecha_visita, motivo, registrado_por, estado_id, estado) 
                 VALUES (:miembro_id, :fecha_visita, :motivo, :registrado_por, 1, 1)";
@@ -137,9 +124,7 @@ class VisitaDAO {
         ]);
     }
 
-    // =========================================================================
-    // 5. LISTADO PARA MAPA - CÁLCULO POR DÍAS (SINCRO PERFECTA)
-    // =========================================================================
+  
     public function listarParaMapa() {
         $sql = "SELECT 
                     m.id AS miembro_id,

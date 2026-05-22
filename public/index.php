@@ -22,7 +22,7 @@ if (file_exists($autoloadPath)) {
     die("Error Crítico: No se encontró el Autoload en: " . $autoloadPath);
 }
 
-//ENRUTAMIENTO API
+
 $_uriActual = strtok($_SERVER['REQUEST_URI'], '?');
 if (str_starts_with($_uriActual, '/IglesiaDelNazarenoBagua/api/')) {
     $router = new \aplicacion\core\Router();
@@ -38,15 +38,19 @@ if (str_starts_with($_uriActual, '/IglesiaDelNazarenoBagua/api/')) {
 }
 
 // 🔐 BYPASS TEMPORAL PARA PRUEBAS EN POSTMAN
-// =========================================================================
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-// Forzamos que la sesión exista para que el sistema crea que ya nos logueamos como Admin
-$_SESSION['usuario']    = 'luis';
-$_SESSION['rol_id']     = 1;
-$_SESSION['rol_nombre'] = 'Admin';
-// 
+
+// if (session_status() === PHP_SESSION_NONE) {
+//     session_start();
+// }
+
+// $_SESSION['usuario']    = 'luis';
+// $_SESSION['rol_id']     = 1;
+// $_SESSION['rol_nombre'] = 'Admin';
+
+
+
+
+
 
 // 5. Captura de Vista
 $vista = $_GET['vista'] ?? 'inicio';
@@ -59,14 +63,13 @@ if ($vista === 'logout') {
 }
 
 //EXCEPCIONES INTERNAS 
-// A. Endpoint JSON para el Mapa (visitasMap.js) -> INTACTO
 if ($vista === 'visitasMapJSON') {
     $controller = new \aplicacion\controladores\VisitaController();
     $controller->obtenerDatosMapaJSON();
     exit; 
 }
 
-// B. Procesar Guardar Registro de Visita -> Respuesta asíncrona limpia
+// B. Procesar Guardar Registro de Visita
 if ($vista === 'admin/guardarVisita') {
     \aplicacion\core\Middleware::csrfVerify();
     $controller = new \aplicacion\controladores\VisitaController();
@@ -76,7 +79,7 @@ if ($vista === 'admin/guardarVisita') {
     exit;
 }
 
-// C. Procesar Ajustes de Rangos -> Respuesta asíncrona limpia
+// C. Procesar Ajustes de Rangos 
 if ($vista === 'admin/guardarAjustesVisita') {
     \aplicacion\core\Middleware::csrfVerify();
     $controller = new \aplicacion\controladores\VisitaController();
@@ -86,7 +89,7 @@ if ($vista === 'admin/guardarAjustesVisita') {
     exit;
 }
 
-// D. Procesar Eliminación (Suprimir) de Visita -> Respuesta asíncrona limpia
+// D. Procesar Eliminación (Suprimir) de Visita 
 if ($vista === 'admin/eliminarVisita') {
     \aplicacion\core\Middleware::csrfVerify();
     $controller = new \aplicacion\controladores\VisitaController();
@@ -96,7 +99,7 @@ if ($vista === 'admin/eliminarVisita') {
     exit;
 }
 
-// CARGA DE VISTAS FÍSICAS (.php standard)
+// CARGA DE VISTAS FÍSICAS
 if ($vista === 'procesar_login') {
     $archivoVista = $raizProyecto . '/procesos/auth/procesar_login.php';
 } 

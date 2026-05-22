@@ -12,7 +12,6 @@ $auth = new TransmisionController();
 $auth->registrar();
 $transmisiones = $auth->listarTransmisiones();
 
-// Lógica de detección de vivo activo (ID 1 según nuevos requerimientos)
 $preview = null;
 $hayVivo = false;
 
@@ -23,7 +22,6 @@ foreach($transmisiones as $t) {
         break; 
     }
 }
-// Si no hay vivo, el monitor y el formulario cargan vacíos (sin persistencia de basura)
 ?>
 
 <!DOCTYPE html>

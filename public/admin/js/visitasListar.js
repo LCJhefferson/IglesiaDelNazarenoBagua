@@ -1,6 +1,5 @@
-// 0. PERSISTENCIA DE FILTROS (Mantiene los filtros activos tras recargar)
+
 document.addEventListener("DOMContentLoaded", function() {
-    // Al cargar la página, verificamos si había filtros guardados en la memoria
     if (localStorage.getItem('v_filtroNombre') !== null) {
         document.getElementById('filtroNombre').value = localStorage.getItem('v_filtroNombre');
     }
@@ -14,7 +13,6 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('filtroModo').value = localStorage.getItem('v_filtroModo');
     }
 
-    // Ejecuta el filtro inmediatamente con los valores recuperados
     filtrarVisitas();
 });
 
@@ -83,7 +81,6 @@ function procesarGuardarVisita(event) {
     });
 }
 
-// 2. MÓDULO MODAL: AJUSTES DE RANGOS DE TIEMPO
 function abrirModalAjustes() {
     document.getElementById('modalAjustes').style.display = 'flex';
 }
@@ -116,7 +113,7 @@ function procesarGuardarAjustes(event) {
     });
 }
 
-// 3. MÓDULO MODAL: ELIMINACIÓN LÓGICA
+
 function abrirModalEliminar(visitaId, nombreMiembro) {
     document.getElementById('modalEliminarVisitaId').value = visitaId;
     document.getElementById('eliminarNombreMiembro').textContent = nombreMiembro;
@@ -139,7 +136,7 @@ function procesarEliminacionLogica() {
     .then(resp => resp.json())
     .then(data => {
         if (data.ok) {
-            window.location.reload(); // Al recargar, el bloque 0 restaurará tus filtros
+            window.location.reload(); 
         } else {
             alert("Error al suprimir la visita.");
         }
@@ -150,14 +147,12 @@ function procesarEliminacionLogica() {
     });
 }
 
-// 4. MÓDULO: FILTROS DINÁMICOS POR AJAX (ACTUALIZADO CON MEMORIA)
 function filtrarVisitas() {
     const nombre = document.getElementById('filtroNombre').value;
     const motivo = document.getElementById('filtroMotivo').value;
     const estado = document.getElementById('filtroEstado').value;
     const modo = document.getElementById('filtroModo').value;
 
-    // GUARDAR EN MEMORIA: Salvamos el estado actual de los filtros
     localStorage.setItem('v_filtroNombre', nombre);
     localStorage.setItem('v_filtroMotivo', motivo);
     localStorage.setItem('v_filtroEstado', estado);
