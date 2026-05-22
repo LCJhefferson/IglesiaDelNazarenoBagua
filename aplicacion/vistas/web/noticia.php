@@ -58,10 +58,11 @@ $relacionadas = $stmtRel->fetchAll(PDO::FETCH_ASSOC);
        <?php
 $origen = isset($_GET['origen']) ? $_GET['origen'] : 'web';
 $urlVolver = ($origen === 'admin')
-    ? URL . "index.php?vista=dashboard&seccion=noticias"
-    : URL . "index.php?vista=inicio#noticias-section";
+    ? URL . "public/index.php?vista=dashboard&seccion=noticias"
+    : URL . "public/index.php?vista=inicio";
 ?>
-<a href="<?= $urlVolver ?>" class="btn-volver">
+<a href="<?= $urlVolver ?>" class="btn-volver" 
+   onclick="sessionStorage.setItem('scrollTo','noticias'); return true;">
     <i class="fa-solid fa-arrow-left"></i> Volver a Noticias
 </a>
         </a>

@@ -179,3 +179,18 @@ include __DIR__ . '/componentes/footer.php';
 
 </body>
 </html>
+
+<script>
+
+  window.addEventListener('DOMContentLoaded', function () {
+    if (sessionStorage.getItem('scrollTo') === 'noticias') {
+      sessionStorage.removeItem('scrollTo');
+      var seccion = document.getElementById('noticias');
+      if (seccion) {
+        setTimeout(function () {
+          seccion.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+      }
+    }
+  });
+</script>
