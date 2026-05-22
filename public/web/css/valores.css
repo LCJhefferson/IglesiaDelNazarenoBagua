@@ -1,0 +1,126 @@
+/* ========================= */
+/* DISEÑO DE VALORES MEDULARES */
+/* ========================= */
+
+.valores-header {
+    text-align: center;
+    padding: 60px 20px 40px;
+    background-color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.titulo-valores {
+    font-size: 32px;
+    color: #8b5cf6; /* Tono púrpura de la imagen */
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.subtitulo-valores {
+    font-size: 15px;
+    color: #64748b;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.valores-container {
+    padding: 20px 5% 80px;
+    display: flex;
+    justify-content: center;
+    background-color: #f8fafc;
+}
+
+.valores-card-wrapper {
+    max-width: 1100px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 50px;
+    display: grid;
+    grid-template-columns: 300px 1fr; /* Columna fija para el recurso y flexible para el texto */
+    gap: 60px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+}
+
+/* Sidebar del Recurso */
+.valores-sidebar {
+    text-align: center;
+}
+
+.valores-resource-icon img {
+    width: 100%;
+    max-width: 200px;
+    margin-bottom: 25px;
+}
+
+.valores-sidebar h3 {
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.btn-descargar-valores {
+    display: inline-block;
+    background: #334155;
+    color: white;
+    padding: 10px 25px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.btn-descargar-valores:hover {
+    background: #1e293b;
+}
+
+/* Contenido de Valores */
+.valor-item {
+    margin-bottom: 45px;
+}
+
+.valor-icon-small img {
+    width: 45px;
+    height: 45px;
+    margin-bottom: 15px;
+    opacity: 0.8;
+}
+
+.valor-item h2 {
+    font-size: 18px;
+    color: #334155;
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.valor-item p {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 15px;
+    color: #475569;
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+
+.cita-biblica {
+    font-style: italic;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* Responsivo */
+@media (max-width: 900px) {
+    .valores-card-wrapper {
+        grid-template-columns: 1fr;
+        padding: 40px 25px;
+    }
+    .valores-sidebar {
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 40px;
+    }
+}

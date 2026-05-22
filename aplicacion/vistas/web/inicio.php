@@ -14,6 +14,7 @@ $live = $stmt->fetch(PDO::FETCH_ASSOC);
     <title>Iglesia del Nazareno</title>
     <link rel="stylesheet" href="<?= URL ?>public/web/css/inicio.css">
     <link rel="stylesheet" href="<?= URL ?>public/web/css/nav.css">
+    <link rel="stylesheet" href="<?= URL ?>public/web/css/cards_conocenos.css">
     <link rel="stylesheet" href="<?= URL ?>public/web/css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
@@ -76,35 +77,7 @@ include __DIR__ . '/componentes/nav.php';
         <a href="<?= URL ?>Car_salvacion" class="btn-descubre">Descúbrelo</a>
     </div>
 </section>
-
-<section class="info-section">
-    <h2 class="titulo-seccion">Conócenos</h2>
-    <div class="cards-container">
-        <a href="<?= URL ?>articulos-fe" class="card card-fe">
-            <div class="overlay"></div>
-            <div class="card-content">
-                <h3>Artículos de Fe</h3>
-                <p>Descubre en qué creemos como iglesia.</p>
-            </div>
-        </a>
-
-        <a href="<?= URL ?>mision" class="card card-mision">
-             <div class="overlay"></div>
-            <div class="card-content">
-                <h3>Misión</h3>
-                <p>Nuestra razón de ser y propósito.</p>
-            </div>
-        </a>
-
-        <a href="<?= URL ?>valores" class="card card-valores">
-             <div class="overlay"></div>
-            <div class="card-content">
-                <h3>Valores</h3>
-                <p>Principios que guían nuestra vida cristiana.</p>
-            </div>
-        </a>
-    </div>
-</section>
+<?php include __DIR__ . '/cards_conocenos.php'; ?>
 
 <section class="noticias-section" id="noticias">
     <h2 class="titulo-noticias">NOTICIAS NAZARENAS</h2>
@@ -123,39 +96,37 @@ include __DIR__ . '/componentes/nav.php';
 
     <!-- CARRUSEL -->
     <div class="carrusel-wrapper">
-        <button class="carrusel-btn prev" onclick="moverCarrusel(-1)">
-            <i class="fa-solid fa-chevron-left"></i>
-        </button>
+    <button class="carrusel-btn prev" onclick="moverCarrusel(-1)">
+        <i class="fa-solid fa-chevron-left"></i>
+    </button>
 
-        <div class="carrusel-track-container">
-            <div class="carrusel-track" id="carrusel-track">
-                <?php foreach($noticiasPublicas as $np): ?>
-                <div class="carrusel-item">
-                    <div class="noticia-card">
-                        <?php if(!empty($np['imagen_portada'])): ?>
-                            <img src="<?= URL ?><?= htmlspecialchars($np['imagen_portada']) ?>" alt="<?= htmlspecialchars($np['titulo']) ?>">
-                        <?php else: ?>
-                            <img src="<?= URL ?>public/web/imagenes/noticia2.webp" alt="Noticia">
-                        <?php endif; ?>
-                        <div class="noticia-content">
-                            <span class="noticia-fecha">
-                                <i class="fa-regular fa-calendar"></i>
-                                <?= date("d/m/Y", strtotime($np['fecha_creacion'])) ?>
-                            </span>
-                            <h3><?= htmlspecialchars($np['titulo']) ?></h3>
-                            <p><?= htmlspecialchars(mb_substr($np['resumen'], 0, 80, 'UTF-8')) ?>...</p>
-                            <a href="<?= URL ?>public/index.php?vista=noticia&id=<?= $np['id'] ?>&origen=web" class="btn-leer">Leer más →</a>
-
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
+    <div class="carrusel-track-container">
+        <div class="carrusel-track" id="carrusel-track">
+            <?php foreach($noticiasPublicas as $np): ?>
+            <div class="carrusel-item">
+                <div class="noticia-card">
+                    <?php if(!empty($np['imagen_portada'])): ?>
+                        <img src="<?= URL ?><?= htmlspecialchars($np['imagen_portada']) ?>" alt="<?= htmlspecialchars($np['titulo']) ?>">
+                    <?php else: ?>
+                        <img src="<?= URL ?>public/web/imagenes/noticia2.webp" alt="Noticia">
+                    <?php endif; ?>
+                    
+                    <div class="noticia-content">
+                        <span class="noticia-fecha">
+                            <i class="fa-regular fa-calendar"></i>
+                            <?= date("d/m/Y", strtotime($np['fecha_creacion'])) ?>
+                        </span>
+                        <h3><?= htmlspecialchars($np['titulo']) ?></h3>
+                        <p><?= htmlspecialchars(mb_substr($np['resumen'], 0, 80, 'UTF-8')) ?>...</p>
+                        <a href="<?= URL ?>public/index.php?vista=noticia&id=<?= $np['id'] ?>&origen=web" class="btn-leer">Leer más →</a>
+                    </div> </div> </div> <?php endforeach; ?>
         </div>
-
-        <button class="carrusel-btn next" onclick="moverCarrusel(1)">
-            <i class="fa-solid fa-chevron-right"></i>
-        </button>
     </div>
+
+    <button class="carrusel-btn next" onclick="moverCarrusel(1)">
+        <i class="fa-solid fa-chevron-right"></i>
+    </button>
+</div>
 
     <!-- PUNTOS INDICADORES -->
     <div class="carrusel-dots" id="carrusel-dots">

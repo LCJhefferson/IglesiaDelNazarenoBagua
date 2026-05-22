@@ -1,65 +1,48 @@
 /* ==========================================================================
-   HEADER & NAV PERFECCIONADO
+   HEADER & NAV PERFECCIONADO (LIMPIO Y UNIFICADO)
    ========================================================================== */
 .header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* Distribución estricta Izquierda / Derecha */
-    padding: 12px 4%;
-    background: rgba(255, 255, 255, 0.92); /* Un toque más opaco para legibilidad */
+    height: 70px;
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4%;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    z-index: 10000;
     box-sizing: border-box;
-    height: 70px; /* Altura fija controlada */
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0; /* Evita que el logo se achique */
-}
+.logo { display: flex; align-items: center; flex-shrink: 0; }
+.logo img { height: 45px; filter: brightness(0); display: block; }
 
-.logo img {
-    height: 42px;
-    width: auto;
-    display: block;
-    filter: brightness(0);
-}
-
-/* Agrupador de navegación y botón de login */
 .nav-container {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 15px;
-    flex-grow: 1; /* Ocupa el espacio disponible de manera balanceada */
+    display: flex; align-items: center; flex-grow: 1; justify-content: flex-end;
 }
 
-.nav {
-    display: flex;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-}
+.nav { display: flex; align-items: center; margin: 0; padding: 0; }
 
-.nav a {
-    color: #000000;
+/* Enlaces principales y Dropdown Link */
+.nav > a, .dropdown-link {
+    color: #333333;
     text-decoration: none;
-    margin-left: 22px;
+    margin-left: 25px;
     font-weight: 500;
     font-size: 0.95rem;
+    padding: 10px 0;
+    transition: 0.3s;
     position: relative;
-    padding: 6px 0;
-    white-space: nowrap; /* Evita que los textos se partan en dos renglones */
+    cursor: pointer;
+    white-space: nowrap;
 }
 
-.nav a::after {
+/* Efecto de línea animada dorada (Solo para los principales) */
+.nav > a::after, .dropdown-link::after {
     content: "";
     position: absolute;
     width: 0;
@@ -70,11 +53,13 @@
     transition: 0.3s;
 }
 
-.nav a:hover::after {
+.nav > a:hover::after, .dropdown-link:hover::after {
     width: 100%;
 }
 
-/* Botón de Ingresar Alineado */
+.nav > a:hover, .dropdown-link:hover { color: #fdc269; }
+
+/* Botón de Ingresar (Login) */
 .header .login {
     padding: 8px 18px;
     border-radius: 20px;
@@ -84,81 +69,102 @@
     font-weight: 600;
     font-size: 0.9rem;
     transition: all 0.2s ease;
-    margin-left: 15px;
+    margin-left: 20px;
     white-space: nowrap;
     display: inline-block;
 }
 
-.header .login:hover {
-    background: rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px);
+.header .login:hover { background: rgba(0, 0, 0, 0.15); transform: translateY(-1px); }
+
+/* Menú Hamburguesa (Oculto en PC) */
+.menu-toggle { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #333; padding: 5px; }
+
+/* ==========================================================================
+   DROPDOWN MINISTERIOS (PC)
+   ========================================================================== */
+.dropdown { position: relative; }
+.dropdown-link i { font-size: 0.75rem; margin-left: 5px; transition: 0.3s; }
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 25px;
+    background: #ffffff;
+    min-width: 220px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    padding: 10px 0;
+    display: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 11000;
 }
 
-/* Botón de menú hamburguesa (Escondido por defecto en PC) */
-.menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    color: #000000;
-    cursor: pointer;
-    padding: 8px;
-    flex-shrink: 0;
+@media (min-width: 1025px) {
+    .dropdown:hover .dropdown-menu { display: block; opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-menu a {
+    display: block !important;
+    margin: 0 !important;
+    padding: 10px 20px !important;
+    font-size: 0.9rem !important;
+    color: #444444 !important;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.dropdown-menu a:hover {
+    background: #fff9f0;
+    color: #fdc269 !important;
+    padding-left: 25px !important; /* Pequeño salto a la derecha al hacer hover */
 }
 
 /* ==========================================================================
-   MEDIA QUERY: COLAPSO MÓVIL AJUSTADO (Aplica para pantallas de 1024px o menos)
+   MÓVIL (Max 1024px)
    ========================================================================== */
 @media (max-width: 1024px) {
-    .menu-toggle {
-        display: block; /* Aparece en la esquina derecha ordenadamente */
-    }
-
+    .menu-toggle { display: block; }
+    
     .nav-container {
         position: fixed;
-        top: 0;
-        right: -100%; /* Oculto fuera de pantalla */
-        width: 280px;
-        height: 100vh;
+        top: 0; right: -100%;
+        width: 280px; height: 100vh;
         background: #ffffff;
-        box-shadow: -5px 0 15px rgba(0,0,0,0.1);
         flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
         padding: 90px 30px;
-        gap: 30px;
-        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 9999;
-    }
-
-    .nav-container.active {
-        right: 0; /* Entra limpiamente */
-    }
-
-    .nav {
-        flex-direction: column;
+        transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         align-items: flex-start;
-        width: 100%;
-        gap: 20px;
+        justify-content: flex-start;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.1);
     }
+    .nav-container.active { right: 0; }
 
-    .nav a {
-        margin-left: 0;
-        font-size: 1.1rem;
-        width: 100%;
-        display: block;
-    }
+    .nav { flex-direction: column; width: 100%; align-items: flex-start; gap: 15px; }
+    
+    .nav > a, .dropdown { width: 100%; margin-left: 0; font-size: 1.1rem; display: block; }
+    .nav > a::after, .dropdown-link::after { display: none; } /* Quita la línea animada en móvil */
 
+    /* Login Móvil */
     .header .login {
-        margin-left: 0;
-        width: 100%;
-        text-align: center;
-        background: #000000;
-        color: #ffffff;
-        box-sizing: border-box;
+        margin-left: 0; width: 100%; text-align: center;
+        background: #000000; color: #ffffff; margin-top: 15px;
+    }
+    .header .login:hover { background: #333333; }
+
+    /* Dropdown Acordeón Móvil */
+    .dropdown-link { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0; }
+    
+    .dropdown-menu {
+        position: static; display: none; box-shadow: none;
+        padding-left: 20px; background: transparent; transform: none; opacity: 1; margin-top: 10px;
     }
     
-    .header .login:hover {
-        background: #333333;
-    }
+    .dropdown.active .dropdown-menu { display: block; }
+    .dropdown-menu a { padding: 8px 0 !important; font-size: 1rem !important; }
+    
+    /* Rotar la flecha al abrir el acordeón */
+    .dropdown.active .dropdown-link i { transform: rotate(180deg); }
 }

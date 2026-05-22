@@ -56,14 +56,13 @@ $relacionadas = $stmtRel->fetchAll(PDO::FETCH_ASSOC);
     <div class="noticia-hero-overlay"></div>
     <div class="noticia-hero-content">
        <?php
-$origen = isset($_GET['origen']) ? $_GET['origen'] : 'web';
-$urlVolver = ($origen === 'admin')
-    ? URL . "public/index.php?vista=dashboard&seccion=noticias"
-    : URL . "public/index.php?vista=inicio#noticias";
-?>
-<a href="<?= $urlVolver ?>" class="btn-volver">
-    <i class="fa-solid fa-arrow-left"></i> Volver a Noticias
-</a>
+        $origen = isset($_GET['origen']) ? $_GET['origen'] : 'web';
+        $urlVolver = ($origen === 'admin')
+            ? URL . "public/index.php?vista=dashboard&seccion=noticias"
+            : URL . "public/index.php?vista=inicio#noticias";
+        ?>
+        <a href="<?= $urlVolver ?>" class="btn-volver">
+            <i class="fa-solid fa-arrow-left"></i> Volver a Noticias
         </a>
         <div class="noticia-hero-meta">
             <span class="noticia-hero-fecha">

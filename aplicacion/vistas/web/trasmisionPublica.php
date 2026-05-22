@@ -15,6 +15,7 @@ $live = $stmt->fetch(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Transmisión en Vivo - Iglesia del Nazareno</title>
     <link rel="stylesheet" href="<?= URL ?>public/web/css/nav.css">
+    <link rel="stylesheet" href="<?= URL ?>public/web/css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     
@@ -139,6 +140,10 @@ $live = $stmt->fetch(PDO::FETCH_ASSOC);
             <?php endif; ?>
         </div>
     </div>
+
+    <?php include __DIR__ . '/componentes/footer.php'; ?>
+    
+
 
     <script>
         // Configuración de Pusher

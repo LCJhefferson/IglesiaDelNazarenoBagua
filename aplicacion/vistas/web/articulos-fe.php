@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
      <link rel="stylesheet" href="<?= URL ?>public/web/css/articulos-fe.css">
     <link rel="stylesheet" href="<?= URL ?>public/web/css/nav.css">
+    <link rel="stylesheet" href="<?= URL ?>public/web/css/cards_conocenos.css">
     <link rel="stylesheet" href="<?= URL ?>public/web/css/footer.css">
 </head>
 <body>
@@ -261,6 +262,11 @@
             </section>
         </div>
     </main>
+    
+    <?php include __DIR__ . '/cards_conocenos.php'; ?>
+<?php 
+include __DIR__ . '/componentes/footer.php'; 
+?>
 
     <script src="<?= URL ?>public/web/js/articulos-fe.js"></script>
 </body>
