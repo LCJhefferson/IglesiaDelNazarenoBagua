@@ -109,7 +109,7 @@ include __DIR__ . '/componentes/nav.php';
     </div>
 </section>
 
-<section class="noticias-section" id="noticias-section">
+<section class="noticias-section" id="noticias">
     <h2 class="titulo-noticias">NOTICIAS NAZARENAS</h2>
 
     <?php
