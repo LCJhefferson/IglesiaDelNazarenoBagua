@@ -389,11 +389,10 @@ body {
 /* CADA ITEM */
 .carrusel-item {
     display: flex;
-    flex: 0 0 auto; /* Evita que las tarjetas se aplasten o cambien de tamaño */
-    width: 300px; /* Ancho de la tarjeta. Puedes subir o bajar este número si las quieres más grandes o delgadas */
-    height: auto; 
+    flex: 0 0 auto;
+    width: 300px;
+    height: 420px; /* altura fija para todas las cards */
 }
-
 /* UNIFICAMOS NOTICIA CARD */
 .noticia-card {
     background: rgba(255,255,255,0.04);
@@ -421,15 +420,13 @@ body {
 
 /* CONTENIDO Y TEXTOS LARGOS */
 .noticia-content {
-    padding: 22px 20px 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+      font-size: 0.82rem;
+    color: #8a9bb0;
+    margin-bottom: 18px;
+    line-height: 1.6;
+    flex: 0
     
-    /* MAGIA PARA QUE LOS TEXTOS RAROS NO SE SALGAN */
-    word-wrap: break-word; 
-    overflow-wrap: break-word;
-    word-break: break-word;
+    
 }
 
 .noticia-fecha {
