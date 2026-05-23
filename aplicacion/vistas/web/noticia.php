@@ -10,7 +10,7 @@ if ($id <= 0) {
     exit;
 }
 
-$stmt = $db->prepare("SELECT * FROM noticias WHERE id = :id AND estado = 1 LIMIT 1");
+$stmt = $db->prepare("SELECT * FROM noticias WHERE id = :id AND estado IN (1, 2) LIMIT 1");
 $stmt->execute([':id' => $id]);
 $noticia = $stmt->fetch(PDO::FETCH_ASSOC);
 

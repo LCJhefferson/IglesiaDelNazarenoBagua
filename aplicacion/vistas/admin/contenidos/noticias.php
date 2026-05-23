@@ -33,6 +33,8 @@ $fecha_actual = date("Y-m-d\TH:i");
 ?>
 
 <link rel="stylesheet" href="css/noticias.css">
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
 
 <!-- TOP BAR -->
 <div class="top-bar">
@@ -229,7 +231,8 @@ $fecha_actual = date("Y-m-d\TH:i");
 
                 <div class="field full">
                     <label for="f-contenido">Contenido extendido</label>
-                    <textarea name="contenido" id="f-contenido" rows="4" placeholder="Escribe el cuerpo de la noticia..."></textarea>
+                    <input type="hidden" name="contenido" id="f-contenido">
+                    <div id="quill-editor" style="height:150px;"></div>
                 </div>
 
                 <div class="field full">
@@ -262,4 +265,5 @@ $fecha_actual = date("Y-m-d\TH:i");
 <!-- TOAST NOTIFICATIONS -->
 <div id="toast-container"></div>
 
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 <script src="js/noticias.js"></script>

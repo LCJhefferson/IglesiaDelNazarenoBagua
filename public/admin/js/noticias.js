@@ -52,6 +52,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const btn = document.getElementById("btn-submit-noticia");
             if (btn) btn.innerHTML = '<i class="fa-solid fa-save"></i> <span>Guardar Publicación</span>';
         }
+        if (!window.quillInstance) {
+        window.quillInstance = new Quill('#quill-editor', { theme: 'snow' });
+        window.quillInstance.on('text-change', function() {
+            document.getElementById('f-contenido').value = window.quillInstance.root.innerHTML;
+        });
+    }
+
+    if (!editar) {
+        window.quillInstance.root.innerHTML = '';
+    }
     };
 
     window.cerrarModal = function() {
@@ -299,7 +309,10 @@ window.editarNoticia = function(n) {
     document.getElementById("f-titulo").value      = n.titulo;
     document.getElementById("f-fecha").value       = n.fecha_creacion;
     document.getElementById("f-resumen").value     = n.resumen;
-    document.getElementById("f-contenido").value   = n.contenido;
+    document.getElementById('f-contenido').value = n.contenido || '';
+     if (window.quillInstance) {
+         window.quillInstance.root.innerHTML = n.contenido || '';
+    }
     document.getElementById("f-video").value       = n.video_link || "";
 
     contarCaracteres("f-resumen", "char-resumen", 150);

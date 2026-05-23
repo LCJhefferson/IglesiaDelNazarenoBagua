@@ -851,3 +851,11 @@ input:focus, textarea:focus {
     visibility: visible;
     opacity: 1;
 }
+
+.ql-editor.ql-blank::before {
+    content: 'Escribe el cuerpo de la noticia...';
+    color: #aaa;
+    font-style: italic;
+    pointer-events: none;
+    position: absolute;
+}
