@@ -24,6 +24,13 @@ class NoticiaController {
         }
     }
 
+    public function cambiarVisibilidad($id, $estado) {
+    if($this->dao->cambiarVisibilidad($id, $estado)) {
+        header("Location: /IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias");
+        exit();
+    }
+}
+
     public function guardarNoticia() {
         $id = isset($_POST['id']) && !empty($_POST['id']) ? $_POST['id'] : null;
 

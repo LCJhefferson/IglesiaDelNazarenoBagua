@@ -40,11 +40,16 @@ class NoticiaDAO {
         return $stmt->execute([':id' => $id]);
     }
 
-    public function listarTodas() {
-        $sql = "SELECT * FROM noticias WHERE estado = 1 ORDER BY fecha_creacion DESC";
-        return $this->db->query($sql)->fetchAll();
-    }
+public function cambiarVisibilidad($id, $estado) {
+    $sql  = "UPDATE noticias SET estado = :estado WHERE id = :id";
+    $stmt = $this->db->prepare($sql);
+    return $stmt->execute([':estado' => $estado, ':id' => $id]);
+}
 
+  public function listarTodas() {
+    $sql = "SELECT * FROM noticias WHERE estado IN (1, 2) ORDER BY fecha_creacion DESC";
+    return $this->db->query($sql)->fetchAll();
+}
     public function actualizar($datos) {
         $sql = "UPDATE noticias SET 
                     titulo          = :titulo, 
@@ -55,7 +60,6 @@ class NoticiaDAO {
                     fecha_creacion  = :fecha
                 WHERE id = :id";
         $stmt = $this->db->prepare($sql);
-        // Aquí es donde ocurría el error si los nombres no coincidían
         return $stmt->execute($datos);
     }
 
@@ -78,4 +82,9 @@ class NoticiaDAO {
         $stmt->execute([':id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function listarPublicas() {
+    $sql = "SELECT * FROM noticias WHERE estado = 1 ORDER BY fecha_creacion DESC";
+    return $this->db->query($sql)->fetchAll();
+}
 }

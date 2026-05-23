@@ -801,3 +801,27 @@ input:focus, textarea:focus {
     .form-grid  { grid-template-columns: 1fr; }
     .full       { grid-column: 1; }
 }
+
+.card-badge.oculto {
+    background-color: #e53935;
+}
+
+.btn-accion.ocultar {
+    background: #fff3e0;
+    color: #e65100;
+    border: 1px solid #ffcc80;
+}
+
+.btn-accion.ocultar:hover {
+    background: #ffe0b2;
+}
+
+.btn-accion.mostrar {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+
+.btn-accion.mostrar:hover {
+    background: #c8e6c9;
+}

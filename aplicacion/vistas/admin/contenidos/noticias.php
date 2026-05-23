@@ -11,6 +11,14 @@ if(isset($_GET['eliminar_foto'])){
     exit; 
 }
 
+if(isset($_GET['ocultar'])){
+    $controller->cambiarVisibilidad($_GET['ocultar'], 2);
+}
+
+if(isset($_GET['mostrar'])){
+    $controller->cambiarVisibilidad($_GET['mostrar'], 1);
+}
+
 if(isset($_GET['eliminar'])){
     $controller->eliminarNoticia($_GET['eliminar']);
 }
@@ -104,9 +112,9 @@ $fecha_actual = date("Y-m-d\TH:i");
                         </div>
                     <?php endif; ?>
                     <div class="card-overlay"></div>
-                    <span class="card-badge <?= $n['estado'] == 1 ? 'publicado' : 'borrador' ?>">
-                        <?= $n['estado'] == 1 ? 'Publicado' : 'Borrador' ?>
-                    </span>
+                   <span class="card-badge <?= $n['estado'] == 1 ? 'publicado' : 'oculto' ?>">
+                     <?= $n['estado'] == 1 ? 'Publicado' : 'Oculto' ?>
+                   </span>
                 </div>
 
                 <div class="card-body">
@@ -122,6 +130,9 @@ $fecha_actual = date("Y-m-d\TH:i");
                     <button class="btn-accion editar" onclick='editarNoticia(<?= json_encode($n) ?>)'>
                         <i class="fa-solid fa-pen"></i> Editar
                         <span class="tooltip">Editar noticia</span>
+                    </button>
+                    <button class="btn-accion ocultar" onclick="event.stopPropagation(); location.href='/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&<?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>=<?= $n['id'] ?>'">
+                        <i class="fa-solid fa-<?= $n['estado'] == 1 ? 'eye-slash' : 'eye' ?>"></i> <?= $n['estado'] == 1 ? 'Ocultar' : 'Mostrar' ?>
                     </button>
                     <button class="btn-accion eliminar"
                         onclick="event.stopPropagation(); confirmarEliminar(<?= $n['id'] ?>, '<?= htmlspecialchars($n['titulo'], ENT_QUOTES) ?>')">
