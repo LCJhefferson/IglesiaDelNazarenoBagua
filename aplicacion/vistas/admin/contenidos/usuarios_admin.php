@@ -1,6 +1,6 @@
 <?php
 use aplicacion\controladores\RegistroController;
-use aplicacion\dao\UserDAO;
+use Illuminate\Database\Capsule\Manager as DB;
 
 // ── PROCESAR REGISTRO ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
@@ -11,46 +11,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
         $_POST['rol'],
         $_POST['estado']
     );
-    if ($resultado) {
-        header("Location: /IglesiaDelNazarenoBagua/dashboard?seccion=usuarios_admin&exito=1");
-    } else {
-        header("Location: /IglesiaDelNazarenoBagua/dashboard?seccion=usuarios_admin&error=1");
-    }
+    $status = $resultado ? 'exito=1' : 'error=1';
+    header("Location: /IglesiaDelNazarenoBagua/dashboard?seccion=usuarios_admin&$status");
     exit;
 }
 
-// ── OBTENER USUARIOS DE LA BD ──
-$dao      = new UserDAO();
-$usuarios = $dao->listar();
+// ── OBTENER USUARIOS CON ELOQUENT ──
+// Obtenemos los usuarios como una colección de objetos stdClass
+$usuarios = DB::table('usuarios')->get();
 
-// ── CONTADORES ──
-$total_usuarios       = count($usuarios);
-$total_activos        = count(array_filter($usuarios, fn($u) => $u['estado'] === 'activo'));
-$total_inactivos      = count(array_filter($usuarios, fn($u) => $u['estado'] === 'inactivo'));
-$total_deshabilitados = 0; // tu BD solo tiene activo/inactivo
+// ── CONTADORES USANDO ELOQUENT ──
+$total_usuarios       = $usuarios->count();
+$total_activos         = $usuarios->where('estado', 'activo')->count();
+$total_inactivos       = $usuarios->where('estado', 'inactivo')->count();
+$total_deshabilitados = 0; 
 
-// ── MAPAS ──
-$etiqueta_rol = [
-    '1' => 'Admin',
-    '2' => 'Pastor',
-];
-$clase_rol = [
-    '1' => 'rol-admin',
-    '2' => 'rol-editor',
-];
-$etiqueta_estado = [
-    'activo'   => 'Activo',
-    'inactivo' => 'Inactivo',
-];
-$clase_estado = [
-    'activo'   => 'estado-activo',
-    'inactivo' => 'estado-inactivo',
-];
-$color_avatar = [
-    '1' => '#38d9a9',
-    '2' => '#4f6ef7',
-];
+// ── MAPAS DE DISEÑO ──
+$etiqueta_rol = ['1' => 'Admin', '2' => 'Pastor'];
+$clase_rol    = ['1' => 'rol-admin', '2' => 'rol-editor'];
+$color_avatar = ['1' => '#38d9a9', '2' => '#4f6ef7'];
+$etiqueta_estado = ['activo' => 'Activo', 'inactivo' => 'Inactivo'];
+$clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'];
 ?>
+
+
 
 <!-- ── BARRA SUPERIOR ── -->
 <header class="barra-superior">
@@ -135,66 +119,69 @@ $color_avatar = [
                         <th style="text-align:center">Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="cuerpoTabla">
-                <?php foreach ($usuarios as $usuario): ?>
-                    <?php
-                        $rolId    = $usuario['id_rol'];
-                        $estado   = $usuario['estado'];
-                        $username = $usuario['username'];
-                        $avatar   = strtoupper(substr($username, 0, 2));
-                        $colorAv  = $color_avatar[$rolId] ?? '#868e96';
-                        $claseRol = $clase_rol[$rolId]    ?? 'rol-lector';
-                        $etqRol   = $etiqueta_rol[$rolId] ?? 'Sin rol';
-                        $claseEst = $clase_estado[$estado] ?? '';
-                        $etqEst   = $etiqueta_estado[$estado] ?? $estado;
-                    ?>
-                    <tr data-nombre="<?= strtolower($username) ?>"
-                        data-estado="<?= $estado ?>"
-                        data-rol="<?= $rolId ?>">
 
-                        <td>
-                            <div class="celda-usuario">
-                                <div class="avatar-usuario" style="background: <?= $colorAv ?>">
-                                    <?= $avatar ?>
-                                </div>
-                                <div>
-                                    <div class="nombre-usuario"><?= htmlspecialchars($username) ?></div>
-                                </div>
-                            </div>
-                        </td>
 
-                        <td>
-                            <span class="badge-rol <?= $claseRol ?>">
-                                <?= $etqRol ?>
-                            </span>
-                        </td>
 
-                        <td>
-                            <span class="badge-estado <?= $claseEst ?>">
-                                <?= $etqEst ?>
-                            </span>
-                        </td>
+<tbody id="cuerpoTabla">
+<?php foreach ($usuarios as $usuario): ?>
+    <?php
+        // Acceso como objeto (Eloquent/stdClass)
+        $idUsuario = $usuario->id;
+        $rolId    = $usuario->id_rol;
+        $estado   = $usuario->estado;
+        $username = $usuario->username;
 
-                        <td>
-                            <div class="celda-acciones" style="justify-content: center;">
-                                <button class="boton-icono" title="Editar usuario"
-                                        onclick="abrirModalEditar(
-                                            <?= $usuario['id'] ?>,
-                                            '<?= addslashes($username) ?>',
-                                            '<?= $rolId ?>',
-                                            '<?= $estado ?>'
-                                        )">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                <button class="boton-icono peligro" title="Eliminar usuario"
-                                        onclick="abrirModalEliminar(<?= $usuario['id'] ?>, '<?= addslashes($username) ?>')">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
+        $avatar   = strtoupper(substr($username, 0, 2));
+        $colorAv  = $color_avatar[$rolId] ?? '#868e96';
+        $claseRol = $clase_rol[$rolId]    ?? 'rol-lector';
+        $etqRol   = $etiqueta_rol[$rolId] ?? 'Sin rol';
+        $claseEst = $clase_estado[$estado] ?? '';
+        $etqEst   = $etiqueta_estado[$estado] ?? $estado;
+    ?>
+    <tr data-nombre="<?= strtolower($username) ?>"
+        data-estado="<?= $estado ?>"
+        data-rol="<?= $rolId ?>">
+
+        <td>
+            <div class="celda-usuario">
+                <div class="avatar-usuario" style="background: <?= $colorAv ?>">
+                    <?= $avatar ?>
+                </div>
+                <div>
+                    <div class="nombre-usuario"><?= htmlspecialchars($username) ?></div>
+                </div>
+            </div>
+        </td>
+
+        <td>
+            <span class="badge-rol <?= $claseRol ?>">
+                <?= $etqRol ?>
+            </span>
+        </td>
+
+        <td>
+            <span class="badge-estado <?= $claseEst ?>">
+                <?= $etqEst ?>
+            </span>
+        </td>
+
+        <td>
+            <div class="celda-acciones" style="justify-content: center;">
+                <button class="boton-icono" title="Editar"
+                        onclick="abrirModalEditar(<?= $idUsuario ?>, '<?= addslashes($username) ?>', '<?= $rolId ?>', '<?= $estado ?>')">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="boton-icono peligro" title="Eliminar"
+                        onclick="abrirModalEliminar(<?= $idUsuario ?>, '<?= addslashes($username) ?>')">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </td>
+    </tr>
+<?php endforeach; ?>
+</tbody>
+
+
             </table>
         </div>
 

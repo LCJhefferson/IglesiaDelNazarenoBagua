@@ -1,15 +1,29 @@
 <?php
-// Forzamos la carga del archivo para evitar errores de Autoload
-require_once __DIR__ . '/../../../dao/inicioDAO.php';
+/**
+ * ARCHIVO: aplicacion/vistas/admin/contenidos/inicioAdmin.php
+ */
 
-use aplicacion\dao\InicioDAO;
+// Usamos el Manager de Eloquent para las consultas rápidas
+use Illuminate\Database\Capsule\Manager as DB;
 
-$inicioDAO = new InicioDAO();
-$stats = $inicioDAO->obtenerEstadisticas();
-$visitas = $inicioDAO->obtenerVisitasRecientes();
+// 1. Obtener Estadísticas con Eloquent (Consultas limpias)
+$stats = [
+    'miembros' => DB::table('miembros')->count(),
+    'grupos'   => DB::table('discipulado_grupos')->where('estado_id', '1')->count(),
+    'visitas'  => DB::table('visitas')->where('estado_id', 1)->count(),
+    'recursos' => DB::table('recursos')->count()
+];
 
-// Ajuste del nombre: intenta primero con 'username' (según tu base de datos)
-$nombreUsuario = $_SESSION['username'] ?? $_SESSION['usuario'] ?? 'Administrador';
+// 2. Obtener Próximas Visitas (Join con miembros)
+$visitas = DB::table('visitas as v')
+    ->join('miembros as m', 'v.miembro_id', '=', 'm.id')
+    ->select('v.fecha_visita', 'v.motivo', 'm.nombres', 'm.apellidos')
+    ->where('v.estado_id', 1)
+    ->orderBy('v.fecha_visita', 'asc')
+    ->limit(5)
+    ->get();
+
+$nombreUsuario = $_SESSION['usuario'] ?? 'Administrador';
 ?>
 
 <div class="welcome-banner">
@@ -67,13 +81,13 @@ $nombreUsuario = $_SESSION['username'] ?? $_SESSION['usuario'] ?? 'Administrador
             </tr>
         </thead>
         <tbody>
-            <?php if (empty($visitas)): ?>
+            <?php if ($visitas->isEmpty()): ?>
                 <tr><td colspan="3">No hay visitas pendientes en la base de datos.</td></tr>
             <?php else: foreach ($visitas as $v): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($v['nombres'] . " " . $v['apellidos']); ?></td>
-                    <td><?php echo date('d/m/Y', strtotime($v['fecha_visita'])); ?></td>
-                    <td><?php echo htmlspecialchars($v['motivo']); ?></td>
+                    <td><?php echo htmlspecialchars($v->nombres . " " . $v->apellidos); ?></td>
+                    <td><?php echo date('d/m/Y', strtotime($v->fecha_visita)); ?></td>
+                    <td><?php echo htmlspecialchars($v->motivo); ?></td>
                 </tr>
             <?php endforeach; endif; ?>
         </tbody>

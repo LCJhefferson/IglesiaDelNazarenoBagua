@@ -202,3 +202,21 @@ function confirmarUbicacion() {
 function cerrarModalMapa() {
     document.getElementById('modalMapa').style.display = 'none';
 }
+
+let urlConfirmacion = "";
+
+function showConfirm(url) {
+    urlConfirmacion = url;
+    const modal = document.getElementById("customConfirm");
+    modal.style.display = "flex"; // Cambiado de 'block' a 'flex' para el centrado
+    
+    document.getElementById("btnConfirmAction").onclick = function() {
+        window.location.href = urlConfirmacion;
+    };
+}
+
+function closeConfirm() {
+    const modal = document.getElementById("customConfirm");
+    modal.style.display = "none";
+    modal.classList.remove("active");
+}

@@ -39,7 +39,7 @@ class RecursoThumbService {
             }
         }
 
-        Recurso::update(['ruta_thumb' => $thumb ?? ''], ['id' => $id]);
+      Recurso::where('id', $id)->update(['ruta_thumb' => $thumb ?? '']);
     }
 
     private static function thumbYoutube(string $url): ?string {

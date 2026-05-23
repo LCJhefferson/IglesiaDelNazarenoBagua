@@ -56,15 +56,19 @@ function editarGrupo(datos) {
     document.getElementById('nivel_grupo').value = datos.nivel;
     document.getElementById('estado_id').value = datos.estado_id;
 
-    // Seleccionar al discipulador en el select
+    // --- CORRECCIÓN AQUÍ ---
     const selectD = document.getElementById('discipulador_id');
     if (selectD) {
-        selectD.value = datos.discipulador_id;
+        // Obtenemos el ID de forma a prueba de fallos, buscando en las propiedades posibles
+        const idLider = datos.discipulador_id || datos.lider_id || (datos.discipulador ? datos.discipulador.id : '');
+        selectD.value = idLider;
+        
         // Actualizar Select2 si existe
-        if (typeof $ !== 'undefined' && $(selectD).data('select2')) {
+        if (typeof $ !== 'undefined' && $(selectD).hasClass('select2-hidden-accessible')) {
             $(selectD).trigger('change');
         }
     }
+    // -----------------------
 
     // Cambiamos el atributo 'name' para que el controlador PHP detecte 'editar_grupo'
     const btnGuardar = document.getElementById('btnGuardarAction');

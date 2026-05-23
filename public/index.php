@@ -1,127 +1,120 @@
 <?php
-// 1. Errores activados al máximo para ver qué falla
+/**
+ * ARCHIVO: public/index.php
+ * Función: Punto de entrada único (Front Controller).
+ */
+
+// 1. Configuración de errores (Solo para desarrollo)
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
 ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
-// 2. URL para el navegador
-define('URL', '/IglesiaDelNazarenoBagua/');
+// 2. Carga de dependencias y configuración
+require_once __DIR__ . '/../aplicacion/config/config.php';
 
-// 3. RUTA DEL SERVIDOR
-$raizProyecto = realpath(__DIR__ . '/../../'); 
-if (strpos($raizProyecto, 'IglesiaDelNazarenoBagua') === false) {
-    $raizProyecto .= DIRECTORY_SEPARATOR . 'IglesiaDelNazarenoBagua';
-}
-
-// 4. Cargar Autoload
-$autoloadPath = $raizProyecto . '/vendor/autoload.php';
-
-if (file_exists($autoloadPath)) {
-    require_once $autoloadPath;
+$autoloadComposer = __DIR__ . '/../vendor/autoload.php';
+if (file_exists($autoloadComposer)) {
+    require_once $autoloadComposer;
 } else {
-    die("Error Crítico: No se encontró el Autoload en: " . $autoloadPath);
+    die("Error Crítico: Ejecuta 'composer install' para continuar.");
 }
 
+// 3. Autoload propio y Base de Datos (Eloquent)
+require_once __DIR__ . '/../aplicacion/core/Autoload.php';
+require_once __DIR__ . '/../aplicacion/config/database.php';
 
-$_uriActual = strtok($_SERVER['REQUEST_URI'], '?');
-if (str_starts_with($_uriActual, '/IglesiaDelNazarenoBagua/api/')) {
-    $router = new \aplicacion\core\Router();
-    $router->post('/api/login',            [\aplicacion\controladores\api\AuthApiController::class,   'login']);
-    $router->post('/api/logout',           [\aplicacion\controladores\api\AuthApiController::class,   'logout']);
-    $router->get('/api/recursos',          [\aplicacion\controladores\api\RecursoApiController::class, 'index']);
-    $router->get('/api/recursos/stats',    [\aplicacion\controladores\api\RecursoApiController::class, 'stats']);
-    $router->get('/api/recursos/{id}',     [\aplicacion\controladores\api\RecursoApiController::class, 'show']);
-    $router->post('/api/recursos',         [\aplicacion\controladores\api\RecursoApiController::class, 'store']);
-    $router->put('/api/recursos/{id}',     [\aplicacion\controladores\api\RecursoApiController::class, 'update']);
-    $router->delete('/api/recursos/{id}',  [\aplicacion\controladores\api\RecursoApiController::class, 'destroy']);
-    $router->dispatch();
+// Importamos las clases necesarias para que el código sea más legible
+use aplicacion\core\Middleware;
+use aplicacion\controladores\AuthController;
+use aplicacion\controladores\VisitaController;
+
+// 4. Determinar la vista (Ruta)
+$vista = $_GET['vista'] ?? 'dashboard'; 
+
+// --- CORRECCIÓN CRÍTICA DE RUTEO ---
+// Si el .htaccess capturó "public/dashboard" o "public/", lo limpiamos:
+if (strpos($vista, 'public/') === 0) {
+    $vista = substr($vista, 7); // Le quita los 7 caracteres de "public/"
 }
+// Si al limpiar quedó vacío, forzamos a que abra el dashboard
+if (empty($vista) || $vista === 'index.php') {
+    $vista = 'dashboard';
+}
+// -----------------------------------
 
-// 🔐 BYPASS TEMPORAL PARA PRUEBAS EN POSTMAN
+$raizProyecto = __DIR__ . '/..';
+/**
+ * 5. ACCIONES DE SISTEMA (Peticiones rápidas o Logout)
+ * Se ejecutan antes de cargar cualquier HTML.
+ */
 
-// if (session_status() === PHP_SESSION_NONE) {
-//     session_start();
-// }
-
-// $_SESSION['usuario']    = 'luis';
-// $_SESSION['rol_id']     = 1;
-// $_SESSION['rol_nombre'] = 'Admin';
-
-
-
-
-
-
-// 5. Captura de Vista
-$vista = $_GET['vista'] ?? 'inicio';
-$vista = str_replace('public/', '', $vista);
-$vista = str_replace('.php', '', $vista);
-
-//Logout
+// Logout: No requiere cargar interfaces
 if ($vista === 'logout') {
-    (new \aplicacion\controladores\AuthController())->logout();
+    (new AuthController())->logout();
+    exit;
 }
 
-//EXCEPCIONES INTERNAS 
+/**
+ * 6. ENDPOINTS DE API / AJAX
+ * Si la petición es para el mapa o guardar datos vía AJAX, 
+ * respondemos y cortamos la ejecución (exit).
+ */
+
+// Datos JSON para el Mapa
 if ($vista === 'visitasMapJSON') {
-    $controller = new \aplicacion\controladores\VisitaController();
-    $controller->obtenerDatosMapaJSON();
+    (new VisitaController())->obtenerDatosMapaJSON();
     exit; 
 }
 
-// B. Procesar Guardar Registro de Visita
-if ($vista === 'admin/guardarVisita') {
-    \aplicacion\core\Middleware::csrfVerify();
-    $controller = new \aplicacion\controladores\VisitaController();
-    $controller->guardarVisita();
-    header('Content-Type: application/json');
-    echo json_encode(['ok' => true]);
+// Procesamiento de Visitas (Guardar / Eliminar)
+$accionesVisitas = [
+    'admin/guardarVisita'        => 'guardarVisita',
+    'admin/guardarAjustesVisita' => 'guardarAjustesVisita',
+    'admin/eliminarVisita'       => 'eliminarVisita'
+];
+
+if (isset($accionesVisitas[$vista])) {
+    // Verificamos seguridad antes de procesar
+    Middleware::csrfVerify();
+    
+    $metodo = $accionesVisitas[$vista];
+    (new VisitaController())->$metodo();
+    
+    // Asumimos que el controlador ya responde con header JSON y exit
     exit;
 }
 
-// C. Procesar Ajustes de Rangos 
-if ($vista === 'admin/guardarAjustesVisita') {
-    \aplicacion\core\Middleware::csrfVerify();
-    $controller = new \aplicacion\controladores\VisitaController();
-    $controller->guardarAjustesVisita();
-    header('Content-Type: application/json');
-    echo json_encode(['ok' => true]);
-    exit;
-}
+/**
+ * 7. ENRUTADOR DE VISTAS (Renderizado)
+ * Decide qué archivo físico cargar.
+ */
 
-// D. Procesar Eliminación (Suprimir) de Visita 
-if ($vista === 'admin/eliminarVisita') {
-    \aplicacion\core\Middleware::csrfVerify();
-    $controller = new \aplicacion\controladores\VisitaController();
-    $controller->eliminarVisita();
-    header('Content-Type: application/json');
-    echo json_encode(['ok' => true]);
-    exit;
-}
-
-// CARGA DE VISTAS FÍSICAS
 if ($vista === 'procesar_login') {
     $archivoVista = $raizProyecto . '/procesos/auth/procesar_login.php';
 } 
+// Si la ruta empieza con 'admin/' o es el dashboard
 else if (strpos($vista, 'admin/') === 0 || $vista === 'dashboard') {
-    if ($vista === 'dashboard' || $vista === 'admin/dashboard') {
-        $archivoVista = $raizProyecto . '/aplicacion/vistas/admin/dashboard.php';
-    } else {
-        $rutaLimpia = str_replace('admin/', '', $vista);
-        $archivoVista = $raizProyecto . '/aplicacion/vistas/admin/' . $rutaLimpia . '.php';
-    }
+    $archivoVista = $raizProyecto . '/aplicacion/vistas/admin/dashboard.php';
 } 
+// Vistas públicas (login, registro, etc)
 else {
     $archivoVista = $raizProyecto . '/aplicacion/vistas/web/' . $vista . '.php';
 }
 
+/**
+ * 8. EJECUCIÓN FINAL
+ */
 if (file_exists($archivoVista)) {
     include $archivoVista;
 } else {
-    echo "<div style='background:#fee2e2; color:#b91c1c; padding:20px; border:2px solid #ef4444; font-family:sans-serif;'>";
-    echo "<h3>[Error de Ruteo] El archivo solicitado no existe</h3>";
-    echo "<b>Vista buscada:</b> " . htmlspecialchars($vista) . "<br>";
-    echo "<b>Ruta física:</b> " . htmlspecialchars($archivoVista) . "<br>";
-    echo "</div>";
-    exit;
+    // Error 404 Personalizado
+    http_response_code(404);
+    echo "
+    <div style='max-width:600px; margin:50px auto; font-family:sans-serif; border:1px solid #ccc; padding:20px; border-radius:10px;'>
+        <h2 style='color:#dc2626;'>Error de Enrutamiento (404)</h2>
+        <p>Lo sentimos, la sección <b>" . htmlspecialchars($vista) . "</b> no está disponible.</p>
+        <hr>
+        <small style='color:gray;'>Ruta buscada: $archivoVista</small><br>
+        <a href='dashboard' style='display:inline-block; margin-top:10px;'>Volver al Panel</a>
+    </div>";
 }
+

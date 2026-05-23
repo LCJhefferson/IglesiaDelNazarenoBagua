@@ -1,12 +1,19 @@
 <?php
 namespace aplicacion\modelos;
 
-class Rol {
-    public $id;
-    public $nombre;
+use Illuminate\Database\Eloquent\Model;
 
-    public function __construct($data = []) {
-        $this->id = $data['id'] ?? null;
-        $this->nombre = $data['nombre'] ?? null;
+class Rol extends Model {
+    protected $table = 'roles';
+    protected $primaryKey = 'id';
+    public $timestamps = false;
+
+    protected $fillable = ['nombre'];
+
+    /**
+     * RELACIÓN: Un rol puede pertenecer a muchos usuarios
+     */
+    public function usuarios() {
+        return $this->hasMany(UserLogin::class, 'rol_id');
     }
 }

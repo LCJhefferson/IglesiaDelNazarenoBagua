@@ -14,21 +14,18 @@ class MiembroController {
     public function manejarPeticion() {
         // 1. Acción: Registrar
         if (isset($_POST['registrar'])) {
-            $miembro = new Miembro($_POST);
-            $datos = $miembro->toArray();
-            
-            // IMPORTANTE: Quitamos el ID para el INSERT (evita error en la DB)
-            unset($datos['id']); 
-            
-            $this->dao->registrar($datos, $_POST['cargos'] ?? []);
+            $cargos = $_POST['cargos'] ?? [];
+            // Limpiamos $_POST de campos que no van a la tabla 'miembros'
+            unset($_POST['registrar'], $_POST['cargos'], $_POST['id']); 
+            $this->dao->registrar($_POST, $cargos);
             $this->redireccionar();
         }
 
         // 2. Acción: Editar
         if (isset($_POST['editar'])) {
-            $miembro = new Miembro($_POST);
-            // Aquí SI enviamos el ID porque el UPDATE lo necesita en el WHERE
-            $this->dao->actualizarConCargos($miembro->toArray(), $_POST['cargos'] ?? []);
+            $cargos = $_POST['cargos'] ?? [];
+            unset($_POST['editar'], $_POST['cargos']);
+            $this->dao->actualizarConCargos($_POST, $cargos);
             $this->redireccionar();
         }
 

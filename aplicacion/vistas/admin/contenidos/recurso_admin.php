@@ -10,8 +10,16 @@ if (isset($_GET['vaciar_papelera']))     $controller->vaciarPapelera();
 if (isset($_GET['descargar']))           $controller->descargar((int)$_GET['descargar']);
 if (isset($_POST['guardar']))            $controller->guardar();
 
-$archivos = $controller->listar();
-$papelera = $controller->listarPapelera();
+// Obtenemos los datos y los convertimos a un arreglo nativo de PHP usando toArray()
+$coleccion_archivos = $controller->listar();
+$archivos = is_object($coleccion_archivos) && method_exists($coleccion_archivos, 'toArray') 
+    ? $coleccion_archivos->toArray() 
+    : $coleccion_archivos;
+
+$coleccion_papelera = $controller->listarPapelera();
+$papelera = is_object($coleccion_papelera) && method_exists($coleccion_papelera, 'toArray') 
+    ? $coleccion_papelera->toArray() 
+    : $coleccion_papelera;
 
 $pendientes = array_filter($archivos, fn($a) => $a['ruta_thumb'] === null);
 if (!empty($pendientes)) {

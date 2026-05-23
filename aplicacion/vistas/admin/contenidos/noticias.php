@@ -44,9 +44,7 @@ $fecha_actual = date("Y-m-d\TH:i");
         <span class="badge-total-real" style="display:none"><?= $total ?></span>
     </div>
     <div class="top-bar-right">
-        <button class="btn-tema" id="btn-tema" onclick="toggleTema()" title="Cambiar tema">
-            <i class="fa-solid fa-moon" id="icono-tema"></i>
-        </button>
+       
         <button class="btn-nuevo" onclick="abrirModal()">
             <i class="fa-solid fa-plus"></i> Nueva Noticia
         </button>
@@ -259,6 +257,10 @@ $fecha_actual = date("Y-m-d\TH:i");
                 </button>
             </div>
         </form>
+
+
+
+
     </div>
 </div>
 

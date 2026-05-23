@@ -1,90 +1,87 @@
 <?php
 namespace aplicacion\modelos;
 
-use aplicacion\core\Model;
-use aplicacion\config\Conexion;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Capsule\Manager as DB;
 
-/**
- * Modelo Recurso — tabla "recursos" (activos).
- * Implementa Active Record vía la clase abstracta Model.
- * La eliminación usa el patrón Archive Table: mueve a recursos_papelera
- * en lugar de soft-delete con flag.
- */
 class Recurso extends Model {
 
-    protected static string $tabla = 'recursos';
+    // Configuración básica
+    protected $table = 'recursos';
+    protected $primaryKey = 'id';
+    public $timestamps = false; // Cambiar a true si tu tabla tiene created_at y updated_at
 
+    protected $fillable = [
+        'titulo', 
+        'descripcion', 
+        'categoria', 
+        'tipo', 
+        'ruta_archivo', 
+        'enlace_youtube', 
+        'ruta_thumb', 
+        'descargas'
+    ];
+
+    // Constantes de validación (se mantienen igual)
     public const TIPOS_VALIDOS      = ['pdf', 'img', 'vid', 'doc', 'yt'];
     public const CATEGORIAS_VALIDAS = ['predica', 'estudio', 'musica', 'devocional', 'evento'];
 
-    /** Lista todos los recursos activos ordenados por fecha descendente. */
-    public static function listar(): array {
-        return static::qb()
-                     ->orderBy('fecha_creacion', 'DESC')
-                     ->get();
+    /** Lista todos los recursos ordenados por fecha descendente */
+    public static function listar() {
+        return self::orderBy('fecha_creacion', 'DESC')->get();
     }
 
-    /** Recursos por categoría con paginación. */
-    public static function porCategoria(string $categoria, int $pagina = 1): array {
-        return static::where('categoria', '=', $categoria)
-                     ->orderBy('fecha_creacion', 'DESC')
-                     ->paginate($pagina, 12);
+    /** Recursos por categoría con paginación */
+    public static function porCategoria(string $categoria, int $pagina = 1) {
+        return self::where('categoria', $categoria)
+                   ->orderBy('fecha_creacion', 'DESC')
+                   ->paginate(12, ['*'], 'page', $pagina);
     }
 
-    /** Cuenta recursos por tipo (útil para dashboards). */
+    /** Cuenta recursos por tipo */
     public static function contarPorTipo(string $tipo): int {
-        return static::where('tipo', '=', $tipo)->count();
+        return self::where('tipo', $tipo)->count();
     }
 
-    /** Total de descargas acumuladas en todo el sistema. */
+    /** Total de descargas acumuladas */
     public static function totalDescargas(): int {
-        return (int) static::qb()->sum('descargas');
+        return (int) self::sum('descargas');
     }
 
-    /** Incrementa el contador de descargas de un recurso. */
+    /** Incrementa el contador de descargas */
     public static function incrementarDescargas(int $id): bool {
-        $recurso = static::find($id);
+        $recurso = self::find($id);
         if (!$recurso) return false;
-        return static::update(
-            ['descargas' => ($recurso['descargas'] ?? 0) + 1],
-            ['id' => $id]
-        );
+        
+        $recurso->descargas = $recurso->descargas + 1;
+        return $recurso->save();
     }
 
     /**
-     * Mueve un recurso a papelera dentro de una transacción.
-     * Patrón Archive Table: copia a recursos_papelera y elimina de recursos.
+     * Mueve un recurso a papelera usando transacciones de Eloquent.
+     * Patrón Archive Table.
      */
     public static function moverAPapelera(int $id, ?int $usuarioId = null): bool {
-        $recurso = static::find($id);
-        if (!$recurso) return false;
+        return DB::transaction(function () use ($id, $usuarioId) {
+            $recurso = self::find($id);
+            if (!$recurso) return false;
 
-        $pdo = Conexion::conectar();
-
-        try {
-            $pdo->beginTransaction();
-
-            RecursoPapelera::create([
-                'recurso_id'        => $recurso['id'],
-                'titulo'            => $recurso['titulo'],
-                'descripcion'       => $recurso['descripcion'],
-                'categoria'         => $recurso['categoria'],
-                'tipo'              => $recurso['tipo'],
-                'ruta_archivo'      => $recurso['ruta_archivo'],
-                'enlace_youtube'    => $recurso['enlace_youtube'],
-                'ruta_thumb'        => $recurso['ruta_thumb'] ?? null,
+            // Insertamos en la tabla de papelera usando Query Builder
+            DB::table('recursos_papelera')->insert([
+                'recurso_id'        => $recurso->id,
+                'titulo'            => $recurso->titulo,
+                'descripcion'       => $recurso->descripcion,
+                'categoria'         => $recurso->categoria,
+                'tipo'              => $recurso->tipo,
+                'ruta_archivo'      => $recurso->ruta_archivo,
+                'enlace_youtube'    => $recurso->enlace_youtube,
+                'ruta_thumb'        => $recurso->ruta_thumb,
                 'eliminado_por'     => $usuarioId,
                 'fecha_eliminacion' => date('Y-m-d H:i:s'),
             ]);
 
-            static::delete(['id' => $id]);
-
-            $pdo->commit();
-            return true;
-        } catch (\Throwable $e) {
-            if ($pdo->inTransaction()) $pdo->rollBack();
-            error_log('Error moviendo recurso a papelera: ' . $e->getMessage());
-            return false;
-        }
+            // Eliminamos de la tabla principal
+            return $recurso->delete();
+        });
     }
 }

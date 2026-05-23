@@ -6,7 +6,6 @@ if (file_exists(__DIR__ . '/../../../../vendor/autoload.php')) {
 }
 
 use aplicacion\controladores\TransmisionController;
-use aplicacion\config\Conexion;
 
 $auth = new TransmisionController();
 $auth->registrar();
@@ -15,8 +14,9 @@ $transmisiones = $auth->listarTransmisiones();
 $preview = null;
 $hayVivo = false;
 
+// Buscamos si hay alguna transmisión en vivo (estado_id == 1)
 foreach($transmisiones as $t) {
-    if($t['estado_id'] == 1) { 
+    if($t->estado_id == 1) { 
         $preview = $t; 
         $hayVivo = true;
         break; 
@@ -51,43 +51,43 @@ foreach($transmisiones as $t) {
     <div class="grid">
         <div class="card">
             <div class="video-container">
-                <iframe id="monitorVideo" class="video" src="<?= $preview['link_video'] ?? '' ?>" allowfullscreen allow="autoplay" style="<?= empty($preview['link_video']) ? 'display:none;' : '' ?>"></iframe>
-                <div id="monitorPlaceholder" style="<?= !empty($preview['link_video']) ? 'display:none;' : 'height:400px; background:#2d3748; display:flex; align-items:center; justify-content:center; color:white; border-radius:10px;' ?>">
+                <iframe id="monitorVideo" class="video" src="<?= $preview ? htmlspecialchars($preview->link_video) : '' ?>" allowfullscreen allow="autoplay" style="<?= !$preview || empty($preview->link_video) ? 'display:none;' : '' ?>"></iframe>
+                <div id="monitorPlaceholder" style="<?= $preview && !empty($preview->link_video) ? 'display:none;' : 'height:400px; background:#2d3748; display:flex; align-items:center; justify-content:center; color:white; border-radius:10px;' ?>">
                     <p><i class="fa-solid fa-video-slash fa-2x"></i><br>Sin vista previa</p>
                 </div>
             </div>
             <div class="info">
-                <h3 id="monitorTitulo"><?= htmlspecialchars($preview['titulo'] ?? 'Sin Transmisión Activa') ?></h3>
-                <p id="monitorDesc"><?= htmlspecialchars($preview['descripcion'] ?? 'Cargue una nueva transmisión o edite la actual.') ?></p>
+                <h3 id="monitorTitulo"><?= $preview ? htmlspecialchars($preview->titulo) : 'Sin Transmisión Activa' ?></h3>
+                <p id="monitorDesc"><?= $preview ? htmlspecialchars($preview->descripcion) : 'Cargue una nueva transmisión o edite la actual.' ?></p>
             </div>
         </div>
 
         <div class="card">
             <h3><i class="fa-solid fa-gear"></i> <span id="formActionTitle"><?= $hayVivo ? 'Control de Vivo' : 'Nueva Transmisión' ?></span></h3>
-            <form id="formTransmision" method="POST">
-                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
-                <input type="hidden" name="id_transmision" id="formId" value="<?= $preview['id'] ?? '' ?>">
+            <form id="formTransmision" method="POST" action="index.php?vista=dashboard&seccion=transmision">
+                <input type="hidden" name="csrf_token" value="<?= isset($csrfToken) ? htmlspecialchars($csrfToken, ENT_QUOTES) : '' ?>">
+                <input type="hidden" name="id_transmision" id="formId" value="<?= $preview ? $preview->id : '' ?>">
 
                 <div class="form-group">
                     <label>Título</label>
-                    <input type="text" name="titulo" id="formTitulo" value="<?= htmlspecialchars($preview['titulo'] ?? '') ?>" required>
+                    <input type="text" name="titulo" id="formTitulo" value="<?= $preview ? htmlspecialchars($preview->titulo) : '' ?>" required>
                 </div>
 
                 <div class="form-group">
                     <label>Descripción</label>
-                    <textarea name="descripcion" id="formDesc" rows="3"><?= htmlspecialchars($preview['descripcion'] ?? '') ?></textarea>
+                    <textarea name="descripcion" id="formDesc" rows="3"><?= $preview ? htmlspecialchars($preview->descripcion) : '' ?></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>URL de YouTube</label>
-                    <input type="text" name="link_video" id="formLink" value="<?= htmlspecialchars($preview['link_video'] ?? '') ?>" required>
+                    <input type="text" name="link_video" id="formLink" value="<?= $preview ? htmlspecialchars($preview->link_video) : '' ?>" required>
                 </div>
 
                 <div class="form-group">
                     <label>Estado</label>
                     <select name="estado_id" id="formEstado">
-                        <option value="1" <?= (isset($preview['estado_id']) && $preview['estado_id'] == 1) ? 'selected' : '' ?>>En Vivo</option>
-                        <option value="2" <?= (isset($preview['estado_id']) && $preview['estado_id'] == 2) ? 'selected' : '' ?>>Finalizado</option>
+                        <option value="1" <?= ($preview && $preview->estado_id == 1) ? 'selected' : '' ?>>En Vivo</option>
+                        <option value="2" <?= ($preview && $preview->estado_id == 2) ? 'selected' : '' ?>>Finalizado</option>
                     </select>
                 </div>
 
@@ -104,8 +104,8 @@ foreach($transmisiones as $t) {
             <h3>¿Confirmar acción?</h3>
             <p id="textoModal" style="margin: 15px 0; color: #4b5563;"></p>
             <div style="display:flex; gap:10px; justify-content:center;">
-                <button id="btnConfirmarModal" class="btn btn-primary">Sí, confirmar</button>
-                <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                <button type="button" id="btnConfirmarModal" class="btn btn-primary">Sí, confirmar</button>
+                <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
             </div>
         </div>
     </div>
@@ -124,26 +124,26 @@ foreach($transmisiones as $t) {
             <tbody id="tablaTransmisiones">
                 <?php foreach($transmisiones as $t): ?>
                 <tr>
-                    <td><strong><?= htmlspecialchars($t['titulo']) ?></strong></td>
+                    <td><strong><?= htmlspecialchars($t->titulo) ?></strong></td>
                     <td>
                         <?php
-                        $claseEstado = ($t['estado_id'] == 1) ? 'est-envivo' : 'est-finalizado';
-                        $nombreEstado = ($t['estado_id'] == 1) ? 'En Vivo' : 'Finalizado';
+                        $claseEstado = ($t->estado_id == 1) ? 'est-envivo' : 'est-finalizado';
+                        $nombreEstado = ($t->estado_id == 1) ? 'En Vivo' : 'Finalizado';
                         ?>
                         <span class="badge-estado <?= $claseEstado ?>">
                             <i class="dot-estado"></i> <?= $nombreEstado ?>
                         </span>
                     </td>
-                    <td><?= date('d/m/Y', strtotime($t['fecha'])) ?></td>
+                    <td><?= date('d/m/Y', strtotime($t->fecha)) ?></td>
                     <td style="text-align:center;">
                         <div style="display: flex; justify-content: center; gap: 10px;">
-                            <?php if($t['estado_id'] == 2): // Solo lápiz para Finalizadas ?>
-                                <button title="Editar" class="btn-edit" onclick='cargarParaEditar(<?= json_encode($t) ?>)'>
+                            <?php if($t->estado_id == 2): // Solo lápiz para Finalizadas ?>
+                                <button title="Editar" class="btn-edit" onclick='cargarParaEditar(<?= json_encode($t->toArray()) ?>)'>
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
                             <?php else: // Para la que está en vivo, botón de finalizar rápido ?>
                                 <button title="Finalizar" class="btn-finalizar" 
-                                        onclick="abrirModalFinalizar('<?= $t['id'] ?>', '<?= htmlspecialchars($t['titulo']) ?>')" 
+                                        onclick="abrirModalFinalizar('<?= $t->id ?>', '<?= htmlspecialchars($t->titulo) ?>')" 
                                         style="color: #ef4444; background: #fee2e2; border: none; padding: 5px 8px; border-radius: 5px; cursor: pointer;">
                                     <i class="fa-solid fa-circle-stop"></i>
                                 </button>

@@ -787,7 +787,15 @@ input:focus, textarea:focus {
     gap: 8px;
     min-width: 150px;
 }
-
+/* ─────────────────────────────────────────
+   TAMAÑO DEL EDITOR DE TEXTO (QUILL)
+───────────────────────────────────────── */
+#quill-editor {
+    min-height: 320px; 
+    max-height: 610px; 
+    overflow-y: auto;  
+    font-size: 15px;   
+}
 /* =========================================
    RESPONSIVE
    ========================================= */
