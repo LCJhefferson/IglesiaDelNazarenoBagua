@@ -210,7 +210,10 @@ $fechaHoy = date('Y-m-d');
                 <div class="form-group" style="grid-column: span 2;">
                     <label>Dirección:</label>
                     <div class="campo-mapa">
-                        <input type="text" name="direccion" placeholder="Calle, Jr o Av.">
+                        <input type="text"
+                        name="direccion"
+                        id="direccion"
+                        placeholder="Calle, Jr o Av.">
                         <button type="button" class="btn-mapa" onclick="abrirMapa()">
                             <i class="fa-solid fa-map-location-dot"></i>
                         </button>
@@ -236,84 +239,291 @@ $fechaHoy = date('Y-m-d');
 
 
 <!-- Modal para selección de ubicación en el mapa usando leaflet-->
-
-
+<!-- LEAFLET -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
-<style>
-    .modal-mapa { 
-        display: none; 
-        position: fixed; 
-        z-index: 2000;
-        left: 0; 
-        top: 0;
-        width: 100%; 
-        height: 100%;
-        background: rgba(0,0,0,0.7); /* Oscurecemos más el fondo para resaltar el mapa */
-        backdrop-filter: blur(4px); /* Efecto de desenfoque al fondo */
-    }
-
-    .modal-mapa-box { 
-        background: white; 
-        width: 95%; /* Ocupa casi todo el ancho disponible */
-        max-width: 1400px; /* Aumentado a 1400px para una vista panorámica */
-        margin: 2vh auto; /* Margen pequeño arriba y abajo */
-        padding: 20px; 
-        border-radius: 15px; 
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    }
-
-    #mapa-seleccionar { 
-        height: 75vh; /* 75% de la altura de la ventana para que no se corte */
-        width: 100%; 
-        border-radius: 10px; 
-        margin-top: 10px;
-        border: 1px solid #cbd5e1;
-    }
-
-    /* Buscador de Leaflet más robusto */
-    .leaflet-control-geocoder {
-        min-width: 450px !important; /* Más ancho para ver direcciones largas */
-        font-size: 16px;
-        border: 2px solid #4f6ef7 !important;
-        border-radius: 8px !important;
-    }
-
-    /* Ajuste para que los botones no se peguen al borde inferior */
-    .modal-footer-mapa {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-        justify-content: flex-end;
-    }
-    /* Filtro opcional para que el mapa se vea aún más vibrante si usas OSM estándar */
-/* Pero con la capa CartoDB Light_All ya se verá muy limpio por defecto */
-
-.leaflet-container {
-    background: #f1f5f9 !important; /* Fondo del contenedor antes de cargar el mapa */
-}
-
-/* Hacer que el marcador azul de la iglesia destaque */
-.leaflet-marker-icon {
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-}
-</style>
-
+<!-- MODAL MAPA -->
 <div id="modalMapa" class="modal-mapa">
     <div class="modal-mapa-box">
-        <h3><i class="fa-solid fa-map-location-dot"></i> Seleccionar Ubicación</h3>
-        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">Usa el buscador o haz clic en el mapa para marcar la ubicación exacta.</p>
-        
+
+        <h3>
+            <i class="fa-solid fa-map-location-dot"></i>
+            Seleccionar Ubicación
+        </h3>
+
+        <p style="font-size: 0.85rem; color:#64748b; margin-bottom:10px;">
+            Usa el buscador o haz clic en el mapa para seleccionar la dirección.
+        </p>
+
         <div id="mapa-seleccionar"></div>
-        
-        <div style="display:flex; gap:10px; margin-top:20px; justify-content: flex-end;">
-            <button type="button" onclick="cerrarModalMapa()" style="background:#dee2e6; color:#495057; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">Cancelar</button>
-            <button type="button" onclick="confirmarUbicacion()" style="background:#4f6ef7; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">Guardar Ubicación</button>
+
+        <div style="display:flex; gap:10px; margin-top:20px; justify-content:flex-end;">
+
+            <button type="button"
+                    onclick="cerrarModalMapa()"
+                    style="background:#dee2e6; color:#495057; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+
+                Cancelar
+
+            </button>
+
+            <button type="button"
+                    onclick="confirmarUbicacion()"
+                    style="background:#4f6ef7; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+
+                Guardar Ubicación
+
+            </button>
+
         </div>
+
     </div>
 </div>
 
-</div>
+<style>
+
+.modal-mapa{
+    display:none;
+    position:fixed;
+    z-index:2000;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.7);
+    backdrop-filter:blur(4px);
+}
+
+.modal-mapa-box{
+    background:white;
+    width:95%;
+    max-width:1400px;
+    margin:2vh auto;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);
+}
+
+#mapa-seleccionar{
+    height:75vh;
+    width:100%;
+    border-radius:10px;
+    margin-top:10px;
+    border:1px solid #cbd5e1;
+}
+
+.leaflet-control-geocoder{
+    min-width:450px !important;
+    font-size:16px;
+    border:2px solid #4f6ef7 !important;
+    border-radius:8px !important;
+}
+
+.leaflet-container{
+    background:#f1f5f9 !important;
+}
+
+.leaflet-marker-icon{
+    filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+}
+
+</style>
+
+<script>
+
+function abrirModal(){
+    document.getElementById('modal').style.display = 'flex';
+}
+
+function cerrarModal(){
+    document.getElementById('modal').style.display = 'none';
+}
+
+function cerrarModalMapa(){
+    document.getElementById('modalMapa').style.display = 'none';
+}
+
+function confirmarUbicacion(){
+    cerrarModalMapa();
+}
+
+let mapa;
+let marcador;
+
+function abrirMapa(){
+
+    document.getElementById('modalMapa').style.display = 'block';
+
+    setTimeout(() => {
+
+        if(!mapa){
+
+            // BAGUA CHICA
+            const latInicial = -5.6419;
+            const lngInicial = -78.5317;
+
+            mapa = L.map('mapa-seleccionar')
+                .setView([latInicial, lngInicial], 16);
+
+            // MAPA MODERNO
+            L.tileLayer(
+                'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                {
+                    attribution:'&copy; OpenStreetMap & CartoDB'
+                }
+            ).addTo(mapa);
+
+            // MARCADOR
+            marcador = L.marker(
+                [latInicial, lngInicial],
+                {
+                    draggable:true
+                }
+            ).addTo(mapa);
+
+            // VALORES INICIALES
+            document.getElementById('latitud').value = latInicial;
+            document.getElementById('longitud').value = lngInicial;
+
+            obtenerDireccion(latInicial, lngInicial);
+
+            // CLICK EN EL MAPA
+            mapa.on('click', async function(e){
+
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+
+                marcador.setLatLng([lat, lng]);
+
+                document.getElementById('latitud').value =
+                    lat.toFixed(6);
+
+                document.getElementById('longitud').value =
+                    lng.toFixed(6);
+
+                await obtenerDireccion(lat, lng);
+
+            });
+
+            // MOVER MARCADOR
+            marcador.on('dragend', async function(){
+
+                const pos = marcador.getLatLng();
+
+                document.getElementById('latitud').value =
+                    pos.lat.toFixed(6);
+
+                document.getElementById('longitud').value =
+                    pos.lng.toFixed(6);
+
+                await obtenerDireccion(pos.lat, pos.lng);
+
+            });
+
+            // BUSCADOR
+            L.Control.geocoder({
+
+                defaultMarkGeocode:false
+
+            })
+
+            .on('markgeocode', async function(e){
+
+                const center = e.geocode.center;
+
+                mapa.setView(center, 18);
+
+                marcador.setLatLng(center);
+
+                document.getElementById('latitud').value =
+                    center.lat.toFixed(6);
+
+                document.getElementById('longitud').value =
+                    center.lng.toFixed(6);
+
+                document.getElementById('direccion').value =
+                    e.geocode.name;
+
+            })
+
+            .addTo(mapa);
+
+        }
+
+        mapa.invalidateSize();
+
+    }, 300);
+
+}
+
+// OBTENER DIRECCIÓN AUTOMÁTICA
+async function obtenerDireccion(lat, lng){
+
+    try{
+
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+        );
+
+        const data = await response.json();
+
+        let direccion = '';
+
+if(data.address){
+
+    const road =
+        data.address.road ||
+        data.address.pedestrian ||
+        data.address.residential ||
+        '';
+
+    // Detectar tipo de vía
+    let prefijo = '';
+
+    if(road.toLowerCase().includes('avenida') || road.toLowerCase().includes('av')){
+        prefijo = 'Av. ';
+    }
+    else if(road.toLowerCase().includes('jiron') || road.toLowerCase().includes('jr')){
+        prefijo = 'Jr. ';
+    }
+    else if(road.toLowerCase().includes('calle')){
+        prefijo = 'Calle ';
+    }
+
+    direccion = prefijo + road;
+
+    // Si no encuentra calle
+    if(direccion.trim() === ''){
+        direccion =
+            data.address.suburb ||
+            data.address.neighbourhood ||
+            data.display_name ||
+            '';
+    }
+
+}else{
+
+    direccion = data.display_name || '';
+
+}
+
+        // LLENAR INPUT DIRECCIÓN
+        const inputDireccion = document.getElementById('direccion');
+
+        if(inputDireccion){
+            inputDireccion.value = direccion;
+        }
+
+    }catch(error){
+
+        console.error('Error obteniendo dirección:', error);
+
+    }
+
+}
+
+</script>
