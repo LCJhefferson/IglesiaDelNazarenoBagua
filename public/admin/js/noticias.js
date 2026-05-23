@@ -280,7 +280,7 @@ window.verNoticia = function(n) {
     const btnLeer = document.querySelector(".btn-leer");
     if (btnLeer) {
         btnLeer.onclick = function() {
-            window.open(rutaBase + "public/index.php?vista=noticia&id=" + n.id + "&origen=admin", "_blank");
+            window.location.href = rutaBase + "public/index.php?vista=noticia&id=" + n.id + "&origen=admin";
         };
     }
 };
