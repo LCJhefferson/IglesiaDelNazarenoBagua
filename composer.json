@@ -1,6 +1,7 @@
 {
     "require": {
-        "pusher/pusher-php-server": "^7.2"
+        "pusher/pusher-php-server": "^7.2",
+        "illuminate/database": "^12.60"
     },
     "autoload": {
         "psr-4": {
