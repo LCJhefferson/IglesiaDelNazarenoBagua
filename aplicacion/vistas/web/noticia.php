@@ -89,7 +89,7 @@ $relacionadas = $stmtRel->fetchAll(PDO::FETCH_ASSOC);
 
         <!-- CONTENIDO COMPLETO -->
         <div class="noticia-cuerpo">
-            <?= nl2br(htmlspecialchars($noticia['contenido'])) ?>
+            <?= $noticia['contenido'] ?>
         </div>
 
         <!-- VIDEO EMBEBIDO -->
