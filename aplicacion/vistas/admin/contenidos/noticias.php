@@ -131,9 +131,9 @@ $fecha_actual = date("Y-m-d\TH:i");
                         <i class="fa-solid fa-pen"></i> Editar
                         <span class="tooltip">Editar noticia</span>
                     </button>
-                    <button class="btn-accion ocultar" onclick="event.stopPropagation(); location.href='...'">
-                     <i class="fa-solid fa-<?= $n['estado'] == 1 ? 'eye-slash' : 'eye' ?>"></i> <?= $n['estado'] == 1 ? 'Ocultar' : 'Mostrar' ?>
-                     <span class="tooltip"><?= $n['estado'] == 1 ? 'Ocultar noticia en el portal' : 'Mostrar noticia en el portal' ?></span>
+                    <button class="btn-accion <?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>" onclick="event.stopPropagation(); location.href='/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&<?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>=<?= $n['id'] ?>'">
+                        <i class="fa-solid fa-<?= $n['estado'] == 1 ? 'eye-slash' : 'eye' ?>"></i> <?= $n['estado'] == 1 ? 'Ocultar' : 'Mostrar' ?>
+                        <span class="tooltip"><?= $n['estado'] == 1 ? 'Ocultar noticia en el portal' : 'Mostrar noticia en el portal' ?></span>
                     </button>
                     <button class="btn-accion eliminar"
                         onclick="event.stopPropagation(); confirmarEliminar(<?= $n['id'] ?>, '<?= htmlspecialchars($n['titulo'], ENT_QUOTES) ?>')">
