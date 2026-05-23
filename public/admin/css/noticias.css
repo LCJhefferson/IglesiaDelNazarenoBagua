@@ -858,4 +858,5 @@ input:focus, textarea:focus {
     font-style: italic;
     pointer-events: none;
     position: absolute;
+    left: 15px;
 }
