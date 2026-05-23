@@ -852,9 +852,9 @@ input:focus, textarea:focus {
     opacity: 1;
 }
 
-.ql-editor.ql-blank::before {
-    content: 'Escribe el cuerpo de la noticia...';
-    color: #aaa;
+.ql-container .ql-editor.ql-blank::before {
+    content: 'Escribe el cuerpo de la noticia...' !important;
+    color: #aaa !important;
     font-style: italic;
     pointer-events: none;
     position: absolute;
