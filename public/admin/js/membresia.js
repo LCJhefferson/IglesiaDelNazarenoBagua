@@ -134,37 +134,35 @@ let lngTemporal = null;
 function abrirMapa() {
     document.getElementById('modalMapa').style.display = 'block';
 
-    if (!mapaSeleccion) {
-        // Coordenadas exactas aproximadas para Jr. Cajamarca, Bagua
-        const defaultLat = -5.640882315845701; 
-        const defaultLng = -78.52988421066584;
+    // Revisar si ya hay coordenadas en los inputs (por ejemplo al editar)
+    const latGuardada = document.getElementById('latitud').value;
+    const lngGuardada = document.getElementById('longitud').value;
 
-        // Inicializamos con un zoom de 18 para que se vea la calle claramente
-        mapaSeleccion = L.map('mapa-seleccionar').setView([defaultLat, defaultLng], 18);
+    if (!mapaSeleccion) {
+        // Si hay coordenadas guardadas, usamos esas, si no, Bagua
+        const initialLat = latGuardada ? parseFloat(latGuardada) : -5.640882;
+        const initialLng = lngGuardada ? parseFloat(lngGuardada) : -78.529884;
+
+        mapaSeleccion = L.map('mapa-seleccionar').setView([initialLat, initialLng], 18);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
         }).addTo(mapaSeleccion);
 
-        // Agregamos el marcador inicial en la iglesia
-        actualizarMarcador(defaultLat, defaultLng);
+        actualizarMarcador(initialLat, initialLng, false);
 
-        // Configuración del buscador
-        const geocoder = L.Control.geocoder({
-            defaultMarkGeocode: false,
-            placeholder: "Buscar calle o número...",
-            errorMessage: "No encontrado"
-        })
-        .on('markgeocode', function(e) {
-            const center = e.geocode.center;
-            actualizarMarcador(center.lat, center.lng);
-            mapaSeleccion.setView(center, 18);
-        })
-        .addTo(mapaSeleccion);
-
+        // ... resto de tu configuración del geocoder y click ...
         mapaSeleccion.on('click', function(e) {
-            actualizarMarcador(e.latlng.lat, e.latlng.lng);
+            actualizarMarcador(e.latlng.lat, e.latlng.lng, true);
         });
+    } else {
+        // Si el mapa ya existía, pero lo volvemos a abrir
+        if (latGuardada && lngGuardada) {
+            const lat = parseFloat(latGuardada);
+            const lng = parseFloat(lngGuardada);
+            mapaSeleccion.setView([lat, lng], 18);
+            actualizarMarcador(lat, lng, false);
+        }
     }
 
     setTimeout(() => {
@@ -172,7 +170,10 @@ function abrirMapa() {
     }, 300);
 }
 
-function actualizarMarcador(lat, lng) {
+// Variable global para guardar la dirección que encuentra el mapa
+let direccionEncontradaMapa = ""; 
+
+function actualizarMarcador(lat, lng, buscarDireccion = true) {
     latTemporal = lat;
     lngTemporal = lng;
 
@@ -182,17 +183,34 @@ function actualizarMarcador(lat, lng) {
         marcador = L.marker([lat, lng], { draggable: true }).addTo(mapaSeleccion);
         marcador.on('dragend', function(event) {
             const position = marcador.getLatLng();
-            latTemporal = position.lat;
-            lngTemporal = position.lng;
+            actualizarMarcador(position.lat, position.lng, true);
         });
+    }
+
+    // SI el marcador se movió, buscamos el nombre de la calle automáticamente
+    if (buscarDireccion) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.display_name) {
+                    direccionEncontradaMapa = data.display_name;
+                    // Opcional: mostrar un mensajito en el mapa de qué dirección se encontró
+                    marcador.bindPopup("Dirección detectada: " + data.display_name).openPopup();
+                }
+            });
     }
 }
 
 function confirmarUbicacion() {
     if (latTemporal && lngTemporal) {
-        // Asignar valores a los campos del modal principal
         document.getElementById('latitud').value = latTemporal.toFixed(6);
         document.getElementById('longitud').value = lngTemporal.toFixed(6);
+        
+        // Si el mapa encontró una dirección nueva, la ponemos en el input principal
+        if (direccionEncontradaMapa !== "") {
+            document.getElementById('direccion').value = direccionEncontradaMapa;
+        }
+        
         cerrarModalMapa();
     } else {
         alert("Por favor, selecciona un punto en el mapa.");
@@ -219,4 +237,83 @@ function closeConfirm() {
     const modal = document.getElementById("customConfirm");
     modal.style.display = "none";
     modal.classList.remove("active");
+}
+
+// --- NUEVO: SISTEMA DE GEOCODIFICACIÓN (Búsqueda de Direcciones) ---
+let debounceTimeout = null;
+let direccionTemporal = ""; // Para guardar la calle cuando hacen clic en el mapa
+
+document.addEventListener("DOMContentLoaded", function() {
+    inicializarBuscadorDirecciones();
+});
+function inicializarBuscadorDirecciones() {
+    const inputDireccion = document.getElementById('direccion');
+    const listaSugerencias = document.getElementById('lista-sugerencias');
+
+    if(!inputDireccion) return;
+
+    inputDireccion.addEventListener('input', function() {
+        clearTimeout(debounceTimeout);
+        const query = this.value;
+
+        if (query.length < 4) {
+            listaSugerencias.style.display = 'none';
+            return;
+        }
+
+        debounceTimeout = setTimeout(() => {
+            // Buscamos con addressdetails=1 para obtener la calle limpia
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=pe&addressdetails=1&limit=5`)
+                .then(response => response.json())
+                .then(data => {
+                    listaSugerencias.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(lugar => {
+                            const li = document.createElement('li');
+                            li.textContent = lugar.display_name;
+                            li.style.cssText = "padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 0.85em; color: #333;";
+
+                            li.onclick = function() {
+                                // 1. Rescatamos el número que el usuario escribió (buscamos cualquier grupo de números)
+                                const textoEscrito = inputDireccion.value;
+                                const matchNumero = textoEscrito.match(/\d+/g); // Busca todos los números
+                                const ultimoNumero = matchNumero ? matchNumero[matchNumero.length - 1] : "";
+
+                                // 2. Obtenemos el nombre de la calle limpio de la API
+                                // Prioridad: road (calle) > house_number > o el primer segmento antes de la coma
+                                let nombreCalleAPI = lugar.address.road || lugar.address.pedestrian || lugar.display_name.split(',')[0];
+
+                                // 3. Construimos la dirección final: Calle + Numero (si existía)
+                                const direccionFinal = ultimoNumero 
+                                    ? `${nombreCalleAPI} ${ultimoNumero}` 
+                                    : nombreCalleAPI;
+
+                                // 4. Actualizamos el input y los campos ocultos
+                                inputDireccion.value = direccionFinal;
+                                
+                                const lat = parseFloat(lugar.lat);
+                                const lng = parseFloat(lugar.lon);
+                                
+                                document.getElementById('latitud').value = lat.toFixed(6);
+                                document.getElementById('longitud').value = lng.toFixed(6);
+                                
+                                // Sincronizar con el mapa
+                                latTemporal = lat;
+                                lngTemporal = lng;
+                                direccionEncontradaMapa = direccionFinal; // Guardamos para que el mapa no lo borre
+
+                                if(mapaSeleccion) {
+                                    mapaSeleccion.setView([lat, lng], 19);
+                                    actualizarMarcador(lat, lng, false); // false para que no vuelva a buscar la calle
+                                }
+                                
+                                listaSugerencias.style.display = 'none';
+                            };
+                            listaSugerencias.appendChild(li);
+                        });
+                        listaSugerencias.style.display = 'block';
+                    }
+                });
+        }, 600); 
+    });
 }

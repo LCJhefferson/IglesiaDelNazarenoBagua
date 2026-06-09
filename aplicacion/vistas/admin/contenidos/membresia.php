@@ -9,7 +9,6 @@ $cargos = $controller->obtenerCargos();
 $condiciones = $controller->obtenerCondiciones();
 $tipos = $controller->obtenerTipos();
 
-// Función ayudante para evitar errores fatales si es Objeto o Array
 function getProp($item, $key) {
     return is_object($item) ? ($item->$key ?? '') : ($item[$key] ?? '');
 }
@@ -210,9 +209,14 @@ $fechaHoy = date('Y-m-d');
                     </select>
                 </div>
                 <div class="form-group" style="grid-column: span 2;">
-                    <label>Dirección:</label>
-                    <div class="campo-mapa" style="display: flex; gap:10px;">
-                        <input type="text" name="direccion" placeholder="Calle, Jr o Av." style="flex-grow: 1;">
+                    <label>Dirección:  "Usar el mapa para hecer precisa la ubicacion"</label>
+                    <div class="campo-mapa" style="display: flex; gap:10px; position: relative;">
+                        <div style="flex-grow: 1; position: relative;">
+                            <input type="text" name="direccion" id="direccion" placeholder="Escribe una calle..." autocomplete="off" style="width: 100%;">
+                            
+                            <ul id="lista-sugerencias" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:1000; background:#fff; border:1px solid #ccc; border-radius:4px; list-style:none; padding:0; margin:0; max-height:200px; overflow-y:auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></ul>
+                        </div>
+
                         <button type="button" class="btn-mapa" onclick="abrirMapa()" style="padding: 10px; background:#4f6ef7; color:white; border:none; border-radius:5px; cursor:pointer;">
                             <i class="fa-solid fa-map-location-dot"></i>
                         </button>
