@@ -1,14 +1,14 @@
 <?php
 namespace aplicacion\controladores;
 
-use aplicacion\dao\MiembroDAO;
+use aplicacion\Repository\MiembroRepository;
 use aplicacion\modelos\Miembro;
 
 class MiembroController {
     private $dao;
 
     public function __construct() {
-        $this->dao = new MiembroDAO();
+        $this->dao = new MiembroRepository();
     }
 
     public function manejarPeticion() {

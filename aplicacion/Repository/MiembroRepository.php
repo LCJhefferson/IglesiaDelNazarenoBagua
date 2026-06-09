@@ -1,10 +1,10 @@
 <?php
-namespace aplicacion\dao;
+namespace aplicacion\Repository;
 
 use aplicacion\modelos\Miembro;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class MiembroDAO {
+class MiembroRepository {
 
     public function listar() {
         return Miembro::with(['cargos'])->orderBy('id', 'DESC')->get();
