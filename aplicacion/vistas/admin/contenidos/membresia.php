@@ -209,7 +209,7 @@ $fechaHoy = date('Y-m-d');
                     </select>
                 </div>
                 <div class="form-group" style="grid-column: span 2;">
-                    <label>Dirección:  "Usar el mapa para hecer precisa la ubicacion"</label>
+                    <label>Dirección:  "Usar el mapa para mejorar la precision de la ubicacion ya que esta puede no ser exacta"</label>
                     <div class="campo-mapa" style="display: flex; gap:10px; position: relative;">
                         <div style="flex-grow: 1; position: relative;">
                             <input type="text" name="direccion" id="direccion" placeholder="Escribe una calle..." autocomplete="off" style="width: 100%;">

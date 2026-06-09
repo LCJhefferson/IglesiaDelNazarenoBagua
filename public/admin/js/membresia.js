@@ -187,15 +187,22 @@ function actualizarMarcador(lat, lng, buscarDireccion = true) {
         });
     }
 
-    // SI el marcador se movió, buscamos el nombre de la calle automáticamente
     if (buscarDireccion) {
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
             .then(res => res.json())
             .then(data => {
                 if (data.display_name) {
-                    direccionEncontradaMapa = data.display_name;
-                    // Opcional: mostrar un mensajito en el mapa de qué dirección se encontró
-                    marcador.bindPopup("Dirección detectada: " + data.display_name).openPopup();
+                    // RESCATAR EL NÚMERO DEL INPUT ACTUAL
+                    const actualValue = document.getElementById('direccion').value;
+                    const matches = actualValue.match(/\b\d+\b/g);
+                    const numeroPrevio = matches ? matches[matches.length - 1] : "";
+
+                    let calleNueva = data.address.road || data.address.pedestrian || data.display_name.split(',')[0];
+                    
+                    // Si ya teníamos un número, se lo pegamos a la nueva calle
+                    direccionEncontradaMapa = numeroPrevio ? `${calleNueva} ${numeroPrevio}` : calleNueva;
+                    
+                    marcador.bindPopup("Ubicación exacta: " + direccionEncontradaMapa).openPopup();
                 }
             });
     }
@@ -274,41 +281,33 @@ function inicializarBuscadorDirecciones() {
                             li.style.cssText = "padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 0.85em; color: #333;";
 
                             li.onclick = function() {
-                                // 1. Rescatamos el número que el usuario escribió (buscamos cualquier grupo de números)
-                                const textoEscrito = inputDireccion.value;
-                                const matchNumero = textoEscrito.match(/\d+/g); // Busca todos los números
-                                const ultimoNumero = matchNumero ? matchNumero[matchNumero.length - 1] : "";
+    // 1. Capturamos el número que el usuario escribió (ej: "123")
+    const textoEscrito = inputDireccion.value;
+    const matches = textoEscrito.match(/\b\d+\b/g); 
+    const numeroManual = matches ? matches[matches.length - 1] : "";
 
-                                // 2. Obtenemos el nombre de la calle limpio de la API
-                                // Prioridad: road (calle) > house_number > o el primer segmento antes de la coma
-                                let nombreCalleAPI = lugar.address.road || lugar.address.pedestrian || lugar.display_name.split(',')[0];
+    // 2. Nombre limpio de la calle desde la API
+    let calleAPI = lugar.address.road || lugar.address.pedestrian || lugar.display_name.split(',')[0];
 
-                                // 3. Construimos la dirección final: Calle + Numero (si existía)
-                                const direccionFinal = ultimoNumero 
-                                    ? `${nombreCalleAPI} ${ultimoNumero}` 
-                                    : nombreCalleAPI;
+    // 3. Unimos todo
+    const direccionFinal = numeroManual ? `${calleAPI} ${numeroManual}` : calleAPI;
 
-                                // 4. Actualizamos el input y los campos ocultos
-                                inputDireccion.value = direccionFinal;
-                                
-                                const lat = parseFloat(lugar.lat);
-                                const lng = parseFloat(lugar.lon);
-                                
-                                document.getElementById('latitud').value = lat.toFixed(6);
-                                document.getElementById('longitud').value = lng.toFixed(6);
-                                
-                                // Sincronizar con el mapa
-                                latTemporal = lat;
-                                lngTemporal = lng;
-                                direccionEncontradaMapa = direccionFinal; // Guardamos para que el mapa no lo borre
+    // 4. Llenamos los campos
+    inputDireccion.value = direccionFinal;
+    document.getElementById('latitud').value = parseFloat(lugar.lat).toFixed(6);
+    document.getElementById('longitud').value = parseFloat(lugar.lon).toFixed(6);
+    
+    // Sincronizamos coordenadas temporales
+    latTemporal = parseFloat(lugar.lat);
+    lngTemporal = parseFloat(lugar.lon);
+    direccionEncontradaMapa = direccionFinal; // <--- IMPORTANTE
 
-                                if(mapaSeleccion) {
-                                    mapaSeleccion.setView([lat, lng], 19);
-                                    actualizarMarcador(lat, lng, false); // false para que no vuelva a buscar la calle
-                                }
-                                
-                                listaSugerencias.style.display = 'none';
-                            };
+    if(mapaSeleccion) {
+        mapaSeleccion.setView([latTemporal, lngTemporal], 19);
+        actualizarMarcador(latTemporal, lngTemporal, false); 
+    }
+    listaSugerencias.style.display = 'none';
+};
                             listaSugerencias.appendChild(li);
                         });
                         listaSugerencias.style.display = 'block';
