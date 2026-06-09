@@ -1,5 +1,25 @@
 /* ==========================================================================
-   HEADER & NAV PERFECCIONADO (LIMPIO Y UNIFICADO)
+   VARIABLES GLOBALES (ROOT) - Requerido para la navegación
+   ========================================================================== */
+:root {
+    /* Identidad Visual */
+    --primary-color: #123d5a;    /* Azul institucional */
+    --accent-color: #b8860b;     /* Dorado (solo para acentos) */
+    
+    /* Colores de Interfaz Clara */
+    --bg-light: #f7fafc;         /* Gris sutil para hovers y botones */
+    --white: #ffffff;            /* Blanco puro */
+    
+    /* Tipografía y Texto */
+    --text-dark: #1a202c;        /* Títulos y enlaces */
+    --text-light: #4a5568;       /* Párrafos y submenús */
+    
+    /* Animaciones */
+    --transition: all 0.3s ease;
+}
+
+/* ==========================================================================
+   HEADER & NAV PERFECCIONADO (SIN LETRAS DORADAS)
    ========================================================================== */
 .header {
     position: fixed;
@@ -9,11 +29,12 @@
     height: 70px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* Soporte para Safari */
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 4%;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 15px rgba(18, 61, 90, 0.04); /* Sombra muy sutil */
     z-index: 10000;
     box-sizing: border-box;
 }
@@ -29,75 +50,90 @@
 
 /* Enlaces principales y Dropdown Link */
 .nav > a, .dropdown-link {
-    color: #333333;
+    color: var(--text-dark); /* Gris oscuro del root */
     text-decoration: none;
     margin-left: 25px;
     font-weight: 500;
     font-size: 0.95rem;
     padding: 10px 0;
-    transition: 0.3s;
+    transition: var(--transition);
     position: relative;
     cursor: pointer;
     white-space: nowrap;
 }
 
-/* Efecto de línea animada dorada (Solo para los principales) */
+/* El dorado se queda exclusivamente en esta delgada línea de acento */
 .nav > a::after, .dropdown-link::after {
     content: "";
     position: absolute;
     width: 0;
-    height: 2.5px;
-    background: #fdc269;
+    height: 2px;
+    background: var(--accent-color); 
     left: 0;
     bottom: 0;
-    transition: 0.3s;
+    transition: var(--transition);
 }
 
 .nav > a:hover::after, .dropdown-link:hover::after {
     width: 100%;
 }
 
-.nav > a:hover, .dropdown-link:hover { color: #fdc269; }
+/* MODIFICADO: El texto cambia al Azul Principal, NO a dorado */
+.nav > a:hover, .dropdown-link:hover { 
+    color: var(--primary-color); 
+}
 
-/* Botón de Ingresar (Login) */
+/* Botón de Ingresar (Login - Versión Escritorio) */
 .header .login {
-    padding: 8px 18px;
+    padding: 8px 20px;
     border-radius: 20px;
-    background: rgba(0, 0, 0, 0.08);
-    color: #000000;
+    background: var(--bg-light); /* Fondo gris claro suave */
+    color: var(--primary-color); 
     text-decoration: none;
     font-weight: 600;
     font-size: 0.9rem;
-    transition: all 0.2s ease;
+    transition: var(--transition);
     margin-left: 20px;
     white-space: nowrap;
     display: inline-block;
 }
 
-.header .login:hover { background: rgba(0, 0, 0, 0.15); transform: translateY(-1px); }
+.header .login:hover { 
+    background: var(--primary-color); 
+    color: var(--white); 
+    transform: translateY(-1px); 
+}
 
 /* Menú Hamburguesa (Oculto en PC) */
-.menu-toggle { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #333; padding: 5px; }
+.menu-toggle { 
+    display: none; 
+    background: none; 
+    border: none; 
+    font-size: 1.5rem; 
+    cursor: pointer; 
+    color: var(--text-dark); 
+    padding: 5px; 
+}
 
 /* ==========================================================================
-   DROPDOWN MINISTERIOS (PC)
+   DROPDOWN MINISTERIOS (PC - TONOS CLAROS Y LIMPIOS)
    ========================================================================== */
 .dropdown { position: relative; }
-.dropdown-link i { font-size: 0.75rem; margin-left: 5px; transition: 0.3s; }
+.dropdown-link i { font-size: 0.75rem; margin-left: 5px; transition: var(--transition); }
 
 .dropdown-menu {
     position: absolute;
     top: 100%;
     left: 25px;
-    background: #ffffff;
+    background: var(--white);
     min-width: 220px;
     border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(12, 61, 90, 0.08);
     padding: 10px 0;
     display: none;
     opacity: 0;
     transform: translateY(10px);
-    transition: all 0.3s ease;
+    transition: var(--transition);
     z-index: 11000;
 }
 
@@ -110,16 +146,17 @@
     margin: 0 !important;
     padding: 10px 20px !important;
     font-size: 0.9rem !important;
-    color: #444444 !important;
+    color: var(--text-light) !important; /* Gris medio */
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: var(--transition);
     text-decoration: none;
 }
 
+/* MODIFICADO: Cambio a fondo gris limpio y letras azules en el submenú */
 .dropdown-menu a:hover {
-    background: #fff9f0;
-    color: #fdc269 !important;
-    padding-left: 25px !important; /* Pequeño salto a la derecha al hacer hover */
+    background: var(--bg-light); /* Fondo gris claro e institucional */
+    color: var(--primary-color) !important; /* Texto Azul */
+    padding-left: 25px !important; 
 }
 
 /* ==========================================================================
@@ -132,27 +169,35 @@
         position: fixed;
         top: 0; right: -100%;
         width: 280px; height: 100vh;
-        background: #ffffff;
+        background: var(--white);
         flex-direction: column;
         padding: 90px 30px;
         transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         align-items: flex-start;
         justify-content: flex-start;
-        box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+        box-shadow: -5px 0 25px rgba(12, 61, 90, 0.1);
     }
     .nav-container.active { right: 0; }
 
     .nav { flex-direction: column; width: 100%; align-items: flex-start; gap: 15px; }
     
     .nav > a, .dropdown { width: 100%; margin-left: 0; font-size: 1.1rem; display: block; }
-    .nav > a::after, .dropdown-link::after { display: none; } /* Quita la línea animada en móvil */
+    .nav > a::after, .dropdown-link::after { display: none; } 
 
     /* Login Móvil */
     .header .login {
-        margin-left: 0; width: 100%; text-align: center;
-        background: #000000; color: #ffffff; margin-top: 15px;
+        margin-left: 0; 
+        width: 100%; 
+        text-align: center;
+        background: var(--primary-color); 
+        color: var(--white); 
+        margin-top: 15px;
     }
-    .header .login:hover { background: #333333; }
+    
+    /* MODIFICADO: El hover en móvil ya no va a dorado, se queda en un tono azul sutilmente más claro */
+    .header .login:hover { 
+        background: #1e537a; 
+    }
 
     /* Dropdown Acordeón Móvil */
     .dropdown-link { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0; }
@@ -165,6 +210,11 @@
     .dropdown.active .dropdown-menu { display: block; }
     .dropdown-menu a { padding: 8px 0 !important; font-size: 1rem !important; }
     
-    /* Rotar la flecha al abrir el acordeón */
+    /* MODIFICADO: Enlace de móvil activo pasa a azul institucional */
+    .dropdown-menu a:hover {
+        background: transparent;
+        color: var(--primary-color) !important;
+    }
+    
     .dropdown.active .dropdown-link i { transform: rotate(180deg); }
 }

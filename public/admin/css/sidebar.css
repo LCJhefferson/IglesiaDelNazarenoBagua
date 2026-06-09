@@ -1,92 +1,167 @@
-/* SIDEBAR: Ahora con altura fija y flexbox */
+/* ==========================================================================
+   VARIABLES DEL PANEL DE ADMINISTRACIÓN
+   ========================================================================== */
+:root {
+    --admin-font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    
+    /* Paleta del Sidebar */
+    --admin-sidebar-bg: #152847;       /* Azul naval (Base) */
+    --admin-sidebar-dark: #0b172a;     /* Azul muy oscuro (Submenús) */
+    --admin-sidebar-hover: #1e3a63;    /* Azul intermedio (Hover) */
+    --admin-border: #1e3a63;           /* Separadores sutiles */
+    
+    /* Textos y Acentos */
+    --admin-text: #cbd5e1;             /* Gris claro para lectura */
+    --admin-text-light: #ffffff;       /* Blanco puro para destacar */
+    --admin-accent: #3b82f6;           /* Azul brillante para elementos activos */
+    
+    /* Área Principal */
+    --admin-bg-content: #f8fafc;       /* Gris súper claro para el fondo principal */
+}
+
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
 .sidebar {
-    background: #152847;
-    color: white;
+    background: var(--admin-sidebar-bg);
+    color: var(--admin-text-light);
     position: fixed;
     top: 0;
     left: 0;
-    height: 100vh; /* Altura total de la pantalla */
+    height: 100vh;
     width: 260px;
     display: flex;
-    flex-direction: column; /* Organiza los hijos (logo y menú) en columna */
-    overflow: hidden; /* Evita scroll innecesario en la barra entera */
-    font-family: Arial, sans-serif !important;
-
+    flex-direction: column;
+    overflow: hidden;
+    font-family: var(--admin-font) !important;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* MENÚ: El contenedor de los enlaces */
+/* LOGO SIDEBAR */
+.sidebar-logo {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 25px 10px;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.sidebar-logo img {
+    width: 80px;
+    margin-bottom: 12px;
+    filter: brightness(0) invert(1);
+}
+
+.sidebar-logo h3 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--admin-text-light);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* MENÚ CONTENEDOR */
 .menu {
     display: flex;
     flex-direction: column;
-    flex: 1; /* ¡CLAVE! Esto hace que el menú crezca y ocupe todo el espacio sobrante */
-    overflow-y: auto; /* Permite scroll solo en la lista de botones si hay muchos */
+    flex: 1;
+    overflow-y: auto;
 }
 
-/* LOGO: Se queda arriba */
-.sidebar-logo {
-    flex-shrink: 0; /* Evita que el logo se aplaste */
-    text-align: center;
-    padding: 20px 10px;
-    border-bottom: 1px solid #334155;
-}
+/* Scrollbar sutil para el sidebar */
+.menu::-webkit-scrollbar { width: 5px; }
+.menu::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 5px; }
 
-
+/* TÍTULOS DE MENÚ (Desplegables) */
 .menu-title {
-    padding: 12px 30px;
+    padding: 15px 25px;
     cursor: pointer;
+    color: var(--admin-text);
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
 }
 
 .menu-title:hover {
-    background: #334155;
+    background: var(--admin-sidebar-hover);
+    color: var(--admin-text-light);
 }
 
+/* SUBMENÚS */
 .submenu {
     max-height: 0;
     overflow: hidden;
-    visibility: hidden; /* Evita que los links sean cliqueables mientras está cerrado */
+    visibility: hidden;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    background: #0f172a !important; 
-    display: block !important; /* IMPORTANTE: No uses display: none */
+    background: var(--admin-sidebar-dark) !important; 
+    display: block !important;
 }
+
 .submenu.active {
-    max-height: 500px !important; /* Valor alto para que quepa todo */
+    max-height: 500px !important;
     visibility: visible;
     padding-bottom: 10px;
 }
 
 .submenu a {
     display: block;
-    padding: 12px 40px; /* Más padding para que se vea la jerarquía */
-    color: #cbd5e1;
+    padding: 12px 25px 12px 45px;
+    color: var(--admin-text);
     text-decoration: none;
     font-size: 14px;
+    transition: all 0.2s ease;
 }
 
 .submenu a:hover {
-    background: #1e293b;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--admin-text-light);
+    padding-left: 50px; /* Efecto sutil de movimiento hacia la derecha */
 }
 
+/* ENLACES DIRECTOS (Sin submenú) */
+.menu-item .menu-title.direct-link {
+    display: block;              
+    padding: 15px 25px;
+    color: var(--admin-text);                
+    text-decoration: none;
+    border-bottom: 1px solid var(--admin-border);
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
 
+.menu-item .menu-title.direct-link:hover {
+    background: var(--admin-sidebar-hover);
+    color: var(--admin-text-light);
+}
 
-/* ÁREA PRINCIPAL */
+/* ÍTEM ACTIVO (Diferenciado para saber dónde estás) */
+.menu-item .menu-title.direct-link.active {
+    background: var(--admin-sidebar-dark);
+    color: var(--admin-accent);                
+    font-weight: 600;
+    border-left: 3px solid var(--admin-accent); /* Línea lateral que marca la sección actual */
+}
+
+/* ==========================================================================
+   ÁREA PRINCIPAL (DASHBOARD)
+   ========================================================================== */
 .main-area {
     margin-left: 260px;              
     width: calc(100% - 260px);      
     min-height: 100vh;              
     display: flex;
     flex-direction: column;
+    font-family: var(--admin-font);
 }
-
 
 /* TOPBAR */
 .topbar {
-    height: 60px;
-    background: white;
+    height: 65px;
+    background: var(--admin-text-light); /* Blanco */
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding: 0 20px;
-    border-bottom: 1px solid #ddd;
+    padding: 0 30px;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 /* USER MENU */
@@ -99,91 +174,54 @@
     border: none;
     cursor: pointer;
     font-size: 18px;
+    color: #475569; /* Gris oscuro para el ícono de usuario */
+    transition: color 0.2s;
+}
+
+.user-btn:hover {
+    color: var(--admin-accent);
 }
 
 .dropdown-content {
     display: none;
     position: absolute;
     right: 0;
-    background: white;
-    border: 1px solid #ddd;
+    top: 35px;
+    background: var(--admin-text-light); /* Blanco */
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
     min-width: 150px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    z-index: 1000;
 }
 
 .dropdown-content button {
     width: 100%;
-    padding: 10px;
+    padding: 12px 15px;
     border: none;
     background: none;
     text-align: left;
     cursor: pointer;
+    font-size: 14px;
+    color: #334155;
+    font-family: var(--admin-font);
+    transition: background 0.2s, color 0.2s;
 }
 
 .dropdown-content button:hover {
-    background: #f1f1f1;
+    background: #f1f5f9;
+    color: var(--admin-accent);
 }
 
 .dropdown.active .dropdown-content {
     display: block;
 }
 
-/* Ítems directos (sin submenú) */
-.menu-item .menu-title.direct-link {
-    display: block;              
-    padding: 12px 20px;
-    color: #e2e8f0;               
-    text-decoration: none;
-    border-bottom: 1px solid #334155;
-    transition: background 0.2s ease, color 0.2s ease;
-}
-
-.menu-item .menu-title.direct-link:hover {
-    background: #334155;
-    color: white;
-}
-/* Ítem activo directo */
-.menu-item .menu-title.direct-link.active {
-    background: #334155;
-    color: #60a5fa;               
-    font-weight: 600;
-}
-
-/* CONTENIDO */
+/* CONTENIDO PRINCIPAL */
 .content {
     flex: 1;
     padding: 30px;
-    background: #f1f5f9;
+    background: var(--admin-bg-content); /* Fondo limpio para leer datos y tablas */
     box-sizing: border-box;          
 }
-
-
-
-/*Logo*/
-/* LOGO SIDEBAR */
-.sidebar-logo {
-    text-align: center;
-    padding: 20px 10px;
-    border-bottom: 1px solid #334155;
-}
-
-.sidebar-logo img {
-    width: 80px;
-    margin-bottom: 10px;
-    filter:brightness(0) invert(1);
-}
-
-.sidebar-logo h3 {
-    margin: 0;
-    font-size: 16px;
-    color: #cbd5e1;
-}
-
-
-
-
-
-
-
-
-
-

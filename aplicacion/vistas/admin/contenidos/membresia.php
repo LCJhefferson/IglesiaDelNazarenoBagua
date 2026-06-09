@@ -282,3 +282,15 @@ $fechaHoy = date('Y-m-d');
         </div>
     </div>
 </div>
+
+
+
+<?php if (isset($_SESSION['flash_success'])): ?>
+    <div id="flash-data" 
+         data-mensaje="<?= htmlspecialchars($_SESSION['flash_success']) ?>" 
+         data-tipo="<?= $_SESSION['flash_type'] ?? 'success' ?>">
+    </div>
+    <?php unset($_SESSION['flash_success'], $_SESSION['flash_type']); ?>
+<?php endif; ?>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

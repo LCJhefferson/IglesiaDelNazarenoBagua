@@ -316,3 +316,26 @@ function inicializarBuscadorDirecciones() {
         }, 600); 
     });
 }
+
+
+// Agrega esto al final de tu archivo membresia.js o dentro del DOMContentLoaded
+document.addEventListener("DOMContentLoaded", function() {
+    const flashData = document.getElementById('flash-data');
+    
+    if (flashData) {
+        const mensaje = flashData.getAttribute('data-mensaje');
+        const tipo = flashData.getAttribute('data-tipo');
+
+        Swal.fire({
+            icon: tipo,
+            title: mensaje,
+            showConfirmButton: false,
+            timer: 2000,
+            toast: true,
+            position: 'top-end',
+            timerProgressBar: true
+        });
+    }
+    
+    // ... resto de tus funciones (inicializarSelect2, etc.)
+});
