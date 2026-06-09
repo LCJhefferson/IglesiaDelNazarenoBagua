@@ -1,5 +1,5 @@
 <?php
-use aplicacion\core\QueryBuilder;
+// Quitamos 'use aplicacion\core\QueryBuilder;' porque ya no lo necesitamos
 use aplicacion\modelos\Recurso;
 use aplicacion\services\RecursoThumbService;
 
@@ -29,9 +29,13 @@ if (!empty($_GET['descargar'])) {
     exit;
 }
 
-$recursos = Recurso::listar();
+// 1. Cargamos los recursos y los forzamos a ser un ARRAY puro
+$recursos_raw = Recurso::listar();
+$recursos = ($recursos_raw instanceof \Illuminate\Support\Collection) ? $recursos_raw->toArray() : $recursos_raw;
 
-$pendientes = array_filter($recursos, fn($r) => $r['ruta_thumb'] === null);
+// 2. Ahora array_filter no tendrá problemas
+$pendientes = array_filter($recursos, fn($r) => ($r['ruta_thumb'] ?? null) === null);
+
 if (!empty($pendientes)) {
     foreach ($pendientes as $r) {
         RecursoThumbService::generar(
@@ -41,24 +45,34 @@ if (!empty($pendientes)) {
             $r['enlace_youtube'] ?? ''
         );
     }
-    $recursos = Recurso::listar();
+    // Volvemos a cargar y convertir
+    $recursos_raw = Recurso::listar();
+    $recursos = ($recursos_raw instanceof \Illuminate\Support\Collection) ? $recursos_raw->toArray() : $recursos_raw;
 }
 
-// Total de descargas — agregado SQL en lugar de PHP
+// Total de descargas
 $total_des = Recurso::sum('descargas');
 
-// Conteo por categoría — GROUP BY en BD en lugar de foreach en PHP
-$cats_raw   = (new QueryBuilder())
-    ->table('recursos')
-    ->select('categoria, COUNT(*) AS total')
+// 3. Conteo por categoría USANDO ELOQUENT PURE (Reemplaza a QueryBuilder)
+$cats_raw = Recurso::selectRaw('categoria, COUNT(*) AS total')
     ->groupBy('categoria')
     ->get();
-$categorias = array_column($cats_raw, 'total', 'categoria');
 
-$icono_tipo  = ['pdf' => '📄', 'img' => '🖼️', 'vid' => '🎬', 'doc' => '📝'];
+// Convertimos a array y extraemos la columna para tu vista
+$cats_array = ($cats_raw instanceof \Illuminate\Support\Collection) ? $cats_raw->toArray() : (array)$cats_raw;
+$categorias = array_column($cats_array, 'total', 'categoria');
+
+$icono_tipo  = [
+    'pdf' => '<i class="fa-solid fa-file-pdf"></i>', 
+    'img' => '<i class="fa-solid fa-file-image"></i>', 
+    'vid' => '<i class="fa-solid fa-file-video"></i>', 
+    'doc' => '<i class="fa-solid fa-file-lines"></i>' 
+    ];
+
 $clase_slab  = ['pdf' => 'slab-pdf', 'img' => 'slab-img', 'vid' => 'slab-vid', 'doc' => 'slab-doc'];
 $label_tipo  = ['pdf' => 'PDF', 'img' => 'IMG', 'vid' => 'VIDEO', 'doc' => 'DOC'];
 $label_btn   = ['vid' => 'Ver recurso'];
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
