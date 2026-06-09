@@ -10,11 +10,11 @@ class Middleware {
     public static function auth(array $rolesPermitidos = [1, 2]): void {
         self::startSession();
         if (empty($_SESSION['usuario'])) {
-            header('Location: /IglesiaDelNazarenoBagua/login');
+            header('Location: ' . URL . 'login');
             exit;
         }
         if (!empty($rolesPermitidos) && !in_array($_SESSION['rol_id'], $rolesPermitidos, true)) {
-            header('Location: /IglesiaDelNazarenoBagua/login?error=3');
+            header('Location: ' . URL . 'login?error=3');
             exit;
         }
     }
