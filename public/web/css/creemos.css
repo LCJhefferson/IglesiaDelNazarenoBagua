@@ -1,0 +1,143 @@
+/* ========================= */
+/* DISEÑO DECLARACIÓN DE CREENCIAS */
+/* ========================= */
+.titulo {
+    font-size: 42px;
+    color: #3daae9; /* Color azul grisáceo del logo */
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+.creencias-header {
+    text-align: center;
+    padding: 60px 20px 20px;
+    background-color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.titulo-creencias {
+    font-size: 32px;
+    color: #4b7086; /* Color azul grisáceo del logo */
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.subtitulo-creencias {
+    font-size: 15px;
+    color: #334155;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Sección Lema (Un Señor, Una Fe...) */
+.creencias-lema {
+    text-align: center;
+    padding: 20px 20px 50px;
+    background-color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.creencias-lema h2 {
+    font-size: 22px;
+    color: #4b7086;
+    font-weight: 600;
+    margin-bottom: 25px;
+    letter-spacing: 0.5px;
+}
+
+.creencias-lema h2 em {
+    font-style: italic;
+    font-weight: 600;
+}
+
+.creencias-lema p {
+    font-size: 15px;
+    color: #475569;
+    line-height: 1.7;
+}
+
+/* Contenedor Principal Gris */
+.creencias-container {
+    padding: 0 5% 80px;
+    display: flex;
+    justify-content: center;
+    background-color: #ffffff; /* Fondo exterior blanco */
+}
+
+.creencias-card-main {
+    max-width: 1200px;
+    width: 100%;
+    background: #f3f4f6; /* Fondo gris claro interior */
+    border-radius: 12px;
+    padding: 50px;
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
+/* Logo Sticky (se queda fijo al bajar) */
+.creencias-sidebar img {
+    width: 100%;
+    max-width: 220px;
+    display: block;
+    margin: 0 auto;
+    position: sticky;
+    top: 20px;
+}
+
+/* Grid de las tarjetas blancas */
+.creencias-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+    gap: 20px;
+}
+
+.creencia-item {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02); /* Sombra súper suave */
+    transition: transform 0.2s ease;
+}
+
+.creencia-item:hover {
+    transform: translateY(-2px); /* Pequeño efecto al pasar el mouse */
+}
+
+.creencia-item h4 {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
+.creencia-item p {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Responsivo para celulares y tablets */
+@media (max-width: 900px) {
+    .creencias-card-main {
+        grid-template-columns: 1fr;
+        padding: 30px 20px;
+    }
+    .creencias-sidebar {
+        margin-bottom: 30px;
+    }
+    .creencias-sidebar img {
+        position: static; /* Quita el sticky en celular */
+        max-width: 180px;
+    }
+    .creencias-grid {
+        grid-template-columns: 1fr; /* Pasa a 1 columna */
+    }
+}

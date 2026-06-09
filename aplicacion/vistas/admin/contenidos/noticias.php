@@ -11,6 +11,14 @@ if(isset($_GET['eliminar_foto'])){
     exit; 
 }
 
+if(isset($_GET['ocultar'])){
+    $controller->cambiarVisibilidad($_GET['ocultar'], 2);
+}
+
+if(isset($_GET['mostrar'])){
+    $controller->cambiarVisibilidad($_GET['mostrar'], 1);
+}
+
 if(isset($_GET['eliminar'])){
     $controller->eliminarNoticia($_GET['eliminar']);
 }
@@ -25,6 +33,8 @@ $fecha_actual = date("Y-m-d\TH:i");
 ?>
 
 <link rel="stylesheet" href="css/noticias.css">
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
 
 <!-- TOP BAR -->
 <div class="top-bar">
@@ -34,9 +44,7 @@ $fecha_actual = date("Y-m-d\TH:i");
         <span class="badge-total-real" style="display:none"><?= $total ?></span>
     </div>
     <div class="top-bar-right">
-        <button class="btn-tema" id="btn-tema" onclick="toggleTema()" title="Cambiar tema">
-            <i class="fa-solid fa-moon" id="icono-tema"></i>
-        </button>
+       
         <button class="btn-nuevo" onclick="abrirModal()">
             <i class="fa-solid fa-plus"></i> Nueva Noticia
         </button>
@@ -104,9 +112,9 @@ $fecha_actual = date("Y-m-d\TH:i");
                         </div>
                     <?php endif; ?>
                     <div class="card-overlay"></div>
-                    <span class="card-badge <?= $n['estado'] == 1 ? 'publicado' : 'borrador' ?>">
-                        <?= $n['estado'] == 1 ? 'Publicado' : 'Borrador' ?>
-                    </span>
+                   <span class="card-badge <?= $n['estado'] == 1 ? 'publicado' : 'oculto' ?>">
+                     <?= $n['estado'] == 1 ? 'Publicado' : 'Oculto' ?>
+                   </span>
                 </div>
 
                 <div class="card-body">
@@ -122,6 +130,10 @@ $fecha_actual = date("Y-m-d\TH:i");
                     <button class="btn-accion editar" onclick='editarNoticia(<?= json_encode($n) ?>)'>
                         <i class="fa-solid fa-pen"></i> Editar
                         <span class="tooltip">Editar noticia</span>
+                    </button>
+                    <button class="btn-accion <?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>" onclick="event.stopPropagation(); location.href='/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&<?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>=<?= $n['id'] ?>'">
+                        <i class="fa-solid fa-<?= $n['estado'] == 1 ? 'eye-slash' : 'eye' ?>"></i> <?= $n['estado'] == 1 ? 'Ocultar' : 'Mostrar' ?>
+                        <span class="tooltip"><?= $n['estado'] == 1 ? 'Ocultar noticia en el portal' : 'Mostrar noticia en el portal' ?></span>
                     </button>
                     <button class="btn-accion eliminar"
                         onclick="event.stopPropagation(); confirmarEliminar(<?= $n['id'] ?>, '<?= htmlspecialchars($n['titulo'], ENT_QUOTES) ?>')">
@@ -141,7 +153,7 @@ $fecha_actual = date("Y-m-d\TH:i");
             <div class="card-body-preview">
                 <h3 id="preview-titulo">Selecciona una noticia</h3>
                 <p id="preview-resumen">Aquí aparecerá el resumen de la noticia seleccionada.</p>
-                <button class="btn-leer">Ir a la noticia completa</button>
+                <button class="btn-leer">Ir a la noticia completa<span class="tooltip">Como se veria la noticia publicada en la web</span></button>
             </div>
         </div>
     </div>
@@ -217,7 +229,8 @@ $fecha_actual = date("Y-m-d\TH:i");
 
                 <div class="field full">
                     <label for="f-contenido">Contenido extendido</label>
-                    <textarea name="contenido" id="f-contenido" rows="4" placeholder="Escribe el cuerpo de la noticia..."></textarea>
+                    <input type="hidden" name="contenido" id="f-contenido">
+                    <div id="quill-editor" style="height:150px;"></div>
                 </div>
 
                 <div class="field full">
@@ -244,10 +257,15 @@ $fecha_actual = date("Y-m-d\TH:i");
                 </button>
             </div>
         </form>
+
+
+
+
     </div>
 </div>
 
 <!-- TOAST NOTIFICATIONS -->
 <div id="toast-container"></div>
 
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 <script src="js/noticias.js"></script>

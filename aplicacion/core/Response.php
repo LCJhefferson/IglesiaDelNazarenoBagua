@@ -2,35 +2,25 @@
 namespace aplicacion\core;
 
 class Response {
-
-    public static function json(mixed $data, int $status = 200): void {
-        http_response_code($status);
+    
+    // Método para devolver respuestas JSON exitosas
+    public static function json($data, $statusCode = 200) {
+        if (ob_get_length()) ob_clean(); // Limpia cualquier texto previo
+        http_response_code($statusCode);
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    public static function success(mixed $data = null, int $status = 200): void {
-        self::json(['success' => true, 'data' => $data], $status);
-    }
-
-    public static function created(mixed $data = null): void {
-        self::success($data, 201);
-    }
-
-    public static function error(string $message, int $status = 400, mixed $errors = null): void {
-        $body = ['success' => false, 'message' => $message];
-        if ($errors !== null) {
-            $body['errors'] = $errors;
-        }
-        self::json($body, $status);
-    }
-
-    public static function notFound(string $message = 'Recurso no encontrado'): void {
-        self::error($message, 404);
-    }
-
-    public static function unprocessable(array $errors): void {
-        self::error('Error de validación', 422, $errors);
+    // EL MÉTODO QUE FALTABA: Para devolver errores en formato JSON
+    public static function error($mensaje, $statusCode = 400) {
+        if (ob_get_length()) ob_clean();
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'ok' => false,
+            'error' => $mensaje
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 }

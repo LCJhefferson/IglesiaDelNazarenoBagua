@@ -1,69 +1,66 @@
 <?php
 namespace aplicacion\modelos;
 
-use aplicacion\core\Model;
-use aplicacion\config\Conexion;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Capsule\Manager as DB;
 
 /**
- * Modelo RecursoPapelera — tabla "recursos_papelera" (archivo de eliminados).
- * Forma parte del patrón Archive Table junto con Recurso.
+ * Modelo RecursoPapelera — tabla "recursos_papelera".
+ * Implementado con Eloquent para consistencia con el sistema.
  */
 class RecursoPapelera extends Model {
 
-    protected static string $tabla = 'recursos_papelera';
+    protected $table = 'recursos_papelera';
+    protected $primaryKey = 'id';
+    public $timestamps = false;
 
-    /** Lista todos los recursos en papelera ordenados por fecha de eliminación. */
-    public static function listar(): array {
-        return static::qb()
-                     ->orderBy('fecha_eliminacion', 'DESC')
-                     ->get();
+    protected $fillable = [
+        'recurso_id', 'titulo', 'descripcion', 'categoria', 
+        'tipo', 'ruta_archivo', 'enlace_youtube', 'ruta_thumb', 
+        'eliminado_por', 'fecha_eliminacion'
+    ];
+
+    /** Lista todos los recursos en papelera */
+    public static function listar() {
+        return self::orderBy('fecha_eliminacion', 'DESC')->get();
     }
 
     /**
      * Restaura un recurso desde la papelera a la tabla activa.
-     * Usa transacción para garantizar consistencia.
      */
     public static function restaurar(int $papeleraId): bool {
-        $registro = static::find($papeleraId);
-        if (!$registro) return false;
+        return DB::transaction(function () use ($papeleraId) {
+            $registro = self::find($papeleraId);
+            if (!$registro) return false;
 
-        $pdo = Conexion::conectar();
-
-        try {
-            $pdo->beginTransaction();
-
+            // Creamos el recurso en la tabla principal
             Recurso::create([
-                'titulo'         => $registro['titulo'],
-                'descripcion'    => $registro['descripcion'],
-                'categoria'      => $registro['categoria'],
-                'tipo'           => $registro['tipo'],
-                'ruta_archivo'   => $registro['ruta_archivo'],
-                'enlace_youtube' => $registro['enlace_youtube'],
-                'ruta_thumb'     => $registro['ruta_thumb'] ?? null,
-                'creado_por'     => $registro['eliminado_por'] ?? null,
+                'titulo'         => $registro->titulo,
+                'descripcion'    => $registro->descripcion,
+                'categoria'      => $registro->categoria,
+                'tipo'           => $registro->tipo,
+                'ruta_archivo'   => $registro->ruta_archivo,
+                'enlace_youtube' => $registro->enlace_youtube,
+                'ruta_thumb'     => $registro->ruta_thumb,
+                'creado_por'     => $registro->eliminado_por,
                 'descargas'      => 0,
             ]);
 
-            static::delete(['id' => $papeleraId]);
-
-            $pdo->commit();
-            return true;
-        } catch (\Throwable $e) {
-            if ($pdo->inTransaction()) $pdo->rollBack();
-            error_log('Error restaurando recurso: ' . $e->getMessage());
-            return false;
-        }
+            // Eliminamos el registro de la papelera
+            return $registro->delete();
+        });
     }
 
     /** Elimina definitivamente un registro de la papelera. */
     public static function eliminarDefinitivo(int $papeleraId): bool {
-        return static::delete(['id' => $papeleraId]);
+        $registro = self::find($papeleraId);
+        return $registro ? $registro->delete() : false;
     }
 
-    /** Vacía toda la papelera. Devuelve la cantidad de registros eliminados. */
+    /** Vacía toda la papelera. */
     public static function vaciar(): int {
-        $count = static::count();
-        Conexion::conectar()->exec("DELETE FROM recursos_papelera");
-        return $count;
+        $cantidad = self::count();
+        self::truncate(); // Borra todo de forma eficiente
+        return $cantidad;
     }
 }

@@ -1,18 +1,21 @@
 <?php
 use aplicacion\controladores\DiscipuladoController;
+use aplicacion\core\Middleware;
 
 $controller = new DiscipuladoController();
+// 1. Procesar acciones (Asignar/Quitar integrante)
 $controller->manejarPeticion();
 
+// 2. Obtener datos mediante Eloquent
 $datos = $controller->obtenerDatosVista('DiscipuladoIntegrantes');
 
-// Aseguramos que siempre sean arreglos, incluso si el DAO falla
-$integrantes = $datos['integrantes'] ?? [];
-$todos_miembros = $datos['todos_miembros'] ?? []; 
-$todos_grupos = $datos['todos_grupos'] ?? [];    
-$discipuladores = $datos['discipuladores'] ?? []; 
+$integrantes = $datos['integrantes']; // Colección de objetos DiscipuladoIntegrante
+$todos_miembros = $datos['todos_miembros'];
+$todos_grupos = $datos['todos_grupos'];
+$discipuladores = $datos['discipuladores'];
 
-$total_integrantes = count($integrantes);
+$total_integrantes = $integrantes->count();
+$csrfToken = Middleware::csrfGenerate();
 ?>
 
 <link rel="stylesheet" href="public/css/Discipulado.css">
@@ -49,8 +52,8 @@ $total_integrantes = count($integrantes);
             <select id="filtroLider" onchange="filtrarTablaIntegrantes()">
                 <option value="todos">Todos los Discipuladores</option>
                 <?php foreach($discipuladores as $d): ?>
-                    <option value="<?= $d['id'] ?>">
-                        <?= htmlspecialchars($d['nombre'] ?? '') ?>
+                    <option value="<?= $d->id ?>">
+                        <?= htmlspecialchars($d->nombres . ' ' . $d->apellidos) ?>
                     </option>
                 <?php endforeach; ?>
             </select>
@@ -69,19 +72,18 @@ $total_integrantes = count($integrantes);
                 </tr>
             </thead>
             <tbody id="cuerpoTablaIntegrantes">
-                <?php if (empty($integrantes)): ?>
+                <?php if ($integrantes->isEmpty()): ?>
                     <tr class="no-data-row">
                         <td colspan="5" class="no-data-table" style="text-align:center; padding:30px;">No hay integrantes asignados.</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($integrantes as $i): 
-                        // Limpiamos los datos para evitar errores de null
-                        $nombreMiembro = $i['miembro_nombre'] ?? 'Sin Nombre';
-                        $nombreGrupo   = $i['grupo_nombre'] ?? 'Sin Grupo';
-                        $nivelGrupo    = $i['grupo_nivel'] ?? '-';
-                        $idLider       = $i['discipulador_id'] ?? '';
-                        $nombreLider   = $i['discipulador_nombre'] ?? 'No asignado';
-                        $relacionId    = $i['relacion_id'] ?? 0;
+                        // Acceso vía relaciones Eloquent
+                        $nombreMiembro = $i->miembro->nombres . ' ' . $i->miembro->apellidos;
+                        $nombreGrupo   = $i->grupo->nombre ?? 'Sin Grupo';
+                        $nivelGrupo    = $i->grupo->nivel ?? '-';
+                        $idLider       = $i->grupo->discipulador_id ?? '';
+                        $nombreLider   = $i->grupo->discipulador ? ($i->grupo->discipulador->nombres . ' ' . $i->grupo->discipulador->apellidos) : 'No asignado';
                     ?>
                     <tr class="fila-integrante" 
                         data-nombre="<?= strtolower(htmlspecialchars($nombreMiembro)) ?>"
@@ -90,7 +92,7 @@ $total_integrantes = count($integrantes);
                         
                         <td>
                             <div class="user-info">
-                                <div class="avatar-circle"><?= strtoupper(substr($nombreMiembro, 0, 1)) ?></div>
+                                <div class="avatar-circle"><?= strtoupper(substr($i->miembro->nombres, 0, 1)) ?></div>
                                 <span><?= htmlspecialchars($nombreMiembro) ?></span>
                             </div>
                         </td>
@@ -102,7 +104,7 @@ $total_integrantes = count($integrantes);
                             </span>
                         </td>
                         <td style="text-align:center;">
-                            <a href="dashboard?seccion=DiscipuladoIntegrantes&quitar_integrante=<?= $relacionId ?>" 
+                            <a href="dashboard?seccion=DiscipuladoIntegrantes&quitar_integrante=<?= $i->id ?>" 
                                class="btn-remove" 
                                onclick="return confirm('¿Quitar a este miembro del grupo?')">
                                 <i class="fas fa-user-minus"></i> Quitar
@@ -124,24 +126,24 @@ $total_integrantes = count($integrantes);
         </div>
 
         <form method="POST" action="dashboard?seccion=DiscipuladoIntegrantes">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
+            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
             <div class="modal-body-unified">
                 <div class="form-group">
                     <label><i class="fas fa-users"></i> 1. Busque y Seleccione los Miembros</label>
                     <select name="miembro_id[]" class="select2-buscable" multiple="multiple" required style="width:100%">
                         <?php foreach($todos_miembros as $m): ?>
-                            <option value="<?= $m['id'] ?>"><?= htmlspecialchars($m['nombre'] ?? '') ?></option>
+                            <option value="<?= $m->id ?>"><?= htmlspecialchars($m->nombres . ' ' . $m->apellidos) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
 
                 <div class="form-group" style="position: relative;">
-                    <label><i class="fas fa-layer-group"></i> 2. Escriba o seleccione el Grupo de Destino</label>
+                    <label><i class="fas fa-layer-group"></i> 2. Seleccione el Grupo de Destino</label>
                     <input type="text" id="buscarGrupoInput" class="form-select-standard" placeholder="Escriba el nombre del grupo..." autocomplete="off" required>
                     <div id="listaGruposResultados" class="custom-dropdown-results">
                         <?php foreach($todos_grupos as $g): ?>
-                            <div class="grupo-item" data-id="<?= $g['id'] ?>">
-                                <?= htmlspecialchars($g['nombre'] ?? '') ?> <span>(Nivel <?= htmlspecialchars($g['nivel'] ?? '') ?>)</span>
+                            <div class="grupo-item" data-id="<?= $g->id ?>">
+                                <?= htmlspecialchars($g->nombre) ?> <span>(Nivel <?= htmlspecialchars($g->nivel) ?>)</span>
                             </div>
                         <?php endforeach; ?>
                     </div>

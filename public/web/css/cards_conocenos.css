@@ -1,0 +1,88 @@
+
+/* ========================= */
+/* CARDS INFORMACIÓN (CONÓCENOS) */
+/* ========================= */
+
+.info-section {
+    padding: 70px 5%;
+    background: #ffffff;
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.titulo-seccion {
+    font-size: 28px;
+    margin-bottom: 35px;
+    color: #1e293b;
+    font-weight: 700;
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* CONTENEDOR */
+.cards-container {
+    display: flex;
+    gap: 30px; /* Reducido el espacio gigante de 70px */
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* CARD BASE (Haciendo las tarjetas más estilizadas y horizontales/proporcionales) */
+.card {
+    position: relative;
+    width: 350px; /* Reducido de 450px */
+    height: 240px; /* Reducido de 350px para romper el aspecto gigante */
+    border-radius: 10px;
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* IMAGEN DE FONDO */
+.card-fe { background: url('../imagenes/fe.jpg') center/cover no-repeat; }
+.card-mision { background: url('../imagenes/mision.png') center/cover no-repeat; }
+.card-valores { background: url('../imagenes/valores.jpg') center/cover no-repeat; }
+.card-creemos { background: url('../imagenes/valores.jpg') center/cover no-repeat; }
+
+/* OVERLAY (Sofisticado desde el inicio) */
+.card .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4); /* Capa azul oscuro transparente permanente para leer texto */
+    transition: 0.3s ease;
+}
+
+/* CONTENIDO */
+.card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 25px 20px;
+    color: #fff;
+    text-align: left;
+    z-index: 2;
+}
+
+.card-content h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.card-content p {
+    font-size: 14px;
+    opacity: 0.85;
+    line-height: 1.4;
+}
+
+/* HOVER CARDS CONÓCENOS */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(15, 23, 42, 0.15);
+}
+
+.card:hover .overlay {
+    background: rgba(15, 23, 42, 0.6); /* Se oscurece un pelín más al pasar el mouse */
+}

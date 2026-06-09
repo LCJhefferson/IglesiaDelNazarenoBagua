@@ -1,120 +1,106 @@
 <?php
 namespace aplicacion\controladores;
 
-use aplicacion\dao\DiscipuladoDAO;
+use aplicacion\modelos\GrupoDiscipulado;
+use aplicacion\modelos\IntegranteDiscipulado;
+use aplicacion\modelos\Miembro;
+use aplicacion\modelos\EstadoDiscipulado;
 
 class DiscipuladoController {
-    private $dao;
 
-    public function __construct() {
-        $this->dao = new DiscipuladoDAO();
-    }
-
-    /**
-     * Procesa todas las operaciones POST y GET
-     */
     public function manejarPeticion() {
-        // --- ACCIONES PARA GRUPOS ---
+        // --- GESTIÓN DE GRUPOS ---
         
-        // Registrar o Editar Grupo
-        // Verificamos si vienen las llaves 'registrar_grupo' o 'editar_grupo' desde el formulario
+        // Registrar o Editar Grupo (¡AQUÍ ESTABA EL ERROR!)
+        // Ahora escucha tanto cuando creas (registrar_grupo) como cuando editas (editar_grupo)
         if (isset($_POST['registrar_grupo']) || isset($_POST['editar_grupo'])) {
             
-            // Recolectamos los datos. Importante: 'id' viene del input hidden 'grupo_id' 
-            // pero su atributo 'name' en el HTML es 'id'
+            // Aseguramos que el ID no esté vacío para que sepa que es una edición
+            $id = !empty($_POST['id']) ? intval($_POST['id']) : null;
+            
             $datos = [
-                'id'              => !empty($_POST['id']) ? intval($_POST['id']) : null,
                 'nombre'          => trim($_POST['nombre']),
-                'nivel'           => $_POST['nivel'],
-                'discipulador_id' => intval($_POST['discipulador_id']),
-                'estado_id'       => intval($_POST['estado_id'])
+                'nivel'           => $_POST['nivel'] ?? 'I',
+                'discipulador_id' => (!empty($_POST['discipulador_id'])) ? intval($_POST['discipulador_id']) : null,
+                'estado_id'       => (!empty($_POST['estado_id'])) ? intval($_POST['estado_id']) : 1 
             ];
 
-            if (isset($_POST['registrar_grupo'])) {
-                // Lógica de Registro
-                $this->dao->registrarGrupo($datos);
-            } else if (isset($_POST['editar_grupo']) && $datos['id'] !== null) {
-                // Lógica de Actualización
-                $this->dao->actualizarGrupo($datos);
+            if ($id) {
+                // Si hay ID, actualizamos
+                GrupoDiscipulado::where('id', $id)->update($datos);
+            } else {
+                // Si no hay ID, creamos uno nuevo
+                GrupoDiscipulado::create($datos);
             }
-            
-            // Redireccionamos para limpiar el POST y evitar re-envíos al actualizar la página
             $this->redireccionar('DiscipuladoGrupos');
         }
+
+        // ... (El resto del código de eliminar_grupo, etc. se queda igual)
 
         // Eliminar Grupo
         if (isset($_GET['eliminar_grupo'])) {
             $id = intval($_GET['eliminar_grupo']);
-            // Asegúrate de que el DAO tenga este método para evitar errores
-            if (method_exists($this->dao, 'eliminarGrupo')) {
-                $this->dao->eliminarGrupo($id);
-            }
+            // Eliminar integrantes vinculados para evitar errores de integridad
+            IntegranteDiscipulado::where('grupo_id', $id)->delete();
+            GrupoDiscipulado::destroy($id);
             $this->redireccionar('DiscipuladoGrupos');
         }
 
-        // --- ACCIONES PARA INTEGRANTES ---
-
-        // Asignar integrante(s) a un grupo (MODIFICADO PARA MULTIPLES)
+        // --- GESTIÓN DE INTEGRANTES ---
+        
+        // Asignar Integrantes
         if (isset($_POST['asignar_integrante'])) {
-            $miembros_ids = $_POST['miembro_id'] ?? []; // Recibe el array de IDs
+            $miembros_ids = $_POST['miembro_id'] ?? [];
             $grupo_id     = intval($_POST['grupo_id']);
-            
-            // Validamos que sea un array y no esté vacío
-            if (is_array($miembros_ids) && !empty($miembros_ids)) {
-                foreach ($miembros_ids as $m_id) {
-                    $id_limpio = intval($m_id);
-                    if ($id_limpio > 0) {
-                        // Registramos cada miembro al mismo grupo
-                        $this->dao->agregarMiembroAGrupo($id_limpio, $grupo_id);
-                    }
-                }
+
+            foreach ($miembros_ids as $m_id) {
+                IntegranteDiscipulado::firstOrCreate([
+                    'miembro_id' => intval($m_id),
+                    'grupo_id'   => $grupo_id
+                ]);
             }
-            
             $this->redireccionar('DiscipuladoIntegrantes');
         }
 
-        // Quitar integrante de un grupo
+        // Quitar Integrante del grupo
         if (isset($_GET['quitar_integrante'])) {
-            $id_relacion = intval($_GET['quitar_integrante']);
-            $this->dao->eliminarIntegranteDeGrupo($id_relacion);
+            IntegranteDiscipulado::destroy(intval($_GET['quitar_integrante']));
             $this->redireccionar('DiscipuladoIntegrantes');
         }
     }
 
-    /**
-     * Prepara los datos para las vistas según la sección
-     */
     public function obtenerDatosVista($seccion) {
-        // Datos comunes que requieren ambas vistas (combos/selects)
         $datos = [
-            'discipuladores' => $this->dao->listarDiscipuladores(),
-            'estados'        => $this->dao->listarEstados()
+            'estados' => EstadoDiscipulado::all(),
+            // Filtrar miembros activos que tengan cargos relacionados con liderazgo
+            'discipuladores' => Miembro::whereHas('cargos', function($q) {
+                $q->where('nombre', 'LIKE', '%Líder%')
+                  ->orWhere('nombre', 'LIKE', '%Discipulador%');
+            })->where('estado', 1)->get()
         ];
 
         if ($seccion === 'DiscipuladoGrupos') {
-            $datos['grupos'] = $this->dao->listarGrupos();
-        } 
-        
+            $datos['grupos'] = GrupoDiscipulado::with(['discipulador', 'estado'])
+                                ->withCount('integrantes')
+                                ->orderBy('id', 'DESC')
+                                ->get();
+        }
+
         if ($seccion === 'DiscipuladoIntegrantes') {
-            // Capturamos filtros de la URL para persistencia si fuera necesario
-            $busqueda = $_GET['busq'] ?? '';
-            $nivel    = $_GET['nivel'] ?? '';
-            $lider    = $_GET['lider'] ?? '';
-            
-            $datos['integrantes']    = $this->dao->listarIntegrantesDetallado($busqueda, $nivel, $lider);
-            $datos['todos_miembros'] = $this->dao->listarTodosMiembrosActivos();
-            $datos['todos_grupos']   = $this->dao->listarGrupos(); 
+            $datos['integrantes'] = IntegranteDiscipulado::with(['miembro', 'grupo.discipulador'])->get();
+            $datos['todos_miembros'] = Miembro::where('estado', 1)->orderBy('nombres')->get();
+            $datos['todos_grupos']   = GrupoDiscipulado::all();
         }
 
         return $datos;
     }
 
     /**
-     * Redirección centralizada
+     * Redirección limpia para evitar que el navegador reenvíe formularios al refrescar
+     * y para que el enrutador de index.php no se pierda.
      */
     private function redireccionar($seccion) {
-        // IMPORTANTE: Verifica que 'dashboard' sea el nombre correcto de tu archivo principal
-        // Usamos una ruta relativa simple para evitar conflictos de carpetas
+        // Importante: No incluir "public/" ni "/" al inicio para que el index.php trabaje bien
         header("Location: dashboard?seccion=" . $seccion);
         exit();
     }

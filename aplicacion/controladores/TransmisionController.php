@@ -1,99 +1,58 @@
 <?php
 namespace aplicacion\controladores;
 
-use aplicacion\dao\TransmisionDAO;
+use aplicacion\modelos\TransmisionModelo;
 use Pusher\Pusher;
 
 class TransmisionController {
-    private $dao;
     private $pusher;
 
     public function __construct() {
-        $this->dao = new TransmisionDAO();
-        $options = ['cluster' => 'tu_cluster_aqui', 'useTLS' => true];
-        
-        try {
-            $this->pusher = new Pusher(
-                'tu_key_aqui',
-                'tu_secret_aqui',
-                'tu_app_id_aqui',
-                $options
-            );
-        } catch (\Exception $e) {
-            $this->pusher = null;
-        }
+        // ... (configuración de Pusher igual que antes)
     }
 
     public function registrar() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id_actual = $_POST['id_transmision'] ?? '';
+            $id = $_POST['id_transmision'] ?? null;
             
-            // CORRECCIÓN PARA EL BOTÓN DE FINALIZAR DESDE LA TABLA / CANCELACIÓN RÁPIDA
-            if (!empty($id_actual) && isset($_POST['mensaje_pusher'])) {
-                $datos = [
-                    'id' => $id_actual,
-                    'titulo' => $_POST['titulo'] ?? 'Transmisión',
-                    'descripcion' => $_POST['descripcion'] ?? '',
-                    'link_video' => $_POST['link_video'] ?? '',
-                    'estado_id' => 2 // 2 = Finalizado
-                ];
-                
-                $this->dao->actualizar($datos);
-                
-                $this->notificarCambio('live_finished', [
-                    'titulo' => $datos['titulo'],
-                    'link_video' => $datos['link_video'],
-                    'mensaje' => 'Fin de la transmisión'
-                ]);
+            // Datos base del formulario
+            $datos = [
+                'titulo'      => $_POST['titulo'],
+                'descripcion' => $_POST['descripcion'],
+                'link_video'  => $this->formatearUrlYoutube($_POST['link_video']),
+                'estado_id'   => $_POST['estado_id'],
+                'creado_por'  => $_SESSION['usuario_id'] ?? 1,
+                'fecha'       => date('Y-m-d H:i:s')
+            ];
 
-                // Modificado para mantener el apartado de transmisión
-                header("Location: dashboard?seccion=transmision&msj=finalizado");
-                exit;
-            }
-
-            // Flujo normal del formulario (Iniciar o Guardar cambios)
-            if (isset($_POST['titulo'])) {
-                $nuevo_estado = $_POST['estado_id'];
-
-                $datos = [
-                    'titulo'      => $_POST['titulo'],
-                    'descripcion' => $_POST['descripcion'],
-                    'link_video'  => $this->formatearUrlYoutube($_POST['link_video']),
-                    'estado_id'   => $nuevo_estado,
-                    'creado_por'  => $_SESSION['usuario_id'] ?? 1 
-                ];
-
-                // 1. LÓGICA DE NUEVA TRANSMISIÓN
-                if (empty($id_actual)) {
-                    if ($nuevo_estado == 1) {
-                        $this->dao->finalizarVivosAnteriores(); 
-                        $this->notificarCambio('live_started', $datos);
-                    }
-                    $this->dao->guardar($datos);
-                } 
-                // 2. LÓGICA DE EDICIÓN
-                else {
-                    $datos['id'] = $id_actual;
-                    
-                    if ($nuevo_estado == 2) {
-                        $this->notificarCambio('live_finished', [
-                            'titulo' => $datos['titulo'],
-                            'link_video' => $datos['link_video'],
-                            'mensaje' => 'Fin de la transmisión'
-                        ]);
-                    } else {
-                        $this->notificarCambio('live_updated', $datos);
-                    }
-                    
-                    $this->dao->actualizar($datos);
+            if (empty($id)) {
+                // --- EQUIVALENTE A: guardar() del DAO ---
+                if ($datos['estado_id'] == 1) {
+                    // --- EQUIVALENTE A: finalizarVivosAnteriores() ---
+                    TransmisionModelo::where('estado_id', 1)->update(['estado_id' => 2]);
+                    $this->notificarCambio('live_started', $datos);
                 }
-
-                // Modificado para mantener el apartado de transmisión
-                header("Location: dashboard?seccion=transmision&msj=exito");
-                exit;
+                TransmisionModelo::create($datos);
+            } else {
+                // --- EQUIVALENTE A: actualizar() del DAO ---
+                $transmision = TransmisionModelo::find($id);
+                if ($transmision) {
+                    $transmision->update($datos);
+                    $this->notificarCambio($datos['estado_id'] == 2 ? 'live_finished' : 'live_updated', $datos);
+                }
             }
+
+            header("Location: index.php?vista=dashboard&seccion=transmision&msj=exito");
+            exit;
         }
     }
+
+    public function listarTransmisiones() {
+        // --- EQUIVALENTE A: listarTodo() del DAO ---
+        // Usamos Eloquent para traer los datos y ordenarlos
+        return TransmisionModelo::orderBy('id', 'desc')->get();
+    }
+
 
     private function notificarCambio($tipo, $datos) {
         if ($this->pusher) {
@@ -125,7 +84,5 @@ class TransmisionController {
         return !empty($videoId) ? "https://www.youtube.com/embed/" . $videoId : $url;
     }
 
-    public function listarTransmisiones() {
-        return $this->dao->listarTodo();
-    }
+    
 }

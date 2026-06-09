@@ -4,23 +4,32 @@ use aplicacion\controladores\MiembroController;
 $controller = new MiembroController();
 $controller->manejarPeticion(); 
 
-$miembros = $controller->listarMiembros();
+$miembros = $controller->listarMiembros(); 
 $cargos = $controller->obtenerCargos();
 $condiciones = $controller->obtenerCondiciones();
 $tipos = $controller->obtenerTipos();
 
-// Estadísticas dinámicas con mitigación de nulos
-$activos = count(array_filter($miembros, fn($m) => (int)($m['estado'] ?? 1) === 1));
-$inactivos = count(array_filter($miembros, fn($m) => (int)($m['estado'] ?? 1) === 0));
-$externos = count(array_filter($miembros, fn($m) => (int)($m['tipo_miembro_id'] ?? 1) !== 1 && (int)($m['estado'] ?? 1) === 1));
+function getProp($item, $key) {
+    return is_object($item) ? ($item->$key ?? '') : ($item[$key] ?? '');
+}
 
-// Pastores y Líderes basados en el texto del cargo (más seguro si los IDs cambian)
-$pastores = count(array_filter($miembros, fn($m) => (str_contains(strtolower($m['cargo_nombre'] ?? ''), 'pastor') && (int)$m['estado'] === 1)));
-$lideres = count(array_filter($miembros, fn($m) => (str_contains(strtolower($m['cargo_nombre'] ?? ''), 'lider') && (int)$m['estado'] === 1)));
+$activos = $miembros->where('estado', 1)->count();
+$inactivos = $miembros->where('estado', 0)->count();
+
+$externos = $miembros->filter(function($m) {
+    return (int)getProp($m, 'tipo_miembro_id') !== 1 && (int)getProp($m, 'estado') === 1;
+})->count();
+
+$pastores = $miembros->filter(function($m) {
+    return getProp($m, 'estado') == 1 && $m->cargos->contains(fn($c) => str_contains(strtolower(getProp($c, 'nombre')), 'pastor'));
+})->count();
+
+$lideres = $miembros->filter(function($m) {
+    return getProp($m, 'estado') == 1 && $m->cargos->contains(fn($c) => str_contains(strtolower(getProp($c, 'nombre')), 'lider'));
+})->count();
 
 $fechaHoy = date('Y-m-d'); 
 ?>
-
 
 <div class="header">
     <h2><i class="fa-solid fa-users"></i> Gestión de Membresía</h2>
@@ -60,21 +69,21 @@ $fechaHoy = date('Y-m-d');
     <select id="filtroTipo" onchange="filtrarTabla()">
         <option value="">Todos los Orígenes</option>
         <?php foreach($tipos as $t): ?>
-            <option value="<?= htmlspecialchars($t['nombre'] ?? '') ?>"><?= htmlspecialchars($t['nombre'] ?? '') ?></option>
+            <option value="<?= htmlspecialchars(getProp($t, 'nombre')) ?>"><?= htmlspecialchars(getProp($t, 'nombre')) ?></option>
         <?php endforeach; ?>
     </select>
 
     <select id="filtroRol" onchange="filtrarTabla()">
         <option value="">Todos los Roles</option>
         <?php foreach($cargos as $c): ?>
-            <option value="<?= htmlspecialchars($c['nombre'] ?? '') ?>"><?= htmlspecialchars(ucfirst($c['nombre'] ?? '')) ?></option>
+            <option value="<?= htmlspecialchars(getProp($c, 'nombre')) ?>"><?= htmlspecialchars(ucfirst(getProp($c, 'nombre'))) ?></option>
         <?php endforeach; ?>
     </select>
 
     <select id="filtroEstado" onchange="filtrarTabla()">
+        <option value="">Ver Todos</option>
         <option value="1">Solo Activos</option>
         <option value="0">Solo Inactivos</option>
-        <option value="">Ver Todos</option>
     </select>
 </div>
 
@@ -89,74 +98,66 @@ $fechaHoy = date('Y-m-d');
             <th>Acciones</th>
         </tr>
     </thead>
-    <tbody id="tablaCuerpo">
-        <?php foreach($miembros as $m): ?>
-        <tr data-estado="<?= $m['estado'] ?? '1' ?>">
-            <td>
-                <div style="display: flex; flex-direction: column;">
-                    <strong><?= htmlspecialchars(($m['nombres'] ?? '') . " " . ($m['apellidos'] ?? '')) ?></strong>
-                    <small style="color: #64748b;">
-                        <i class="fa-solid fa-church"></i> 
-                        <span class="col-tipo"><?= htmlspecialchars($m['tipo_nombre'] ?? 'Local') ?></span> 
-                    </small>
-                </div>
-            </td>
-            <td><?= htmlspecialchars($m['telefono'] ?? 'S/N') ?></td>
-            <td class="col-rol">
-                <?php 
-                if (!empty($m['cargo_nombre'])) {
-                    // Separar los cargos si hay varios
-                    $listaCargos = explode(', ', $m['cargo_nombre']);
-                    foreach ($listaCargos as $nombreCargo) {
-                        $nombreCargo = trim($nombreCargo);
-                        $slug = strtolower($nombreCargo);
-                        // Determinar clase de color
+<tbody id="tablaCuerpo">
+    <?php foreach($miembros as $m): ?>
+    <tr data-estado="<?= getProp($m, 'estado') ?>">
+        <td>
+            <div style="display: flex; flex-direction: column;">
+                <strong><?= htmlspecialchars(getProp($m, 'nombres') . " " . getProp($m, 'apellidos')) ?></strong>
+                <small style="color: #64748b;">
+                    <i class="fa-solid fa-church"></i> 
+                    <span class="col-tipo"><?= htmlspecialchars($m->tipo->nombre ?? 'Sin Origen') ?></span>
+                </small>
+            </div>
+        </td>
+        <td><?= htmlspecialchars(getProp($m, 'telefono') ?: 'S/N') ?></td>
+
+        <td class="col-rol">
+            <?php if ($m->cargos && $m->cargos->count() > 0): ?>
+                <?php foreach ($m->cargos as $cargo): ?>
+                    <?php 
+                        $slug = strtolower(getProp($cargo, 'nombre'));
                         $claseColor = 'cargo-default';
                         if(str_contains($slug, 'pastor')) $claseColor = 'cargo-pastor';
                         elseif(str_contains($slug, 'lider')) $claseColor = 'cargo-lider';
-                        elseif(str_contains($slug, 'maestro')) $claseColor = 'cargo-maestro';
-                        elseif(str_contains($slug, 'evangelista')) $claseColor = 'cargo-evangelista';
-                        elseif(str_contains($slug, 'discipulador')) $claseColor = 'cargo-discipulador';
-                        elseif(str_contains($slug, 'miembro')) $claseColor = 'cargo-miembro';
-                        
-                        echo "<span class='badge-cargo " . htmlspecialchars($claseColor, ENT_QUOTES) . "'>" . htmlspecialchars($nombreCargo, ENT_QUOTES) . "</span>";
-                    }
-                } else {
-                    // Si no tiene cargos asignados, se muestra como Miembro por defecto
-                    echo "<span class='badge-cargo cargo-miembro'>Miembro</span>";
-                }
-                ?>
-            </td>
-            <td class="col-condicion"><?= htmlspecialchars($m['condicion_nombre'] ?? 'Saludable') ?></td>
-            <td>
-                <?php if((int)($m['estado'] ?? 1) === 1): ?>
-                    <span style="color: #28a745; font-weight: bold;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Activo</span>
-                <?php else: ?>
-                    <span style="color: #dc3545; font-weight: bold;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Inactivo</span>
-                <?php endif; ?>
-            </td>
-            <td>
-                <button class="btn editar" onclick='editar(<?= json_encode($m) ?>)'>
-                    <i class="fa-solid fa-pen"></i>
-                </button>
-                <a class="btn <?= (int)($m['estado'] ?? 1) === 1 ? 'eliminar' : 'editar' ?>" 
-                   href="index.php?vista=dashboard&seccion=membresia&<?= (int)($m['estado'] ?? 1) === 1 ? 'eliminar' : 'activar' ?>=<?= $m['id'] ?>" 
-                   style="<?= (int)($m['estado'] ?? 1) === 0 ? 'background: #28a745; color: white;' : '' ?>"
-                   onclick="return confirm('¿Confirmar cambio de estado?')">
-                    <i class="fa-solid <?= (int)($m['estado'] ?? 1) === 1 ? 'fa-user-slash' : 'fa-user-plus' ?>"></i>
-                </a>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+                    ?>
+                    <span class="badge-cargo <?= $claseColor ?>"><?= htmlspecialchars(getProp($cargo, 'nombre')) ?></span>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <span class="badge-cargo cargo-miembro">Miembro</span>
+            <?php endif; ?>
+        </td>
 
-<div class="modal" id="modal">
+        <td class="col-condicion"><?= htmlspecialchars($m->condicion->nombre ?? 'Saludable') ?></td>
+        
+        <td>
+            <?php if((int)getProp($m, 'estado') === 1): ?>
+                <span style="color: #28a745; font-weight: bold;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Activo</span>
+            <?php else: ?>
+                <span style="color: #8d8b8b; font-weight: bold;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Inactivo</span>
+            <?php endif; ?>
+        </td>
+        <td>
+            <button class="btn editar" onclick='editar(<?= json_encode($m) ?>)'>
+                <i class="fa-solid fa-pen"></i>
+            </button>
+            
+            <a class="btn <?= (int)getProp($m, 'estado') === 1 ? 'eliminar' : 'editar' ?>" 
+            href="javascript:void(0)" 
+            style="<?= (int)getProp($m, 'estado') === 0 ? 'background: #28a745; color: white;' : '' ?>"
+            onclick="showConfirm('index.php?vista=dashboard&seccion=membresia&<?= (int)getProp($m, 'estado') === 1 ? 'eliminar' : 'activar' ?>=<?= getProp($m, 'id') ?>')">
+                <i class="fa-solid <?= (int)getProp($m, 'estado') === 1 ? 'fa-user-slash' : 'fa-user-plus' ?>"></i>
+            </a>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+</tbody>
+
+<div class="modal" id="modal" style="display:none;">
     <div class="modal-box">
         <h3 id="tituloModal"><i class="fa-solid fa-user-plus"></i> Gestionar Miembro</h3>
-       
         <form method="POST" id="formMiembro" action="index.php?vista=dashboard&seccion=membresia">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES) ?>">
             <input type="hidden" name="id">
             <div class="grid">
                 <div class="form-group">
@@ -179,7 +180,7 @@ $fechaHoy = date('Y-m-d');
                     <label>Origen / Tipo:</label>
                     <select name="tipo_miembro_id" id="tipo_miembro_id" required>
                         <?php foreach($tipos as $t): ?>
-                            <option value="<?= $t['id'] ?>"><?= htmlspecialchars($t['nombre'] ?? '') ?></option>
+                            <option value="<?= getProp($t, 'id') ?>"><?= htmlspecialchars(getProp($t, 'nombre')) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -187,7 +188,7 @@ $fechaHoy = date('Y-m-d');
                     <label>Cargos / Funciones:</label>
                     <select name="cargos[]" id="cargos_select" class="form-control" multiple="multiple" style="width: 100%;">
                         <?php foreach($cargos as $c): ?>
-                            <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['nombre'] ?? '') ?></option>
+                            <option value="<?= getProp($c, 'id') ?>"><?= htmlspecialchars(getProp($c, 'nombre')) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -196,7 +197,7 @@ $fechaHoy = date('Y-m-d');
                     <select name="condicion_id" required>
                         <option value="">Seleccione Condición</option>
                         <?php foreach($condiciones as $con): ?>
-                            <option value="<?= $con['id'] ?>"><?= htmlspecialchars(ucfirst($con['nombre'] ?? '')) ?></option>
+                            <option value="<?= getProp($con, 'id') ?>"><?= htmlspecialchars(ucfirst(getProp($con, 'nombre'))) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -208,10 +209,15 @@ $fechaHoy = date('Y-m-d');
                     </select>
                 </div>
                 <div class="form-group" style="grid-column: span 2;">
-                    <label>Dirección:</label>
-                    <div class="campo-mapa">
-                        <input type="text" name="direccion" placeholder="Calle, Jr o Av.">
-                        <button type="button" class="btn-mapa" onclick="abrirMapa()">
+                    <label>Dirección:  "Usar el mapa para mejorar la precision de la ubicacion ya que esta puede no ser exacta"</label>
+                    <div class="campo-mapa" style="display: flex; gap:10px; position: relative;">
+                        <div style="flex-grow: 1; position: relative;">
+                            <input type="text" name="direccion" id="direccion" placeholder="Escribe una calle..." autocomplete="off" style="width: 100%;">
+                            
+                            <ul id="lista-sugerencias" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:1000; background:#fff; border:1px solid #ccc; border-radius:4px; list-style:none; padding:0; margin:0; max-height:200px; overflow-y:auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></ul>
+                        </div>
+
+                        <button type="button" class="btn-mapa" onclick="abrirMapa()" style="padding: 10px; background:#4f6ef7; color:white; border:none; border-radius:5px; cursor:pointer;">
                             <i class="fa-solid fa-map-location-dot"></i>
                         </button>
                     </div>
@@ -233,87 +239,46 @@ $fechaHoy = date('Y-m-d');
             </div>
         </form>
     </div>
-
-
-<!-- Modal para selección de ubicación en el mapa usando leaflet-->
-
+</div>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-
-<style>
-    .modal-mapa { 
-        display: none; 
-        position: fixed; 
-        z-index: 2000;
-        left: 0; 
-        top: 0;
-        width: 100%; 
-        height: 100%;
-        background: rgba(0,0,0,0.7); /* Oscurecemos más el fondo para resaltar el mapa */
-        backdrop-filter: blur(4px); /* Efecto de desenfoque al fondo */
-    }
-
-    .modal-mapa-box { 
-        background: white; 
-        width: 95%; /* Ocupa casi todo el ancho disponible */
-        max-width: 1400px; /* Aumentado a 1400px para una vista panorámica */
-        margin: 2vh auto; /* Margen pequeño arriba y abajo */
-        padding: 20px; 
-        border-radius: 15px; 
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    }
-
-    #mapa-seleccionar { 
-        height: 75vh; /* 75% de la altura de la ventana para que no se corte */
-        width: 100%; 
-        border-radius: 10px; 
-        margin-top: 10px;
-        border: 1px solid #cbd5e1;
-    }
-
-    /* Buscador de Leaflet más robusto */
-    .leaflet-control-geocoder {
-        min-width: 450px !important; /* Más ancho para ver direcciones largas */
-        font-size: 16px;
-        border: 2px solid #4f6ef7 !important;
-        border-radius: 8px !important;
-    }
-
-    /* Ajuste para que los botones no se peguen al borde inferior */
-    .modal-footer-mapa {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-        justify-content: flex-end;
-    }
-    /* Filtro opcional para que el mapa se vea aún más vibrante si usas OSM estándar */
-/* Pero con la capa CartoDB Light_All ya se verá muy limpio por defecto */
-
-.leaflet-container {
-    background: #f1f5f9 !important; /* Fondo del contenedor antes de cargar el mapa */
-}
-
-/* Hacer que el marcador azul de la iglesia destaque */
-.leaflet-marker-icon {
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-}
-</style>
 
 <div id="modalMapa" class="modal-mapa">
     <div class="modal-mapa-box">
         <h3><i class="fa-solid fa-map-location-dot"></i> Seleccionar Ubicación</h3>
         <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">Usa el buscador o haz clic en el mapa para marcar la ubicación exacta.</p>
-        
         <div id="mapa-seleccionar"></div>
-        
         <div style="display:flex; gap:10px; margin-top:20px; justify-content: flex-end;">
             <button type="button" onclick="cerrarModalMapa()" style="background:#dee2e6; color:#495057; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">Cancelar</button>
             <button type="button" onclick="confirmarUbicacion()" style="background:#4f6ef7; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">Guardar Ubicación</button>
         </div>
+
     </div>
 </div>
 
+<div id="customConfirm" class="modal-confirm">
+    <div class="modal-confirm-box">
+        <div class="modal-confirm-icon">
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+
+        <h3 class="modal-confirm-title">¿Estás seguro?</h3>
+        
+        <p id="confirmMessage" class="modal-confirm-text">
+            ¿Realmente deseas cambiar el estado de este miembro?
+        </p>
+        
+        <div class="modal-confirm-buttons">
+            <button onclick="closeConfirm()" class="btn-cancel">
+                Cancelar
+            </button>
+            <button id="btnConfirmAction" class="btn-confirm">
+                Sí, confirmar
+            </button>
+        </div>
+    </div>
 </div>

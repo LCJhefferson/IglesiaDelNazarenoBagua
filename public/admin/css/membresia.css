@@ -391,3 +391,107 @@ input:focus,select:focus{
 .select2-search__field::placeholder {
     color: #94a3b8 !important;
 }
+
+
+    .modal-mapa { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
+    .modal-mapa-box { background: white; width: 95%; max-width: 1400px; margin: 2vh auto; padding: 20px; border-radius: 15px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+    #mapa-seleccionar { height: 75vh; width: 100%; border-radius: 10px; margin-top: 10px; border: 1px solid #cbd5e1; }
+    .leaflet-control-geocoder { min-width: 450px !important; font-size: 16px; border: 2px solid #4f6ef7 !important; border-radius: 8px !important; }
+
+
+
+
+    /* Contenedor principal del modal (Fondo oscuro) */
+.modal-confirm {
+    display: none; /* Se activa con JS */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2500;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(2px); /* Efecto de desenfoque al fondo */
+}
+
+/* La caja blanca del mensaje */
+.modal-confirm-box {
+    background: white;
+    padding: 35px;
+    border-radius: 20px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    animation: zoomIn 0.3s ease; /* Animación de entrada */
+}
+
+.modal-confirm-icon {
+    color: #ffc107;
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.modal-confirm-title {
+    margin-bottom: 10px;
+    font-size: 1.6rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.modal-confirm-text {
+    color: #64748b;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+/* Contenedor de botones */
+.modal-confirm-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+/* Botón Cancelar */
+.btn-cancel {
+    background: #e2e8f0;
+    color: #475569;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: #cbd5e1;
+}
+
+/* Botón Confirmar */
+.btn-confirm {
+    background: #4f6ef7;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(79, 110, 247, 0.3);
+}
+
+.btn-confirm:hover {
+    background: #3b5bdb;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(79, 110, 247, 0.4);
+}
+
+/* Animación de entrada suave */
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}

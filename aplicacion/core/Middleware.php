@@ -1,6 +1,6 @@
 <?php
 namespace aplicacion\core;
-
+use aplicacion\core\Response;
 class Middleware {
 
     /**
@@ -56,6 +56,25 @@ class Middleware {
     private static function startSession(): void {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
+        }
+
+        // --- CONTROL DE INACTIVIDAD ---
+        $tiempoMaximo = 1800; // 30 minutos en segundos (ajústalo a tu gusto)
+
+        if (isset($_SESSION['usuario'])) {
+            if (isset($_SESSION['ultima_actividad'])) {
+                $vidaSesion = time() - $_SESSION['ultima_actividad'];
+
+                if ($vidaSesion > $tiempoMaximo) {
+                    // La sesión caducó por tiempo
+                    session_unset();
+                    session_destroy();
+                    header('Location: /IglesiaDelNazarenoBagua/login?error=3'); // O un error específico para "Sesión expirada"
+                    exit;
+                }
+            }
+            // Si está activo, renovamos su marca de tiempo en cada clic/petición
+            $_SESSION['ultima_actividad'] = time();
         }
     }
 }

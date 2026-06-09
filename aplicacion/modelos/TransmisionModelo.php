@@ -1,22 +1,14 @@
 <?php
 namespace aplicacion\modelos;
 
-class TransmisionModelo {
-    public $id;
-    public $titulo;
-    public $descripcion;
-    public $link_video;
-    public $fecha;
-    public $creado_por;
-    public $estado_id;
+use Illuminate\Database\Eloquent\Model;
 
-    public function __construct($data = []) {
-        $this->id = $data['id'] ?? null;
-        $this->titulo = $data['titulo'] ?? null;
-        $this->descripcion = $data['descripcion'] ?? null;
-        $this->link_video = $data['link_video'] ?? null;
-        $this->fecha = $data['fecha'] ?? null;
-        $this->creado_por = $data['creado_por'] ?? null;
-        $this->estado_id = $data['estado_id'] ?? null;
-    }
+class TransmisionModelo extends Model {
+    protected $table = 'transmisiones';
+    protected $primaryKey = 'id';
+    public $timestamps = false; // Ya que usas 'fecha' manualmente
+
+    protected $fillable = [
+        'titulo', 'descripcion', 'link_video', 'estado_id', 'creado_por', 'fecha'
+    ];
 }

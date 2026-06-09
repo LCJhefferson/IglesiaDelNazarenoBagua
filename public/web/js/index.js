@@ -24,12 +24,11 @@ if (slides.length > 0) {
     const dots    = document.querySelectorAll(".carrusel-dots .dot");
     const btnPrev = document.querySelector(".carrusel-btn.prev");
     const btnNext = document.querySelector(".carrusel-btn.next");
-    const GAP     = 24;
+    const GAP     = 20; // Ajustado a 20 para sincronizarse con el CSS
 
     let actual   = 0;
     let autoPlay = null;
 
-    /* Cuántas cards caben según el ancho */
     function calcPorVista() {
         const w = window.innerWidth;
         if (w <= 480)  return 1;
@@ -39,7 +38,6 @@ if (slides.length > 0) {
         return 5;
     }
 
-    /* Ajusta el ancho de cada item dinámicamente */
     function ajustarAnchosItems() {
         const porVista   = calcPorVista();
         const contenedor = track.parentElement.offsetWidth;
@@ -49,31 +47,25 @@ if (slides.length > 0) {
         });
     }
 
-    /* Desplazamiento de un item */
     function getDesplazamiento() {
         if (items.length === 0) return 0;
         return items[0].offsetWidth + GAP;
     }
 
-    /* Máximo índice posible */
     function maxSlide() {
         return Math.max(0, total - calcPorVista());
     }
 
-    /* Ir a un slide específico */
     function irA(index) {
         actual = Math.max(0, Math.min(index, maxSlide()));
         track.style.transform = `translateX(-${actual * getDesplazamiento()}px)`;
 
-        /* Actualizar dots */
         dots.forEach((d, i) => d.classList.toggle("activo", i === actual));
 
-        /* Deshabilitar botones en los extremos */
         if (btnPrev) btnPrev.disabled = actual === 0;
         if (btnNext) btnNext.disabled = actual >= maxSlide();
     }
 
-    /* Auto-play */
     function iniciarAutoPlay() {
         autoPlay = setInterval(() => {
             irA(actual >= maxSlide() ? 0 : actual + 1);
@@ -84,7 +76,6 @@ if (slides.length > 0) {
         clearInterval(autoPlay);
     }
 
-    /* Funciones globales para los botones y dots del HTML */
     window.moverCarrusel = function(direccion) {
         detenerAutoPlay();
         irA(actual + direccion);
@@ -97,7 +88,6 @@ if (slides.length > 0) {
         iniciarAutoPlay();
     };
 
-    /* Soporte táctil (swipe) */
     let touchStartX = 0;
     track.addEventListener("touchstart", (e) => {
         touchStartX = e.touches[0].clientX;
@@ -112,13 +102,11 @@ if (slides.length > 0) {
         }
     }, { passive: true });
 
-    /* Recalcular al cambiar tamaño de ventana */
     window.addEventListener("resize", () => {
         ajustarAnchosItems();
         irA(actual);
     });
 
-    /* Inicializar */
     ajustarAnchosItems();
     irA(0);
     iniciarAutoPlay();

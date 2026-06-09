@@ -1,49 +1,55 @@
 <?php
 namespace aplicacion\controladores;
 
-use aplicacion\dao\UserDAO;
+// Importamos el modelo de Eloquent
+use aplicacion\modelos\Usuario;
 
 class AuthController {
 
     private const URL_BASE = '/IglesiaDelNazarenoBagua/';
-    private UserDAO $dao;
-
-    public function __construct() {
-        $this->dao = new UserDAO();
-    }
 
     public function login(): void {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('login');
         }
+
+        // Verificamos el token de seguridad
         \aplicacion\core\Middleware::csrfVerify();
 
-        $usuario  = trim($_POST['usuario']  ?? '');
-        $password = trim($_POST['password'] ?? '');
+        // 1. CAPTURAMOS LOS CAMPOS (Usando 'usuario' como viene de tu formulario)
+        $usuarioVal  = trim($_POST['usuario']  ?? '');
+        $passwordVal = trim($_POST['password'] ?? '');
 
-        if (empty($usuario) || empty($password)) {
+        // Validación de campos vacíos
+        if (empty($usuarioVal) || empty($passwordVal)) {
             $this->redirect('login?error=1');
         }
 
-        $resultado = $this->dao->buscarParaLogin($usuario);
+        $user = Usuario::where('username', $usuarioVal)
+                       ->where('estado', 'activo')
+                       ->first();
 
-        if (!$resultado) {
-            $this->redirect('login?error=3');
+        if (!$user) {
+            $this->redirect('login?error=3'); // Usuario no existe o inactivo
         }
 
-        if (!password_verify($password, $resultado['password'])) {
-            $this->redirect('login?error=2');
+        if (!password_verify($passwordVal, $user->password)) {
+            $this->redirect('login?error=2'); // Contraseña incorrecta
         }
 
         session_regenerate_id(true);
-        $_SESSION['usuario']    = $resultado['username'];
-        $_SESSION['rol_id']     = $resultado['id_rol'];
-        $_SESSION['rol_nombre'] = $resultado['rol_nombre'];
+        $_SESSION['usuario']    = $user->username;
+        $_SESSION['usuario_id'] = $user->id;
+        $_SESSION['rol_id']     = $user->id_rol;
 
-        if (in_array((int) $resultado['id_rol'], [1, 2], true)) {
+        // INICIALIZAMOS EL TIEMPO (Añade esta línea)///////////////////////////
+        $_SESSION['ultima_actividad'] = time();
+
+        if (in_array((int) $user->id_rol, [1, 2], true)) {
             $this->redirect('dashboard');
         } else {
             $this->redirect('login?error=3');
@@ -57,21 +63,6 @@ class AuthController {
         session_unset();
         session_destroy();
         $this->redirect('login');
-    }
-
-    public function registrar(): void {
-        $controller = new RegistroController();
-        $ok = $controller->registrar(
-            $_POST['username'] ?? '',
-            $_POST['password'] ?? '',
-            (int) ($_POST['rol']   ?? 3),
-            $_POST['estado']   ?? 'activo'
-        );
-
-        $this->redirect($ok
-            ? 'dashboard?seccion=usuarios_admin&exito=1'
-            : 'dashboard?seccion=usuarios_admin&error=1'
-        );
     }
 
     private function redirect(string $ruta): void {

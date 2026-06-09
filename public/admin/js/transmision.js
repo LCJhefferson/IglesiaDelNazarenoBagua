@@ -72,7 +72,6 @@ function actualizarMonitor(url) {
 }
 
 function prepararNueva() {
-    // Resetear formulario y ID para que sea un INSERT
     document.getElementById('formId').value = "";
     document.getElementById('formTitulo').value = "";
     document.getElementById('formDesc').value = "";
@@ -85,7 +84,6 @@ function prepararNueva() {
     document.getElementById('formActionTitle').innerText = "Nueva Transmisión";
     document.getElementById('btnAccionPrincipal').innerHTML = '<i class="fa-solid fa-play"></i> Iniciar y Notificar';
     
-    // Limpiar vista previa
     document.getElementById('monitorTitulo').innerText = "Título del Evento";
     document.getElementById('monitorDesc').innerText = "Descripción de la transmisión...";
     document.getElementById('monitorVideo').src = "";
@@ -102,7 +100,6 @@ function cargarParaEditar(data) {
     const selectEstado = document.getElementById('formEstado');
     selectEstado.value = data.estado_id;
 
-    // REGLA: Si está finalizada (2), bloquear cambio de estado
     if (data.estado_id == 2) {
         selectEstado.disabled = true;
         document.getElementById('formActionTitle').innerText = "Editando Transmisión Finalizada";
@@ -159,10 +156,6 @@ function ejecutarEnvio() {
     }
 }
 
-
-/**
- * FINALIZACIÓN RÁPIDA DESDE TABLA 
- */
 function abrirModalFinalizar(id, titulo) {
     const modal = document.getElementById('modalConfirmar');
     const texto = document.getElementById('textoModal');
@@ -173,22 +166,19 @@ function abrirModalFinalizar(id, titulo) {
     btnConfirmar.onclick = () => {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = ''; // Recarga la misma URL del módulo actual
+        form.action = ''; 
 
-        // 1. CAPTURAR EL TOKEN CSRF DEL FORMULARIO EXISTENTE EN LA VISTA
         const csrfInputExistente = document.querySelector('input[name="csrf_token"]');
         const tokenValor = csrfInputExistente ? csrfInputExistente.value : '';
 
-        // 2. AGREGAR EL CSRF_TOKEN AL OBJETO DE PARÁMETROS
         const params = {
-            'csrf_token': tokenValor, // ◄ LLAVE DE SEGURIDAD VITAL INYECTADA
+            'csrf_token': tokenValor, 
             'id_transmision': id,
-            'estado_id': '2', // Finalizado
+            'estado_id': '2',
             'titulo': titulo,
             'mensaje_pusher': 'Fin de la transmisión'
         };
 
-        // 3. CONSTRUIR E INYECTAR LOS CAMPOS EN EL FORMULARIO DINÁMICO
         for (const key in params) {
             const input = document.createElement('input');
             input.type = 'hidden';
@@ -198,7 +188,7 @@ function abrirModalFinalizar(id, titulo) {
         }
 
         document.body.appendChild(form);
-        form.submit(); // Envío seguro de la mutación de estado
+        form.submit(); 
     };
     
     modal.style.display = 'flex';

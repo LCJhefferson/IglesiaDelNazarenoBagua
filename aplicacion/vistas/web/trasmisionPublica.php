@@ -1,12 +1,8 @@
 <?php
-// Incluimos la conexión para la carga inicial rápida
-require_once __DIR__ . '/../../../aplicacion/config/Conexion.php';
-use aplicacion\config\Conexion;
+use aplicacion\modelos\TransmisionModelo;
 
-$db = Conexion::conectar();
-// Buscamos si hay alguna transmisión activa (Estado 1)
-$stmt = $db->query("SELECT * FROM transmisiones WHERE estado_id = 1 LIMIT 1");
-$live = $stmt->fetch(PDO::FETCH_ASSOC);
+// Buscamos si hay alguna transmisión activa (Estado 1) usando Eloquent
+$live = TransmisionModelo::where('estado_id', 1)->first();
 ?>
 
 <!DOCTYPE html>
@@ -15,7 +11,9 @@ $live = $stmt->fetch(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Transmisión en Vivo - Iglesia del Nazareno</title>
     <link rel="stylesheet" href="<?= URL ?>public/web/css/nav.css">
+    <link rel="stylesheet" href="<?= URL ?>public/web/css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     
     <style>
@@ -107,13 +105,13 @@ $live = $stmt->fetch(PDO::FETCH_ASSOC);
             
             <div id="live-header" style="<?= $live ? 'display:block;' : 'display:none;' ?>">
                 <h2><span class="dot-live"></span> EN VIVO AHORA</h2>
-                <h1 id="live-title"><?= htmlspecialchars($live['titulo'] ?? '') ?></h1>
+                <h1 id="live-title"><?= $live ? htmlspecialchars($live->titulo) : '' ?></h1>
             </div>
 
             <div id="player-wrapper">
                 <?php if ($live): ?>
                     <div class="video-container">
-                        <iframe id="main-iframe" src="<?= $live['link_video'] ?>?autoplay=1" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                        <iframe id="main-iframe" src="<?= htmlspecialchars($live->link_video) ?>?autoplay=1" allow="autoplay; fullscreen" allowfullscreen></iframe>
                     </div>
                 <?php else: ?>
                     <div class="video-container empty-bg">
@@ -134,11 +132,14 @@ $live = $stmt->fetch(PDO::FETCH_ASSOC);
             <?php if ($live): ?>
                 <div class="info-card">
                     <h4>Descripción del servicio</h4>
-                    <p><?= nl2br(htmlspecialchars($live['descripcion'] ?? 'Sin descripción disponible.')) ?></p>
+                    <p><?= $live->descripcion ? nl2br(htmlspecialchars($live->descripcion)) : 'Sin descripción disponible.' ?></p>
                 </div>
             <?php endif; ?>
         </div>
     </div>
+
+    <?php include __DIR__ . '/componentes/footer.php'; ?>
+    
 
     <script>
         // Configuración de Pusher
