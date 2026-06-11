@@ -5,7 +5,7 @@ body {
 }
 
 .admin-container {
-  min-height: 100vh;
+  min-height: auto;
   display: flex;
 }
 

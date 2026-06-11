@@ -1,5 +1,113 @@
+/* ══════════════════════════════
+BARRA SUPERIOR
+══════════════════════════════ */
+
+.barra-superior{
+background: linear-gradient(
+135deg,
+#152847 0%,
+#1e3a63 100%
+);
+
+color: #ffffff;
+padding: 28px 35px;
+border-radius: 18px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 30px;
+border: 1px solid rgba(255,255,255,.08);
+box-shadow:
+    0 10px 25px rgba(0,0,0,.12);
+}
+
+/* INFORMACIÓN */
+
+.barra-info h1{
+margin: 0;
+font-size: 28px;
+font-weight: 700;
+display: flex;
+align-items: center;
+gap: 12px;
+color: #ffffff;
+}
+
+.barra-info p{
+margin: 8px 0 0;
+font-size: 14px;
+color: rgba(255,255,255,.85);
+}
+
+/* ACCIONES */
+
+.barra-acciones{
+display: flex;
+align-items: center;
+gap: 15px;
+}
+
+/* BADGE */
+
+.badge-info{
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 10px 16px;
+background: rgba(255,255,255,.12);
+border-radius: 999px;
+font-size: 14px;
+font-weight: 600;
+color: #ffffff;
+}
+
+.badge-info i{
+opacity: .9;
+}
+
+/* BOTÓN SECUNDARIO */
+
+.boton-secundario{
+background: rgba(255,255,255,.12);
+color: #ffffff;
+border: 1px solid rgba(255,255,255,.15);
+padding: 12px 20px;
+border-radius: 10px;
+cursor: pointer;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 8px;
+transition: all .25s ease;
+}
+
+.boton-secundario:hover{
+background: rgba(255,255,255,.18);
+transform: translateY(-2px);
+box-shadow:
+    0 8px 20px rgba(0,0,0,.15);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px){
+.barra-superior{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+}
+.barra-acciones{
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.barra-info h1{
+    font-size: 24px;
+}
+}
+
 /* =========================================================================
-   ESTILOS BASE E INTERFAZ GENERAL
+   ESTILOS BASE
    ========================================================================= */
 body { 
     font-family: 'Segoe UI', sans-serif; 
@@ -7,17 +115,7 @@ body {
     margin: 20px; 
     color: #1e293b; 
 }
-.header-seccion { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    margin-bottom: 25px; 
-}
-h1 { 
-    margin: 0; 
-    font-size: 1.6rem; 
-    color: #0f172a; 
-}
+
 
 /* =========================================================================
    TARJETAS DE ESTADÍSTICAS

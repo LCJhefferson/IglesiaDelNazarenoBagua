@@ -35,97 +35,106 @@ body {
     font-family: 'DM Sans', sans-serif;
     background: var(--fondo);
     color: var(--texto);
-    padding: 20px;
     transition: background 0.3s, color 0.3s;
 }
 
-/* =========================================
-   TOP BAR
-   ========================================= */
-.top-bar {
-    background: var(--blanco);
-    padding: 15px 25px;
-    border-radius: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 98%;
-    margin: 0 auto 25px auto;
-    box-shadow: var(--sombra);
-    border: 1px solid var(--borde);
-    transition: background 0.3s, border-color 0.3s;
+/* ══════════════════════════════
+BARRA SUPERIOR - NOTICIAS
+══════════════════════════════ */
+
+.barra-superior{
+background: linear-gradient(
+135deg,
+#152847 0%,
+#1e3a63 100%
+);
+
+color: white;
+padding: 28px 35px;
+border-radius: 18px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 30px;
+border: 1px solid rgba(255,255,255,.08);
+box-shadow:
+    0 10px 25px rgba(0,0,0,.12);
 }
 
-.top-bar-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.barra-info h1{
+margin:0;
+font-size:28px;
+font-weight:700;
+display:flex;
+align-items:center;
+gap:12px;
 }
 
-.top-bar-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.barra-info p{
+margin:8px 0 0;
+font-size:14px;
+opacity:.85;
 }
 
-.top-bar h2 {
-    font-size: 1.3rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.barra-acciones{
+display:flex;
+align-items:center;
+gap:15px;
 }
 
-.badge-contador {
-    background: #eff6ff;
-    color: var(--acento);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    min-width: 36px;
-    text-align: center;
+.badge-info{
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px 16px;
+background:rgba(255,255,255,.12);
+border-radius:999px;
+font-size:14px;
+font-weight:600;
 }
 
-.btn-tema {
-    background: var(--fondo);
-    border: 1px solid var(--borde);
-    color: var(--suave);
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    transition: all 0.3s;
+#badge-total{
+background:rgba(255,255,255,.2);
+padding:4px 10px;
+border-radius:999px;
+min-width:28px;
+text-align:center;
 }
 
-.btn-tema:hover {
-    background: var(--acento);
-    color: white;
-    border-color: var(--acento);
+.boton-primario{
+background:#2563eb;
+color:white;
+border:none;
+padding:12px 20px;
+border-radius:10px;
+cursor:pointer;
+font-weight:600;
+display:flex;
+align-items:center;
+gap:8px;
+transition:.25s ease;
 }
 
-.btn-nuevo {
-    background: var(--acento);
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: 0.3s;
-    font-family: 'DM Sans', sans-serif;
+.boton-primario:hover{
+transform:translateY(-2px);
+
+box-shadow:
+    0 8px 20px rgba(37,99,235,.25);
 }
 
-.btn-nuevo:hover {
-    background: var(--acento-hover);
-    transform: translateY(-1px);
+@media (max-width:768px){
+.barra-superior{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:20px;
 }
+
+.barra-acciones{
+    width:100%;
+    flex-wrap:wrap;
+}
+}
+
 
 /* =========================================
    LAYOUT PRINCIPAL

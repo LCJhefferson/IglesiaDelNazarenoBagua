@@ -10,25 +10,27 @@ $datos = $controller->obtenerDatosVista('DiscipuladoGrupos');
 $grupos = $datos['grupos']; 
 $discipuladores = $datos['discipuladores'];
 $estados = $datos['estados'];
-
-// NOTA: Si esta línea te sigue dando error de "Undefined method", 
-// cámbiala temporalmente por: $csrfToken = '';
 $csrfToken = Middleware::csrfGenerate();
 ?>
 
 <link rel="stylesheet" href="css/DiscipuladoGrupos.css">
 
-<div class="gestion-container">
-    <div class="header-section">
-        <div>
-            <h2><i class="fas fa-users-cog"></i> Gestión de Grupos</h2>
-            <p style="color: #6b7a99; font-size: 0.9rem;">Administra los grupos de estudio y sus niveles.</p>
-        </div>
-        <button class="btn-nuevo" onclick="abrirModalGrupo()">
-            <i class="fas fa-plus"></i> Crear Nuevo Grupo
-        </button>
-    </div>
+   
+ <header class="barra-superior">
+<div class="barra-info">
+    <h1><i class="fas fa-users-cog"></i>Gestión de Grupos    </h1>
+    <p>Administra los grupos de discipulado, niveles de formación y responsables.</p>
+</div>
+<div class="barra-acciones">
+    <button class="boton boton-primario" onclick="abrirModalGrupo()">
+        <i class="fas fa-plus"></i>
+        Crear Nuevo Grupo
+    </button>
+</div>
+</header>
 
+
+<div class="gestion-container">
     <div class="filter-bar">
         <input type="text" id="buscarGrupo" onkeyup="filtrarGrupos()" placeholder="Buscar por nombre de grupo...">
         

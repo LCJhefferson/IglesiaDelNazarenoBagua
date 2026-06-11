@@ -9,8 +9,14 @@
 </head>
 <body>
 
-<header>
-    <h1>Vista General de Miembros</h1>
+ <header class="barra-superior">
+<div class="barra-info">
+    <h1><i class="fas fa-users-cog"></i>Vista General de Miembros</h1>
+    <p>Ver la ubicacion reguistrada por Miembro</p>
+</div>
+</header>
+
+<div class="conteiner_map">
     <div class="filtros">
         <div class="contenedor">
             <label for="buscarNombre">Filtrar por nombre</label>
@@ -30,7 +36,7 @@
             </select>
         </div>
     </div>
-</header>
+</div>
 
 <div id="map"></div>
 

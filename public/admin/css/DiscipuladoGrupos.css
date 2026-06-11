@@ -1,45 +1,91 @@
+/* ══════════════════════════════
+BARRA SUPERIOR - GRUPOS
+══════════════════════════════ */
+
+.barra-superior{
+background: linear-gradient(
+135deg,
+#152847 0%,
+#1e3a63 100%
+);
+color: white;
+padding: 28px 35px;
+border-radius: 18px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 30px;
+border: 1px solid rgba(255,255,255,.08);
+box-shadow:
+    0 10px 25px rgba(0,0,0,.12);
+}
+
+.barra-info h1{
+margin: 0;
+font-size: 28px;
+font-weight: 700;
+display: flex;
+align-items: center;
+gap: 12px;
+}
+
+.barra-info p{
+margin: 8px 0 0;
+font-size: 14px;
+opacity: .85;
+}
+
+.barra-acciones{
+display: flex;
+align-items: center;
+gap: 15px;
+}
+
+.boton-primario{
+background: #2563eb;
+color: white;
+border: none;
+padding: 12px 20px;
+border-radius: 10px;
+cursor: pointer;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 8px;
+transition: .25s ease;
+
+}
+
+.boton-primario:hover{
+transform: translateY(-2px);
+
+box-shadow:
+    0 8px 20px rgba(37,99,235,.25);
+}
+
+@media (max-width:768px){
+.barra-superior{
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+}
+.barra-acciones{
+    width: 100%;
+}
+}
+
+
+
 /* ==========================================
-   CONTENEDOR Y ESTRUCTURA
+   CONTENEDOR 
    ========================================== */
 .gestion-container {
-    padding: 30px;
     background-color: #f0f2f7; /* Color de fondo suave solicitado */
     min-height: 100vh;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-.header-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-}
 
-.header-section h2 {
-    color: #1a1f36; /* Azul muy oscuro para títulos */
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0;
-}
-
-/* Botón Principal - Verde Sólido (#2f9e44) */
-.btn-nuevo {
-    background-color: #2f9e44;
-    color: #ffffff;
-    border: none;
-    padding: 14px 28px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 6px rgba(47, 158, 68, 0.2);
-}
-
-.btn-nuevo:hover {
-    background-color: #2b8a3e; /* Oscurecimiento sutil del verde */
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(47, 158, 68, 0.3);
-}
 /* ==========================================
    BARRA DE FILTROS - DISCIPULADO GRUPOS
    ========================================== */

@@ -34,21 +34,29 @@ foreach($transmisiones as $t) {
 </head>
 <body>
 
-<div class="contenedor">
-    <div class="header">
-        <div class="titulo"><i class="fa-solid fa-video"></i> Panel de Control de Transmisión</div>
-        <div style="display:flex; gap:10px; align-items:center;">
-            <button type="button" class="btn-nueva" onclick="prepararNueva()" style="background:#2563eb; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:600;">
-                <i class="fa-solid fa-plus"></i> Nueva Transmisión
-            </button>
-            <div class="badge <?= $hayVivo ? 'activo' : 'inactivo' ?>">
-                <i class="fa-solid fa-circle <?= $hayVivo ? 'blink' : '' ?>"></i> 
-                <?= $hayVivo ? 'En vivo ahora' : 'Sin transmisión activa' ?>
-            </div>
-        </div>
+<header class="barra-superior">
+    <div class="barra-info">
+        <h1>
+            <i class="fa-solid fa-video"></i>Panel de Control de Transmisión
+        </h1>
+        <p>Administra transmisiones en vivo, programas y eventos de la iglesia.</p>
     </div>
+    <div class="barra-acciones">
+        <div class="badge <?= $hayVivo ? 'activo' : 'inactivo' ?>">
+            <i class="fa-solid fa-circle <?= $hayVivo ? 'blink' : '' ?>"></i>
+            <?= $hayVivo ? 'En vivo ahora' : 'Sin transmisión activa' ?>
+        </div>
+        <button type="button" class="boton boton-primario" onclick="prepararNueva()">
+            <i class="fa-solid fa-plus"></i>
+            Nueva Transmisión
+        </button>
+    </div>
+</header>
 
-    <div class="grid">
+
+    
+    
+        <div class="grid">
         <div class="card">
             <div class="video-container">
                 <iframe id="monitorVideo" class="video" src="<?= $preview ? htmlspecialchars($preview->link_video) : '' ?>" allowfullscreen allow="autoplay" style="<?= !$preview || empty($preview->link_video) ? 'display:none;' : '' ?>"></iframe>
