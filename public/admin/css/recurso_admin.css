@@ -41,13 +41,13 @@ html, body {
     min-height: 100vh;
 }
 
-.barra-superior {
+.barra-superior_recursos {
     padding: 24px 44px 0;
     display: flex;
     align-items: center;
     gap: 16px;
 }
-.barra-superior .eyebrow {
+.barra-superior_recursos .eyebrow {
     font-family: var(--serif);
     font-size: 14px;
     color: var(--texto-suave);
@@ -55,7 +55,7 @@ html, body {
     text-transform: uppercase;
     font-weight: 500;
 }
-.barra-superior .relleno { flex: 1; }
+.barra-superior_recursos .relleno { flex: 1; }
 
 .barra-busqueda-header {
     position: relative;

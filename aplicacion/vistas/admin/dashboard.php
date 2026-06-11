@@ -76,6 +76,7 @@ $scripts = [
     <title>Panel Admin | Iglesia del Nazareno</title>
     
     <link rel="stylesheet" href="admin/css/dashboard.css">
+    <link rel="stylesheet" href="admin/css/componentes.css">
     <link rel="stylesheet" href="admin/css/sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

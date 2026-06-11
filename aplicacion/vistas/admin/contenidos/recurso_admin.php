@@ -215,7 +215,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
 ], $archivos)) ?>;
 </script>
 
-<header class="barra-superior">
+<header class="barra-superior_recursos">
     <div class="eyebrow" id="eyebrowPagina">Comunidad · Recursos</div>
     <div class="relleno"></div>
 
