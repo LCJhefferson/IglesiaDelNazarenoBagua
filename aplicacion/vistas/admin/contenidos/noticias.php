@@ -28,7 +28,8 @@ if(isset($_POST['guardar'])){
 }
 
 $noticias = $controller->mostrarNoticias();
-$total = count($noticias);
+$TotalVisibles = $noticias->where('estado', 1)->count();
+$TotalOcultas = $noticias->where('estado',2)->count();
 $fecha_actual = date("Y-m-d\TH:i");
 ?>
 
@@ -36,20 +37,34 @@ $fecha_actual = date("Y-m-d\TH:i");
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
 
-<!-- TOP BAR -->
-<div class="top-bar">
-    <div class="top-bar-left">
-        <h2><i class="fa-solid fa-newspaper"></i> Panel de Noticias</h2>
-        <span class="badge-contador" id="badge-total">0</span>
-        <span class="badge-total-real" style="display:none"><?= $total ?></span>
-    </div>
-    <div class="top-bar-right">
-       
-        <button class="btn-nuevo" onclick="abrirModal()">
-            <i class="fa-solid fa-plus"></i> Nueva Noticia
-        </button>
-    </div>
+<header class="barra-superior">
+<div class="barra-info">
+    <h1>
+        <i class="fa-solid fa-newspaper"></i>
+        Panel de Noticias
+    </h1>
+    <p>
+        Administra, publica y organiza las noticias y comunicados de la iglesia.
+    </p>
 </div>
+<div class="barra-acciones">
+    <div class="badge-info">
+        <i class="fa-solid fa-file-lines"></i>
+        <span class="badge-total-real" ><?= $TotalVisibles ?></span>
+        Noticias Activas
+    </div>
+    <div class="badge-info">
+        <i class="fa-solid fa-file-lines"></i>
+        <span class="badge-total-real" ><?= $TotalOcultas ?></span>
+        Noticias Inactivas
+    </div>
+    <button class="boton boton-primario" onclick="abrirModal()">
+        <i class="fa-solid fa-plus"></i>
+        Nueva Noticia
+    </button>
+</div>
+</header>
+
 
 <!-- CONTENEDOR PRINCIPAL -->
 <div class="contenedor">

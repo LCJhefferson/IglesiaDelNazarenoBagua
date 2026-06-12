@@ -31,18 +31,37 @@ $lideres = $miembros->filter(function($m) {
 $fechaHoy = date('Y-m-d'); 
 ?>
 
-<div class="header">
-    <h2><i class="fa-solid fa-users"></i> Gestión de Membresía</h2>
-    <button class="nuevo" onclick="abrirModal()">
-        <i class="fa-solid fa-user-plus"></i> Nuevo Miembro
+<header class="barra-superior">
+<div class="barra-info">
+    <h1>
+        <i class="fa-solid fa-newspaper"></i>
+        Gestión de Membresía
+    </h1>
+    <p>
+        Creacion y administracionde miembros de la Iglesia Del Nazareno
+    </p>
+</div>
+<div class="barra-acciones">
+    <div class="badge-info">
+        <i class="fa-solid fa-user-check"></i>
+        <span class="badge-total-real" ><?= $activos ?></span>
+        Miembros Activos
+    </div>
+    <div class="badge-info">
+        <i class="fa-solid fa-user-xmark"></i>
+        <span class="badge-total-real"><?= $inactivos ?></span>
+        Miembros Inactivos
+    </div>
+    <button class="boton boton-primario" onclick="abrirModal()">
+        <i class="fa-solid fa-plus"></i>
+        Nuevo Miembro
     </button>
 </div>
+</header>
+
+
 
 <div class="cards">
-    <div class="card" style="border-left: 5px solid #28a745;">
-        <i class="fa-solid fa-user-check icono" style="color: #28a745;"></i>
-        <div><h3><?= $activos ?></h3><p>Activos</p></div>
-    </div>
     <div class="card" style="border-left: 5px solid #4f6ef7;">
         <i class="fa-solid fa-user-tie icono" style="color: #4f6ef7;"></i>
         <div><h3><?= $pastores ?></h3><p>Pastores</p></div>
@@ -54,10 +73,6 @@ $fechaHoy = date('Y-m-d');
     <div class="card" style="border-left: 5px solid #6f42c1;">
         <i class="fa-solid fa-earth-americas icono" style="color: #6f42c1;"></i>
         <div><h3><?= $externos ?></h3><p>Externos</p></div>
-    </div>
-    <div class="card" style="border-left: 5px solid #dc3545;">
-        <i class="fa-solid fa-user-xmark icono" style="color: #dc3545;"></i>
-        <div><h3><?= $inactivos ?></h3><p>Inactivos</p></div>
     </div>
 </div>
 

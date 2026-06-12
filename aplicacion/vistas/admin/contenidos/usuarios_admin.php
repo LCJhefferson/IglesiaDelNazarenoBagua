@@ -24,7 +24,6 @@ $usuarios = DB::table('usuarios')->get();
 $total_usuarios       = $usuarios->count();
 $total_activos         = $usuarios->where('estado', 'activo')->count();
 $total_inactivos       = $usuarios->where('estado', 'inactivo')->count();
-$total_deshabilitados = 0; 
 
 // ── MAPAS DE DISEÑO ──
 $etiqueta_rol = ['1' => 'Admin', '2' => 'Pastor'];
@@ -33,21 +32,41 @@ $color_avatar = ['1' => '#38d9a9', '2' => '#4f6ef7'];
 $etiqueta_estado = ['activo' => 'Activo', 'inactivo' => 'Inactivo'];
 $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'];
 ?>
-
-
-
 <!-- ── BARRA SUPERIOR ── -->
+
 <header class="barra-superior">
-    <h1>Gestión de Usuarios</h1>
+<div class="barra-info">
+    <h1>
+        <i class="fa-solid fa-newspaper"></i>
+        Gestión de Usuarios
+    </h1>
+    <p>
+        Creacion y administracionde miembros de la Iglesia Del Nazareno
+    </p>
+</div>
+<div class="barra-acciones">
+    <div class="badge-info">
+        <i class="fa-solid fa-user-check"></i>
+        <span class="badge-total-real" ><?= $total_activos ?></span>
+        Usuario Activos
+    </div>
+    <div class="badge-info">
+        <i class="fa-solid fa-user-xmark"></i>
+        <span class="badge-total-real"><?= $total_inactivos  ?></span>
+        Usuarios Inactivos
+    </div>
     <button class="boton boton-primario" onclick="abrirModalCrear()">
         <i class="fa-solid fa-user-plus"></i> Nuevo usuario
     </button>
+</div>
 </header>
+
+
 
 <!-- ── CONTENIDO PRINCIPAL ── -->
 <main class="area-contenido">
 
-    <!-- ESTADÍSTICAS -->
+    <!-- ESTADÍSTICAS 
     <div class="cuadricula-estadisticas">
         <div class="tarjeta-estadistica">
             <div class="icono-estadistica azul"><i class="fa-solid fa-users"></i></div>
@@ -70,15 +89,8 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
                 <div class="etiqueta">Inactivos</div>
             </div>
         </div>
-        <div class="tarjeta-estadistica">
-            <div class="icono-estadistica rojo"><i class="fa-solid fa-ban"></i></div>
-            <div class="datos-estadistica">
-                <div class="valor"><?= $total_deshabilitados ?></div>
-                <div class="etiqueta">Deshabilitados</div>
-            </div>
-        </div>
     </div>
-
+    -->
     <!-- TABLA -->
     <div class="contenedor-tabla">
         <div class="cabecera-tabla">

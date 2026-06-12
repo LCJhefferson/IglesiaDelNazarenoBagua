@@ -26,15 +26,18 @@ $visitas = DB::table('visitas as v')
 $nombreUsuario = $_SESSION['usuario'] ?? 'Administrador';
 ?>
 
-<div class="welcome-banner">
-    <div class="welcome-text">
-        <h1>¡Bienvenido de nuevo, <span><?php echo htmlspecialchars($nombreUsuario); ?></span>!</h1>
-        <p>Resumen de actividad - Iglesia del Nazareno Bagua</p>
+<header class="barra-superior">
+    <div class="barra-info">
+    <h1>¡Bienvenido, <span><?php echo htmlspecialchars($nombreUsuario); ?></span>!</h1>
+    <p><i class="fas fa-church"></i> Resumen de actividad - Iglesia del Nazareno Bagua</p>
     </div>
-    <div class="welcome-image">
-        <i class="fas fa-church"></i>
-    </div>
-</div>
+</header>
+
+
+
+
+
+
 
 <div class="stats-grid">
     <div class="stat-card">

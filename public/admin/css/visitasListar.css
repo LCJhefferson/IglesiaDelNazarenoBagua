@@ -1,5 +1,5 @@
 /* =========================================================================
-   ESTILOS BASE E INTERFAZ GENERAL
+   ESTILOS BASE
    ========================================================================= */
 body { 
     font-family: 'Segoe UI', sans-serif; 
@@ -7,17 +7,7 @@ body {
     margin: 20px; 
     color: #1e293b; 
 }
-.header-seccion { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    margin-bottom: 25px; 
-}
-h1 { 
-    margin: 0; 
-    font-size: 1.6rem; 
-    color: #0f172a; 
-}
+
 
 /* =========================================================================
    TARJETAS DE ESTADÍSTICAS

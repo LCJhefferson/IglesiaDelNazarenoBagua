@@ -1,43 +1,12 @@
+
+
 /* ==========================================
-   CONFIGURACIÓN GENERAL
+   CONFIGURACIÓN Contenedor
    ========================================== */
 .gestion-container {
-    padding: 30px;
     background-color: #f0f2f7;
     min-height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.header-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-}
-
-.header-section h2 {
-    color: #1a1f36;
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin: 0;
-}
-
-.btn-nuevo {
-    background-color: #2f9e44;
-    color: #ffffff;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(47, 158, 68, 0.2);
-}
-
-.btn-nuevo:hover {
-    background-color: #2b8a3e;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(47, 158, 68, 0.3);
 }
 
 /* ==========================================

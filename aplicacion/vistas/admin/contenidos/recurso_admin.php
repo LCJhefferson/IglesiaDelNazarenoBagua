@@ -224,7 +224,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
 ], $archivos)) ?>;
 </script>
 
-<header class="barra-superior">
+<header class="barra-superior_recursos">
     <div class="eyebrow" id="eyebrowPagina">Comunidad · Recursos</div>
     <div class="relleno"></div>
 
@@ -277,12 +277,11 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
                 <div class="hero-contenido">
                     <div class="hero-eyebrow">
                         <span class="punto"></span>
-                        Comunidad Parroquial
+                        Iglesia Del Nazareno
                     </div>
                     <h1 class="hero-titulo">Recursos Disponibles</h1>
                     <p class="hero-subtitulo">
-                        Descarga materiales y recursos compartidos por la comunidad.
-                        Catequesis, liturgia, música y documentación institucional en un solo lugar.
+                       Recursos compartidos con la congregación
                     </p>
 
                     <div class="hero-stats">

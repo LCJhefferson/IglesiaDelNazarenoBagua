@@ -3,6 +3,7 @@
    ========================================================================== */
 :root {
     --admin-font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+     --sidebar-width: 300px;
     
     /* Paleta del Sidebar */
     --admin-sidebar-bg: #152847;       /* Azul naval (Base) */
@@ -14,7 +15,7 @@
     --admin-text: #cbd5e1;             /* Gris claro para lectura */
     --admin-text-light: #ffffff;       /* Blanco puro para destacar */
     --admin-accent: #3b82f6;           /* Azul brillante para elementos activos */
-    
+
     /* Área Principal */
     --admin-bg-content: #f8fafc;       /* Gris súper claro para el fondo principal */
 }
@@ -29,7 +30,7 @@
     top: 0;
     left: 0;
     height: 100vh;
-    width: 260px;
+    width:var(--sidebar-width);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -42,7 +43,7 @@
     flex-shrink: 0;
     text-align: center;
     padding: 25px 10px;
-    border-bottom: 1px solid var(--admin-border);
+    border-bottom: none;
 }
 
 .sidebar-logo img {
@@ -65,6 +66,8 @@
     flex-direction: column;
     flex: 1;
     overflow-y: auto;
+    padding: 10px;
+    gap: 4px;
 }
 
 /* Scrollbar sutil para el sidebar */
@@ -73,19 +76,35 @@
 
 /* TÍTULOS DE MENÚ (Desplegables) */
 .menu-title {
-    padding: 15px 25px;
-    cursor: pointer;
-    color: var(--admin-text);
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
+    margin: 2px 8px;
+    border-radius: 12px;
+    padding: 14px 18px;
+    border-left: none;
 }
 
 .menu-title:hover {
-    background: var(--admin-sidebar-hover);
-    color: var(--admin-text-light);
+    background: rgba(255,255,255,0.08);
+    transform: translateX(4px);
+}
+/*para los iconos*/
+.menu-title {
+display: flex;
+align-items: center;
+gap: 12px;
+}
+
+.menu-title i {
+width: 20px;
+text-align: center;
+font-size: 16px;
+opacity: 0.9;
+}
+.menu-title:hover i {
+    color: var(--admin-accent);
 }
 
 /* SUBMENÚS */
+/*
 .submenu {
     max-height: 0;
     overflow: hidden;
@@ -103,7 +122,9 @@
 
 .submenu a {
     display: block;
-    padding: 12px 25px 12px 45px;
+    margin: 2px 12px 2px 24px;
+    border-radius: 10px;
+    padding: 10px 16px;
     color: var(--admin-text);
     text-decoration: none;
     font-size: 14px;
@@ -113,8 +134,10 @@
 .submenu a:hover {
     background: rgba(255, 255, 255, 0.05);
     color: var(--admin-text-light);
-    padding-left: 50px; /* Efecto sutil de movimiento hacia la derecha */
+    background: rgba(255,255,255,.06);
+    transform: translateX(3px);
 }
+    */
 
 /* ENLACES DIRECTOS (Sin submenú) */
 .menu-item .menu-title.direct-link {
@@ -122,7 +145,7 @@
     padding: 15px 25px;
     color: var(--admin-text);                
     text-decoration: none;
-    border-bottom: 1px solid var(--admin-border);
+    border-bottom: none;
     transition: all 0.2s ease;
     border-left: 3px solid transparent;
 }
@@ -134,23 +157,31 @@
 
 /* ÍTEM ACTIVO (Diferenciado para saber dónde estás) */
 .menu-item .menu-title.direct-link.active {
-    background: var(--admin-sidebar-dark);
-    color: var(--admin-accent);                
+    background: linear-gradient(
+        90deg,
+        rgba(59,130,246,.25),
+        rgba(59,130,246,.05)
+    );
+
+    color: white;
     font-weight: 600;
-    border-left: 3px solid var(--admin-accent); /* Línea lateral que marca la sección actual */
+    border-left: none;
+
+    box-shadow:
+        inset 3px 0 0 var(--admin-accent);
 }
 
 /* ==========================================================================
    ÁREA PRINCIPAL (DASHBOARD)
    ========================================================================== */
 .main-area {
-    margin-left: 260px;              
-    width: calc(100% - 260px);      
-    min-height: 100vh;              
-    display: flex;
-    flex-direction: column;
-    font-family: var(--admin-font);
+margin-left: var(--sidebar-width);
+width: calc(100% - var(--sidebar-width));
+min-height: 100vh;
+display: flex;
+flex-direction: column;
 }
+
 
 /* TOPBAR */
 .topbar {

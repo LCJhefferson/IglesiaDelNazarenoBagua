@@ -22,27 +22,6 @@ body {
     color: var(--texto);
     min-height: 100vh;
 }
-
-/* ══════════════════════════════
-   BARRA SUPERIOR
-══════════════════════════════ */
-.barra-superior {
-    background: var(--blanco);
-    padding: 16px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--borde);
-    position: sticky;
-    top: 0;
-    z-index: 50;
-}
-.barra-superior h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
-    color: var(--texto);
-}
-
 /* ══════════════════════════════
    CONTENIDO PRINCIPAL
 ══════════════════════════════ */
@@ -74,7 +53,7 @@ body {
 
 /* ══════════════════════════════
    ESTADÍSTICAS
-══════════════════════════════ */
+
 .cuadricula-estadisticas {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -95,6 +74,7 @@ body {
 .icono-estadistica.rojo    { background: rgba(240,62,62,0.12);   color: var(--peligro); }
 .datos-estadistica .valor   { font-size: 1.6rem; font-weight: 700; line-height: 1; }
 .datos-estadistica .etiqueta { font-size: 0.78rem; color: var(--texto-suave); margin-top: 3px; }
+══════════════════════════════ */
 
 /* ══════════════════════════════
    BARRA DE BÚSQUEDA Y FILTROS

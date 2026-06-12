@@ -20,19 +20,27 @@ $csrfToken = Middleware::csrfGenerate();
 
 <link rel="stylesheet" href="public/css/Discipulado.css">
 
-<div class="gestion-container">
-    <div class="header-section">
-        <div>
-            <h2><i class="fas fa-user-graduate"></i> Integrantes de Discipulado</h2>
-            <p style="color: #6b7a99; font-size: 0.9rem; margin-top: 5px;">
-                Mostrando <span id="filasMostradas"><?= $total_integrantes ?></span> de <?= $total_integrantes ?> registros
-            </p>
+<header class="barra-superior">
+    <div class="barra-info">
+        <h1><i class="fas fa-user-graduate"></i>Integrantes de Discipulado</h1>
+        <p>Gestiona la asignación y seguimiento de los miembros en los grupos de discipulado.</p>
+    </div>
+    <div class="barra-acciones">
+        <div class="badge-info">
+            <i class="fas fa-users"></i>
+            <span id="filasMostradas"><?= $total_integrantes ?></span>
+            integrantes registrados
         </div>
-        <button class="btn-nuevo" onclick="abrirModalAsignar()">
-            <i class="fas fa-user-plus"></i> Asignar Miembro a Grupo
+        <button class="boton boton-primario" onclick="abrirModalAsignar()">
+            <i class="fas fa-user-plus"></i>
+            Asignar Miembro a Grupo
         </button>
     </div>
+</header>
 
+
+
+<div class="gestion-container">
     <div class="filter-bar">
         <div style="flex: 3; position: relative;">
             <input type="text" id="inputBusq" 

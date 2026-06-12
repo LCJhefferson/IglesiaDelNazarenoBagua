@@ -22,25 +22,6 @@ body{
     background:var(--fondo);
 }
 
-/* CONTENEDOR */
-.contenedor{
-    padding:20px;
-}
-
-/* HEADER */
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
-}
-
-.titulo{
-    font-size:22px;
-    font-weight:bold;
-    color:var(--texto);
-}
-
 /* BOTÓN */
 .btn{
     background:var(--primario);

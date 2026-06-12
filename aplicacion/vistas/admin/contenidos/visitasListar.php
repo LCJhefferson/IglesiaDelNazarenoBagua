@@ -5,16 +5,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 
-
-
-//////PROTECTOR PARA MULTI CONTROL Z   XD//1/2//W/D/F/S/C/F/F/
-
-
-
-
-
-
-
 // 1. Definimos el Token CSRF (Ajusta 'csrf_token' al nombre real que uses en tu sistema)
 $csrfToken = $_SESSION['csrf_token'] ?? ''; 
 
@@ -151,12 +141,27 @@ endif;
 // ==========================================
 ?>
 
-<div class="header-seccion">
-    <h1>Seguimiento de Visitas a Miembros</h1>
-    <a href="javascript:void(0);" class="btn-ajustes" onclick="abrirModalAjustes()">
-        <i class="fa-solid fa-gear"></i> Ajustes Rango (<?= $mesesLimiteActual ?> meses)
-    </a>
+<header class="barra-superior">
+<div class="barra-info">
+    <h1>
+        <i class="fa-solid fa-clipboard-check"></i>Seguimiento de Visitas a Miembros
+    </h1>
+    <p>Monitorea las visitas pastorales y realiza seguimiento a los miembros de la congregación</p>
 </div>
+
+<div class="barra-acciones">
+    <div class="badge-info">
+        <i class="fa-solid fa-calendar-days"></i>
+        Rango actual:
+        <?= $mesesLimiteActual ?>
+        meses
+    </div>
+    <button class="boton boton-secundario" onclick="abrirModalAjustes()">
+        <i class="fa-solid fa-gear"></i>Ajustar Rango
+    </button>
+</div>
+</header>
+
 
 <div class="cuadricula-estadisticas" id="contenedor-stats">
   <div class="tarjeta-estadistica"><div class="icono-estadistica verde"><i class="fa-solid fa-circle-check"></i></div><div class="datos-estadistica"><div class="valor"><?= $conteo['reciente'] ?></div><div class="etiqueta">Visitado reciente</div></div></div>

@@ -19,35 +19,7 @@
 body{
     font-family:'DM Sans',sans-serif;
     background:var(--fondo);
-    padding:30px;
     color:var(--texto);
-}
-
-/* HEADER */
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:25px;
-}
-
-.header h2{
-    font-size:1.3rem;
-}
-
-/* BOTON */
-.nuevo{
-    background:var(--acento);
-    color:#fff;
-    padding:10px 18px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
-    transition:.2s;
-}
-.nuevo:hover{
-    background:#3a58e0;
 }
 
 /* CARDS */
