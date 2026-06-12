@@ -138,7 +138,7 @@ $fechaHoy = date('Y-m-d');
             <?php endif; ?>
         </td>
         <td>
-            <button class="btn editar" onclick='editar(<?= json_encode($m) ?>)'>
+            <button class="btn editar" onclick='editar(<?= htmlspecialchars(json_encode($m), ENT_QUOTES, "UTF-8") ?>)'>
                 <i class="fa-solid fa-pen"></i>
             </button>
             

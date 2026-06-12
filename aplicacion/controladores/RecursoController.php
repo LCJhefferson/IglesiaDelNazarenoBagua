@@ -26,6 +26,14 @@ class RecursoController {
 
         // 1. Manejo seguro de subida de archivos
         if (!empty($_FILES['archivo_principal']['name']) && $_FILES['archivo_principal']['error'] === UPLOAD_ERR_OK) {
+            $extension = strtolower(pathinfo($_FILES['archivo_principal']['name'], PATHINFO_EXTENSION));
+            $permitidos = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi', 'xls', 'xlsx', 'ppt', 'pptx', 'gif', 'webp'];
+            
+            if (!in_array($extension, $permitidos, true)) {
+                header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin&error=invalid_extension");
+                exit;
+            }
+
             $carpeta = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/admin/imagenes/recursos/';
             
             if (!is_dir($carpeta)) {

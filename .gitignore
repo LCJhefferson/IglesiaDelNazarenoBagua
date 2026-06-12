@@ -1,0 +1,17 @@
+# Archivos de entorno (contienen credenciales - NO subir al repositorio)
+.env
+.env.local
+.env.production
+
+# Dependencias de Composer
+vendor/
+
+# Archivos temporales y de sistema
+*.log
+*.tmp
+db_check.php
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp

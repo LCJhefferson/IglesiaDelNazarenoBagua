@@ -206,6 +206,15 @@ function tarjeta_publica(array $archivo, string $ruta_base): string {
 </script>
 <?php endif; ?>
 
+<?php if (isset($_GET['error']) && $_GET['error'] === 'invalid_extension'): ?>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const modalErr = document.getElementById('modalErrorExtension');
+        if (modalErr) modalErr.style.display = 'flex';
+    });
+</script>
+<?php endif; ?>
+
 <script>
 var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
     'id'        => (int)$a['id'],
@@ -558,7 +567,9 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
         </button>
         <h3>✏️ Editar archivo</h3>
         <form method="POST" enctype="multipart/form-data">
+            <!--//token de seguridad-->
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
+            <!--//tokens para identificar el archivo-->
             <input type="hidden" name="id"          id="editarId">
             <input type="hidden" name="ruta_actual" id="editarRuta">
             <input type="hidden" name="tipo_actual" id="editarTipoActual">
@@ -651,3 +662,18 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
     <span id="mensajeAviso">Acción completada</span>
 </div>
 
+<div class="superposicion-modal" id="modalErrorExtension" onclick="if(event.target===this) this.style.display='none'" style="display:none; z-index: 9999;">
+    <div class="caja-modal-confirm" style="border-top: 4px solid var(--rojo);">
+        <div class="icono-confirm" style="color: var(--rojo);">🚫</div>
+        <h3 style="color: var(--rojo);">Subida bloqueada por seguridad</h3>
+        <p>
+            El sistema ha rechazado el archivo porque tiene una extensión no permitida. 
+            <br><br>
+            <strong>Podría tratarse de un script dañino, ejecutable (.exe) o malware.</strong>
+            Solo se permiten formatos seguros (PDF, Word, Imágenes y Videos).
+        </p>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:15px;">
+            <button class="boton boton-peligro-solido" onclick="document.getElementById('modalErrorExtension').style.display='none'">Entendido</button>
+        </div>
+    </div>
+</div>

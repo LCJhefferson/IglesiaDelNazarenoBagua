@@ -58,8 +58,8 @@ class Middleware {
             session_start();
         }
 
-        // --- CONTROL DE INACTIVIDAD ---
-        $tiempoMaximo = 1800; // 30 minutos en segundos (ajústalo a tu gusto)
+      
+        $tiempoMaximo = 1800; 
 
         if (isset($_SESSION['usuario'])) {
             if (isset($_SESSION['ultima_actividad'])) {

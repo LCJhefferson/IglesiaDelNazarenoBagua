@@ -61,6 +61,7 @@ if ($vista === 'logout') {
 
 // Datos JSON para el Mapa
 if ($vista === 'visitasMapJSON') {
+    Middleware::auth();
     (new VisitaController())->obtenerDatosMapaJSON();
     exit; 
 }
@@ -73,6 +74,7 @@ $accionesVisitas = [
 ];
 
 if (isset($accionesVisitas[$vista])) {
+    Middleware::auth();
     // Verificamos seguridad antes de procesar
     Middleware::csrfVerify();
     
