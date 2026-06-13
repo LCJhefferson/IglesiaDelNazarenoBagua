@@ -1,0 +1,175 @@
+/* Paleta de colores basada en tu UI institucional */
+:root {
+    --primary-color: #1e3a8a; /* Azul Marino Oscuro */
+    --primary-hover: #172554;
+    --bg-card: #ffffff;
+    --text-color: #1f2937;
+    --gray-border: #e5e7eb;
+    --pdf-color: #ef4444;
+    --excel-color: #10b981;
+    --csv-color: #6b7280;
+}
+
+.titulo-principal {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--gray-border);
+}
+
+.card-reporte {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--gray-border);
+}
+
+.card-reporte h2 {
+    font-size: 18px;
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Grids Avanzados e Individuales para Manejo de Tamaños Eficientes */
+.grid-filtros {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: flex-end;
+}
+
+/* Distribución Proporcional Específica por Formulario */
+.filtros-miembros {
+    grid-template-columns: 2fr 2fr 1fr 1fr; /* Edad min y max ocupan la mitad de espacio */
+}
+
+.filtros-visitas {
+    grid-template-columns: 1fr 1.5fr 1.2fr;
+}
+
+.filtros-discipulado {
+    grid-template-columns: 2fr 1.5fr 1.5fr 1fr; /* Nivel es más compacto */
+}
+
+.filtros-cumpleanos {
+    grid-template-columns: 1.5fr 1.2fr 1.2fr;
+}
+
+/* Componentes de Formulario */
+.grid-filtros label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: 6px;
+}
+
+.grid-filtros select, 
+.grid-filtros input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--text-color);
+    background-color: #f9fafb;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.grid-filtros select:focus, 
+.grid-filtros input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: #fff;
+}
+
+/* Contenedor de Acciones */
+.contenedor-botones {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.btn-exportar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    transition: transform 0.1s, filter 0.2s;
+}
+
+.btn-exportar:active {
+    transform: scale(0.97);
+}
+
+.btn-pdf { background-color: var(--pdf-color); }
+.btn-pdf:hover { filter: brightness(0.9); }
+
+.btn-excel { background-color: var(--excel-color); }
+.btn-excel:hover { filter: brightness(0.9); }
+
+.btn-csv { background-color: var(--csv-color); }
+.btn-csv:hover { filter: brightness(0.9); }
+
+/* Bloque Informativo de Discipulado */
+.info-bloque {
+    background-color: #f0f4ff;
+    border-left: 4px solid var(--primary-color);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 24px;
+    font-size: 14px;
+    color: #1e40af;
+    font-weight: 500;
+}
+
+/* Tablas de Vista Previa Limpias */
+.tabla-preview {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+    text-align: left;
+}
+
+.tabla-preview th {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    font-weight: 500;
+    padding: 12px 16px;
+    text-transform: capitalize;
+}
+
+.tabla-preview td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--gray-border);
+    color: #374151;
+}
+
+.tabla-preview tr:hover {
+    background-color: #f9fafb;
+}
+
+.tabla-preview tbody:empty::after {
+    content: "No hay registros cargados para los filtros seleccionados.";
+    display: block;
+    padding: 20px;
+    color: #9ca3af;
+    font-style: italic;
+    text-align: center;
+}

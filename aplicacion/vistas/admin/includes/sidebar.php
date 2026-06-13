@@ -77,6 +77,12 @@
             Mapa de Visitas
         </a>
     </div>
+      <div class="menu-item">
+        <a href="index.php?vista=dashboard&seccion=reportes" class="menu-title direct-link">
+            <i class="fa-solid fa-file-invoice"></i>
+            Reportes
+        </a>
+    </div>
 
     <div class="menu-item" style="margin-top: auto !important; padding: 20px 0;">
         <a href="index.php?vista=logout" class="menu-title direct-link"

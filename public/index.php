@@ -26,6 +26,7 @@ require_once __DIR__ . '/../aplicacion/config/database.php';
 use aplicacion\core\Middleware;
 use aplicacion\controladores\AuthController;
 use aplicacion\controladores\VisitaController;
+use aplicacion\controladores\ReporteController; // <-- Añadido
 
 // 4. Determinar la vista (Ruta)
 $vista = $_GET['vista'] ?? 'dashboard'; 
@@ -42,6 +43,7 @@ if (empty($vista) || $vista === 'index.php') {
 // -----------------------------------
 
 $raizProyecto = __DIR__ . '/..';
+
 /**
  * 5. ACCIONES DE SISTEMA (Peticiones rápidas o Logout)
  * Se ejecutan antes de cargar cualquier HTML.
@@ -54,9 +56,9 @@ if ($vista === 'logout') {
 }
 
 /**
- * 6. ENDPOINTS DE API / AJAX
- * Si la petición es para el mapa o guardar datos vía AJAX, 
- * respondemos y cortamos la ejecución (exit).
+ * 6. ENDPOINTS DE API / AJAX / DESCARGAS DIRECTAS
+ * Si la petición es para el mapa, datos AJAX o descarga de archivos, 
+ * respondemos y cortamos la ejecución (exit) de inmediato.
  */
 
 // Datos JSON para el Mapa
@@ -64,6 +66,20 @@ if ($vista === 'visitasMapJSON') {
     (new VisitaController())->obtenerDatosMapaJSON();
     exit; 
 }
+
+// === CORRECCIÓN DE REPORTES: Se cambió $seccion por $vista y se movió aquí ===
+if ($vista === 'datos_reporte') {
+    $reporteCtrl = new ReporteController();
+    $reporteCtrl->obtenerDatos();
+    exit;
+}
+
+if ($vista === 'descargar_reporte') {
+    $reporteCtrl = new ReporteController();
+    $reporteCtrl->descargar();
+    exit;
+}
+// ============================================================================
 
 // Procesamiento de Visitas (Guardar / Eliminar)
 $accionesVisitas = [
@@ -84,8 +100,8 @@ if (isset($accionesVisitas[$vista])) {
 }
 
 /**
- * 7. ENRUTADOR DE VISTAS (Renderizado)
- * Decide qué archivo físico cargar.
+ * 7. ENRUTADOR DE VISTAS (Renderizado de interfaces)
+ * Decide qué archivo HTML/PHP principal cargar.
  */
 
 if ($vista === 'procesar_login') {
@@ -117,4 +133,3 @@ if (file_exists($archivoVista)) {
         <a href='dashboard' style='display:inline-block; margin-top:10px;'>Volver al Panel</a>
     </div>";
 }
-
