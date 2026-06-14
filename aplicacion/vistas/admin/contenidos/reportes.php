@@ -1,8 +1,10 @@
- <header class="barra-superior">
-<div class="barra-info">
-    <h1><i class="fas fa-users-cog"></i>Reportes</h1>
-    <p>Reportes por filtro</p>
-</div>
+<link rel="stylesheet" href="reportes.css">
+
+<header class="barra-superior">
+    <div class="barra-info">
+        <h1><i class="fas fa-users-cog"></i>Reportes</h1>
+        <p>Reportes por filtro personalizados</p>
+    </div>
 </header>
 
 <div class="card-reporte">
@@ -10,10 +12,8 @@
     <form id="form-miembros" class="grid-filtros filtros-miembros">
         <div>
             <label>Condición:</label>
-            <select name="condicion" onchange="cargarVistaPrevia('miembros')">
+            <select name="condicion" id="select-condiciones" onchange="cargarVistaPrevia('miembros')">
                 <option value="">Todas</option>
-                <option value="1">Saludable</option>
-                <option value="2">Regular</option>
             </select>
         </div>
         <div>
@@ -25,21 +25,24 @@
             </select>
         </div>
         <div class="campo-corto">
-            <label>Edad Mínima:</label>
+            <label>Edad Mín:</label>
             <input type="number" name="edad_min" oninput="cargarVistaPrevia('miembros')" placeholder="0">
         </div>
         <div class="campo-corto">
-            <label>Edad Máxima:</label>
+            <label>Edad Máx:</label>
             <input type="number" name="edad_max" oninput="cargarVistaPrevia('miembros')" placeholder="100">
         </div>
+        
     </form>
-
+    
     <div class="contenedor-botones">
+        <button type="button" onclick="limpiarFiltrosMiembros()" style="background-color: #ffc117; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+    🗑️ Limpiar Filtros</button>
         <button class="btn-exportar btn-pdf" onclick="descargar('miembros','pdf')">📄 PDF</button>
         <button class="btn-exportar btn-excel" onclick="descargar('miembros','excel')">📊 Excel</button>
         <button class="btn-exportar btn-csv" onclick="descargar('miembros','csv')">📝 CSV</button>
+        
     </div>
-
     <table class="tabla-preview" id="tabla-miembros">
         <thead>
             <tr>
@@ -78,22 +81,19 @@
             </select>
         </div>
         <div>
-            <label>Rango de Tiempo:</label>
-            <select name="meses" onchange="cargarVistaPrevia('visitas')">
-                <option value="">Cualquier fecha</option>
-                <option value="2">Últimos 2 meses</option>
-                <option value="3">Últimos 3 meses</option>
-                <option value="6">Últimos 6 meses</option>
-            </select>
+            <label>Desde:</label>
+            <input type="date" name="fecha_inicio" onchange="cargarVistaPrevia('visitas')">
+        </div>
+        <div>
+            <label>Hasta:</label>
+            <input type="date" name="fecha_fin" onchange="cargarVistaPrevia('visitas')">
         </div>
     </form>
-
     <div class="contenedor-botones">
         <button class="btn-exportar btn-pdf" onclick="descargar('visitas','pdf')">📄 PDF</button>
         <button class="btn-exportar btn-excel" onclick="descargar('visitas','excel')">📊 Excel</button>
         <button class="btn-exportar btn-csv" onclick="descargar('visitas','csv')">📝 CSV</button>
     </div>
-
     <table class="tabla-preview" id="tabla-visitas">
         <thead>
             <tr>
@@ -110,50 +110,43 @@
 
 <div class="card-reporte">
     <h2>Reporte de Discipulado</h2>
-    <form id="form-discipulado" class="grid-filtros filtros-discipulado">
-        <div>
-            <label>Miembro:</label>
-            <select name="miembro_id" onchange="cargarVistaPrevia('discipulado')">
-                <option value="">Todos los integrantes</option>
-            </select>
+    <form id="form-discipulado" class="grid-filtros filtros-discipulado-avanzado">
+        <div class="autocomplete-container" style="position:relative;">
+            <label>Miembro Integrante:</label>
+            <input type="text" id="input-miembro" placeholder="Escribe para buscar miembro..." oninput="ejecutarAutocomplete('miembros', this)">
+            <input type="hidden" name="miembro_id" id="hidden-miembro">
+            <div class="autocomplete-resultados" id="res-miembros"></div>
         </div>
-        <div>
+        <div class="autocomplete-container" style="position:relative;">
             <label>Grupo:</label>
-            <select name="grupo_id" id="d-grupo" onchange="cargarVistaPrevia('discipulado')">
-                <option value="">Todos los grupos</option>
-                <option value="1">Grupo Jericó</option>
-                <option value="2">Grupo Damasco</option>
-            </select>
+            <input type="text" id="input-grupo" placeholder="Escribe para buscar grupo..." oninput="ejecutarAutocomplete('grupos', this)">
+            <input type="hidden" name="grupo_id" id="hidden-grupo">
+            <div class="autocomplete-resultados" id="res-grupos"></div>
+        </div>
+        <div class="autocomplete-container" style="position:relative;">
+            <label>Discipulador:</label>
+            <input type="text" id="input-discipulador" placeholder="Escribe para buscar líder..." oninput="ejecutarAutocomplete('discipuladores', this)">
+            <input type="hidden" name="discipulador_id" id="hidden-discipulador">
+            <div class="autocomplete-resultados" id="res-discipuladores"></div>
         </div>
         <div>
-            <label>Discipulador:</label>
-            <select name="discipulador_id" onchange="cargarVistaPrevia('discipulado')">
+            <label>Estado del Integrante:</label>
+            <select name="estado_alumno" onchange="cargarVistaPrevia('discipulado')">
                 <option value="">Todos</option>
-                <option value="1">Juan Carlos</option>
-            </select>
-        </div>
-        <div class="campo-corto">
-            <label>Nivel:</label>
-            <select name="nivel" onchange="cargarVistaPrevia('discipulado')">
-                <option value="">Todos</option>
-                <option value="1">Nivel 1</option>
-                <option value="2">Nivel 2</option>
+                <option value="proceso">Activo / En proceso</option>
+                <option value="1">Aprobado</option>
+                <option value="0">Desaprobado / Retirado</option>
             </select>
         </div>
     </form>
-
     <div class="contenedor-botones">
         <button class="btn-exportar btn-pdf" onclick="descargar('discipulado','pdf')">📄 PDF</button>
         <button class="btn-exportar btn-excel" onclick="descargar('discipulado','excel')">📊 Excel</button>
         <button class="btn-exportar btn-csv" onclick="descargar('discipulado','csv')">📝 CSV</button>
     </div>
-
-    <div class="info-bloque" id="bloque-meta-discipulado" style="display:none;">
-        <div>Nombre del grupo: <span id="meta-grupo" style="text-decoration: underline;"></span></div>
-        <div>Nivel: <span id="meta-nivel"></span></div>
-        <div>Estado del grupo: <span id="meta-estado"></span></div>
+    <div class="info-bloque" id="bloque-meta-discipulado" style="display:none; background:#f3f4f6; padding:10px; border-radius:5px; margin: 10px 0;">
+        <div>Nombre del grupo: <span id="meta-grupo" style="text-decoration: underline; font-weight:bold;"></span></div>
     </div>
-
     <table class="tabla-preview" id="tabla-discipulado">
         <thead>
             <tr>
@@ -195,13 +188,11 @@
             <input type="date" name="fecha_fin" onchange="cargarVistaPrevia('cumpleanos')">
         </div>
     </form>
-
     <div class="contenedor-botones">
         <button class="btn-exportar btn-pdf" onclick="descargar('cumpleanos','pdf')">📄 PDF</button>
         <button class="btn-exportar btn-excel" onclick="descargar('cumpleanos','excel')">📊 Excel</button>
         <button class="btn-exportar btn-csv" onclick="descargar('cumpleanos','csv')">📝 CSV</button>
     </div>
-
     <table class="tabla-preview" id="tabla-cumpleanos">
         <thead>
             <tr>
@@ -214,3 +205,5 @@
         <tbody></tbody>
     </table>
 </div>
+
+<script src="reportes.js"></script>

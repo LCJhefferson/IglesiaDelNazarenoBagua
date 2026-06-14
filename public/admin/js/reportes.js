@@ -1,121 +1,132 @@
+// OBTENCIÓN DE RUTA DINÁMICA PERFECTA
+const pathSegments = window.location.pathname.split('/');
+const RUTA_PROYECTO = pathSegments[1] ? '/' + pathSegments[1] + '/' : '/';
+const RUTA_BASE = window.location.origin + RUTA_PROYECTO;
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicialización del select de condiciones al cargar la página
+    inicializarCondicionesMiembros();
+});
+
 /**
- * Envía las variables del formulario vía AJAX para obtener la vista previa
- * @param {string} modulo 
+ * Carga las opciones del selector de condiciones desde la Base de Datos
  */
-function cargarVistaPrevia(modulo) {
-    const form = document.getElementById(`form-${modulo}`);
-    if (!form) return;
+function inicializarCondicionesMiembros() {
+    const select = document.getElementById('select-condiciones');
+    if (!select) return;
 
-    const formData = new FormData(form);
-    const params = new URLSearchParams(formData).toString();
-
-    // Llamada dinámica a tu controlador único index/FrontController
-    fetch(`datos_reporte?tipo=${modulo}&${params}`)
-        .then(response => {
-            if (!response.ok) throw new Error("Error en la respuesta del servidor");
-            return response.json();
-        })
-        .then(data => {
-            renderizarTabla(modulo, data);
-        })
-        .catch(error => {
-            console.error(`Error al cargar la vista previa de ${modulo}:`, error);
-        });
+    fetch(`${RUTA_BASE}inicializar_filtros_reporte`)
+    .then(res => {
+        if (!res.ok) throw new Error(`HTTP status: ${res.status}`);
+        return res.json();
+    })
+    .then(data => {
+        select.innerHTML = '<option value="">Todas</option>'; 
+        if (data.condiciones && Array.isArray(data.condiciones)) {
+            data.condiciones.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.nombre; 
+                select.appendChild(opt);
+            });
+        }
+        // REACTIVADO: Carga automática inicial de la tabla al abrir el módulo
+       // cargarVistaPrevia('miembros');
+    })
+    .catch(err => console.error("Error cargando condiciones:", err));
 }
 
 /**
- * Renderiza dinámicamente las filas devueltas por el servidor
- * @param {string} modulo 
- * @param {Object} data 
+ * Renderiza la tabla de vista previa con AJAX de forma global
  */
-function renderizarTabla(modulo, data) {
-    const tbody = document.querySelector(`#tabla-${modulo} tbody`);
-    if (!tbody) return;
-    
-    tbody.innerHTML = ""; // Limpiar tabla previa
+window.cargarVistaPrevia = function(tipo) {
+    if (tipo !== 'miembros') return; 
 
-    // Lógica especial para metadatos del bloque de discipulado
-    if (modulo === 'discipulado') {
-        const metaBloque = document.getElementById('bloque-meta-discipulado');
-        if (data.meta && data.meta.mostrar) {
-            document.getElementById('meta-grupo').textContent = data.meta.grupo || 'N/A';
-            document.getElementById('meta-nivel').textContent = data.meta.nivel || 'N/A';
-            document.getElementById('meta-estado').textContent = data.meta.estado || 'N/A';
-            metaBloque.style.display = 'flex';
-        } else {
-            metaBloque.style.display = 'none';
+    const form = document.getElementById('form-miembros');
+    if (!form) return; 
+
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData);
+    params.append('tipo', 'miembros');
+
+    fetch(`${RUTA_BASE}datos_reporte?${params.toString()}`)
+    .then(res => {
+        if (!res.ok) throw new Error(`HTTP status: ${res.status}`);
+        return res.json();
+    })
+    .then(datos => {
+        const tbody = document.querySelector('#tabla-miembros tbody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = ''; 
+
+        if (!datos || datos.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:15px; color:#888;">No se encontraron registros para los filtros seleccionados</td></tr>`;
+            return;
         }
+
+        datos.forEach(fila => {
+            const tr = document.createElement('tr');
+            
+            // TRADUCCIÓN DEL ORIGEN: 1 = Local, 2 = Externo
+            let origenTexto = 'Otros';
+            if (fila.origen == 1) {
+                origenTexto = 'Local';
+            } else if (fila.origen == 2) {
+                origenTexto = 'Externo';
+            }
+
+            const columnas = [
+                fila.nombre_completo || 'Sin Nombre',
+                fila.telefono || '-',
+                fila.edad !== undefined ? fila.edad : '-',
+                fila.direccion || '-',
+                origenTexto,
+                fila.condicion || 'Sin asignar',
+                fila.estado || 'Activo'
+            ];
+
+            columnas.forEach(texto => {
+                const td = document.createElement('td');
+                td.textContent = texto;
+                tr.appendChild(td);
+            });
+
+            tbody.appendChild(tr);
+        });
+    })
+    .catch(err => console.error("Error cargando vista previa de miembros:", err));
+};
+
+/**
+ * FUNCIÓN NUEVA: Resetea el formulario y limpia la tabla visual por completo
+ */
+window.limpiarFiltrosMiembros = function() {
+    const form = document.getElementById('form-miembros');
+    if (form) {
+        form.reset(); // Devuelve todos los inputs y selects a su valor vacío por defecto
     }
 
-    const filas = data.registros || [];
-    if (filas.length === 0) return;
-
-    filas.forEach(row => {
-        const tr = document.createElement('tr');
-        let htmlContent = "";
-
-        switch (modulo) {
-            case 'miembros':
-                htmlContent = `
-                    <td><b>${row.nombre_completo}</b></td>
-                    <td>${row.telefono || '-'}</td>
-                    <td>${row.edad || '-'}</td>
-                    <td>${row.direccion || '-'}</td>
-                    <td>${row.origen || '-'}</td>
-                    <td>${row.condicion || '-'}</td>
-                    <td>${row.estado || '-'}</td>
-                `;
-                break;
-            case 'visitas':
-                htmlContent = `
-                    <td><b>${row.nombre_completo}</b></td>
-                    <td>${row.direccion || '-'}</td>
-                    <td>${row.ultima_visita || '-'}</td>
-                    <td>${row.motivo || '-'}</td>
-                    <td>${row.estado || '-'}</td>
-                `;
-                break;
-            case 'discipulado':
-                htmlContent = `
-                    <td>${row.integrante}</td>
-                    <td>${row.estado_integrante || '-'}</td>
-                `;
-                break;
-            case 'cumpleanos':
-                htmlContent = `
-                    <td><b>${row.nombre_completo}</b></td>
-                    <td>${row.fecha_nacimiento || '-'}</td>
-                    <td>${row.edad_actual || '-'} años</td>
-                    <td>${row.telefono || '-'}</td>
-                `;
-                break;
-        }
-
-        tr.innerHTML = htmlContent;
-        tbody.appendChild(tr);
-    });
-}
+    const tbody = document.querySelector('#tabla-miembros tbody');
+    if (tbody) {
+        // Dejamos la tabla en blanco con un mensaje limpio para poder pasar tranquilamente al siguiente módulo
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:15px; color:#aaa;">Filtros limpiados. Seleccione un filtro para iniciar una nueva búsqueda.</td></tr>`;
+    }
+};
 
 /**
- * Redirecciona al endpoint que compila y descarga el archivo binario
- * @param {string} modulo 
- * @param {string} formato 
+ * Descarga y exportación física de archivos de forma global
  */
-function descargar(modulo, formato) {
-    const form = document.getElementById(`form-${modulo}`);
+window.descargar = function(tipo, formato) {
+    if (tipo !== 'miembros') return;
+
+    const form = document.getElementById('form-miembros');
     if (!form) return;
 
     const formData = new FormData(form);
-    const params = new URLSearchParams(formData).toString();
+    const params = new URLSearchParams(formData);
+    params.append('tipo', 'miembros');
+    params.append('formato', formato);
 
-    // Redirección directa hacia el FrontController corregido del index
-    window.location.href = `descargar_reporte?tipo=${modulo}&formato=${formato}&${params}`;
-}
-
-// Carga inicial automatizada de todas las vistas previas al entrar al panel de reportes
-document.addEventListener("DOMContentLoaded", () => {
-    cargarVistaPrevia('miembros');
-    cargarVistaPrevia('visitas');
-    cargarVistaPrevia('discipulado');
-    cargarVistaPrevia('cumpleanos');
-});
+    window.location.href = `${RUTA_BASE}descargar_reporte?${params.toString()}`;
+};

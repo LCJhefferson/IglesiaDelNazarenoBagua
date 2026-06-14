@@ -54,29 +54,39 @@ if ($vista === 'logout') {
     (new AuthController())->logout();
     exit;
 }
+// ============================================================================
+// =6== ENRUTAMIENTO DE REPORTES (AJAX Y DESCARGAS) ===
+// ============================================================================
 
-/**
- * 6. ENDPOINTS DE API / AJAX / DESCARGAS DIRECTAS
- * Si la petición es para el mapa, datos AJAX o descarga de archivos, 
- * respondemos y cortamos la ejecución (exit) de inmediato.
- */
-
-// Datos JSON para el Mapa
-if ($vista === 'visitasMapJSON') {
-    (new VisitaController())->obtenerDatosMapaJSON();
-    exit; 
-}
-
-// === CORRECCIÓN DE REPORTES: Se cambió $seccion por $vista y se movió aquí ===
+// 1. Vista previa de tablas (AJAX)
 if ($vista === 'datos_reporte') {
+    \aplicacion\core\Middleware::apiAuth([1, 2]); // Valida que tenga sesión activa de forma segura
     $reporteCtrl = new ReporteController();
-    $reporteCtrl->obtenerDatos();
+    $reporteCtrl->obtenerVistaPrevia();
     exit;
 }
 
+// 2. Descargas directas (Excel, CSV, PDF)
 if ($vista === 'descargar_reporte') {
+    \aplicacion\core\Middleware::apiAuth([1, 2]);
     $reporteCtrl = new ReporteController();
-    $reporteCtrl->descargar();
+    $reporteCtrl->descargarReporte();
+    exit;
+}
+
+// 3. Autocompletados dinámicos (Live Search)
+if ($vista === 'sugerencias_reporte') {
+    \aplicacion\core\Middleware::apiAuth([1, 2]);
+    $reporteCtrl = new ReporteController();
+    $reporteCtrl->sugerenciasAutocomplete();
+    exit;
+}
+
+// 4. Carga inicial de filtros (Condiciones de miembros de la BD)
+if ($vista === 'inicializar_filtros_reporte') {
+    \aplicacion\core\Middleware::apiAuth([1, 2]);
+    $reporteCtrl = new ReporteController();
+    $reporteCtrl->inicializarFiltros();
     exit;
 }
 // ============================================================================
