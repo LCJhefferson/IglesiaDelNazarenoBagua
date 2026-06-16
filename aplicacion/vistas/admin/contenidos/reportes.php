@@ -7,7 +7,17 @@
     </div>
 </header>
 
-<div class="card-reporte">
+
+<div class="reportes-tabs">
+    <button class="tab-btn active" onclick="cambiarPestaña('miembros', this)">👤 Reporte de Miembros</button>
+    <button class="tab-btn" onclick="cambiarPestaña('visitas', this)">🚗 Reporte de Visitas</button>
+    <button class="tab-btn" onclick="cambiarPestaña('discipulado', this)">📖 Discipulado Avanzado</button>
+    <button class="tab-btn" onclick="cambiarPestaña('cumple', this)">🎂 Cumpleaños</button>
+</div>
+
+
+
+<div class="card-reporte " id="pane-miembros">
     <h2>Reporte de Miembros</h2>
     <form id="form-miembros" class="grid-filtros filtros-miembros">
         <div>
@@ -32,17 +42,17 @@
             <label>Edad Máx:</label>
             <input type="number" name="edad_max" oninput="cargarVistaPrevia('miembros')" placeholder="100">
         </div>
-        
     </form>
     
     <div class="contenedor-botones">
-        <button type="button" onclick="limpiarFiltrosMiembros()" style="background-color: #ffc117; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
-    🗑️ Limpiar Filtros</button>
+        <button type="button" onclick="limpiarFiltros('miembros')" style="background-color: #ffc117; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            🗑️ Limpiar Filtros
+        </button>
         <button class="btn-exportar btn-pdf" onclick="descargar('miembros','pdf')">📄 PDF</button>
         <button class="btn-exportar btn-excel" onclick="descargar('miembros','excel')">📊 Excel</button>
         <button class="btn-exportar btn-csv" onclick="descargar('miembros','csv')">📝 CSV</button>
-        
     </div>
+
     <table class="tabla-preview" id="tabla-miembros">
         <thead>
             <tr>
@@ -59,15 +69,17 @@
     </table>
 </div>
 
-<div class="card-reporte">
-    <h2>Reporte de Visitas</h2>
+<div class="card-reporte" id="pane-visitas">
+    <h2>Reporte de Control de Visitas</h2>
     <form id="form-visitas" class="grid-filtros filtros-visitas">
         <div>
             <label>Estado:</label>
             <select name="estado" onchange="cargarVistaPrevia('visitas')">
                 <option value="">Todos</option>
-                <option value="Realizada">Realizada</option>
-                <option value="Pendiente">Pendiente</option>
+                <option value="Visitado reciente">Visitado reciente</option>
+                <option value="Visitado intermedio">Visitado intermedio</option>
+                <option value="Pendiente próximo">Pendiente próximo</option>
+                <option value="Pendiente crítico">Pendiente crítico</option>
             </select>
         </div>
         <div>
@@ -89,11 +101,16 @@
             <input type="date" name="fecha_fin" onchange="cargarVistaPrevia('visitas')">
         </div>
     </form>
+
     <div class="contenedor-botones">
+        <button type="button" onclick="limpiarFiltros('visitas')" style="background-color: #ffc117; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            🗑️ Limpiar Filtros
+        </button>
         <button class="btn-exportar btn-pdf" onclick="descargar('visitas','pdf')">📄 PDF</button>
         <button class="btn-exportar btn-excel" onclick="descargar('visitas','excel')">📊 Excel</button>
         <button class="btn-exportar btn-csv" onclick="descargar('visitas','csv')">📝 CSV</button>
     </div>
+
     <table class="tabla-preview" id="tabla-visitas">
         <thead>
             <tr>
@@ -108,57 +125,60 @@
     </table>
 </div>
 
-<div class="card-reporte">
-    <h2>Reporte de Discipulado</h2>
-    <form id="form-discipulado" class="grid-filtros filtros-discipulado-avanzado">
+<div class="card-reporte" id="pane-discipulado">
+    <h2>Reporte de Discipulado Avanzado</h2>
+    <form id="form-discipulado" class="grid-filtros filtros-discipulado-avanzado" onsubmit="event.preventDefault();">
+        
         <div class="autocomplete-container" style="position:relative;">
             <label>Miembro Integrante:</label>
-            <input type="text" id="input-miembro" placeholder="Escribe para buscar miembro..." oninput="ejecutarAutocomplete('miembros', this)">
+            <input type="text" id="input-miembro" placeholder="Escribe para buscar miembro..." oninput="ejecutarAutocomplete('miembros', this)" autocomplete="off">
             <input type="hidden" name="miembro_id" id="hidden-miembro">
             <div class="autocomplete-resultados" id="res-miembros"></div>
         </div>
+        
         <div class="autocomplete-container" style="position:relative;">
-            <label>Grupo:</label>
-            <input type="text" id="input-grupo" placeholder="Escribe para buscar grupo..." oninput="ejecutarAutocomplete('grupos', this)">
+            <label>Grupo / Clase:</label>
+            <input type="text" id="input-grupo" placeholder="Escribe para buscar grupo..." oninput="ejecutarAutocomplete('grupos', this)" autocomplete="off">
             <input type="hidden" name="grupo_id" id="hidden-grupo">
             <div class="autocomplete-resultados" id="res-grupos"></div>
         </div>
+        
         <div class="autocomplete-container" style="position:relative;">
-            <label>Discipulador:</label>
-            <input type="text" id="input-discipulador" placeholder="Escribe para buscar líder..." oninput="ejecutarAutocomplete('discipuladores', this)">
+            <label>Discipulador / Líder:</label>
+            <input type="text" id="input-discipulador" placeholder="Escribe para buscar líder..." oninput="ejecutarAutocomplete('discipuladores', this)" autocomplete="off">
             <input type="hidden" name="discipulador_id" id="hidden-discipulador">
             <div class="autocomplete-resultados" id="res-discipuladores"></div>
         </div>
+        
         <div>
             <label>Estado del Integrante:</label>
-            <select name="estado_alumno" onchange="cargarVistaPrevia('discipulado')">
-                <option value="">Todos</option>
-                <option value="proceso">Activo / En proceso</option>
-                <option value="1">Aprobado</option>
-                <option value="0">Desaprobado / Retirado</option>
+            <select name="estado_discipulo_id" id="select-estados-discipulo" onchange="cargarVistaPrevia('discipulado')">
+                <option value="">Cargando estados...</option>
             </select>
         </div>
     </form>
+
     <div class="contenedor-botones">
+        <button type="button" onclick="limpiarFiltros('discipulado')" style="background-color: #ffc117; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            🗑️ Limpiar Filtros
+        </button>
         <button class="btn-exportar btn-pdf" onclick="descargar('discipulado','pdf')">📄 PDF</button>
         <button class="btn-exportar btn-excel" onclick="descargar('discipulado','excel')">📊 Excel</button>
         <button class="btn-exportar btn-csv" onclick="descargar('discipulado','csv')">📝 CSV</button>
     </div>
-    <div class="info-bloque" id="bloque-meta-discipulado" style="display:none; background:#f3f4f6; padding:10px; border-radius:5px; margin: 10px 0;">
-        <div>Nombre del grupo: <span id="meta-grupo" style="text-decoration: underline; font-weight:bold;"></span></div>
-    </div>
+
     <table class="tabla-preview" id="tabla-discipulado">
         <thead>
             <tr>
-                <th>Integrante(s)</th>
-                <th>Estado Integrante</th>
+                <th>Grupo de Crecimiento</th>
+                <th>Miembro / Alumno</th>
+                <th>Estado del Alumno</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
 </div>
-
-<div class="card-reporte">
+<div class="card-reporte"id="pane-cumple">
     <h2>Reporte de Cumpleaños</h2>
     <form id="form-cumpleanos" class="grid-filtros filtros-cumpleanos">
         <div>
@@ -188,11 +208,16 @@
             <input type="date" name="fecha_fin" onchange="cargarVistaPrevia('cumpleanos')">
         </div>
     </form>
+
     <div class="contenedor-botones">
+        <button type="button" onclick="limpiarFiltros('cumpleanos')" style="background-color: #ffc117; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+            🗑️ Limpiar Filtros
+        </button>
         <button class="btn-exportar btn-pdf" onclick="descargar('cumpleanos','pdf')">📄 PDF</button>
         <button class="btn-exportar btn-excel" onclick="descargar('cumpleanos','excel')">📊 Excel</button>
         <button class="btn-exportar btn-csv" onclick="descargar('cumpleanos','csv')">📝 CSV</button>
     </div>
+
     <table class="tabla-preview" id="tabla-cumpleanos">
         <thead>
             <tr>

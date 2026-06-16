@@ -9,7 +9,7 @@ class VisitaModelo extends Model {
     public $timestamps = false; 
 
     protected $fillable = [
-        'miembro_id', 'fecha_visita', 'motivo', 'registrado_por', 'estado_id', 'estado'
+        'miembro_id', 'fecha_visita', 'motivo', 'registrado_por', 'estado'
     ];
 
     public function miembro() {

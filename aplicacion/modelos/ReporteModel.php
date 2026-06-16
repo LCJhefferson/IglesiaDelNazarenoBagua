@@ -46,13 +46,21 @@ class ReporteModel {
      * Búsqueda en tiempo real para el Autocomplete de Discipuladores
      * Vincula la tabla usuarios con datos_usuario para obtener los nombres reales
      */
-    public static function buscarDiscipuladores($termino) {
-        return Capsule::table('usuarios')
-            ->join('datos_usuario', 'usuarios.id', '=', 'datos_usuario.usuario_id')
-            ->where('datos_usuario.nombres', 'LIKE', "%{$termino}%")
-            ->orWhere('datos_usuario.apellidos', 'LIKE', "%{$termino}%")
-            ->select('usuarios.id', Capsule::raw("CONCAT(datos_usuario.nombres, ' ', datos_usuario.apellidos) as nombre_completo"))
-            ->limit(10)
+    public static function buscarDiscipuladores($term) {
+    return Capsule::table('miembros')
+        ->select('id', Capsule::raw("CONCAT(nombres, ' ', apellidos) as nombre"))
+        ->where(Capsule::raw("CONCAT(nombres, ' ', apellidos)"), 'LIKE', "%{$term}%")
+        ->limit(10)
+        ->get()
+        ->toArray();
+}
+    /**
+     * Llena el selector de los estados individuales de un discípulo en el grupo
+     */
+    public static function obtenerEstadosDiscipulo() {
+        return Capsule::table('estados_discipulo')
+            ->select('id', 'nombre')
+            ->orderBy('id', 'ASC')
             ->get()
             ->toArray();
     }
