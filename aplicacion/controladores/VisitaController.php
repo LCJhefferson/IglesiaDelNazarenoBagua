@@ -12,6 +12,38 @@ class VisitaController {
         // Constructor vacío - Usamos Eloquent Models directamente
     }
 
+  /**
+     * Define en la conexión de MySQL quién está haciendo la acción en las visitas
+     */
+    private function configurarUsuarioAuditoria() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        $usuarioLogueadoId = 0;
+        
+        // 1. Intentamos leer desde el objeto estándar de tu sistema
+        if (isset($_SESSION['usuario']) && is_object($_SESSION['usuario'])) {
+            $usuarioLogueadoId = $_SESSION['usuario']->id ?? 0;
+        } elseif (isset($_SESSION['usuario']) && is_array($_SESSION['usuario'])) {
+            $usuarioLogueadoId = $_SESSION['usuario']['id'] ?? 0;
+        }
+        
+        // 2. Si no se encuentra, intentamos leer desde el campo plano por si acaso
+        if ($usuarioLogueadoId === 0) {
+            $usuarioLogueadoId = $_SESSION['usuario_id'] ?? $_SESSION['user_id'] ?? $_SESSION['id'] ?? 0;
+        }
+
+        // 3. FALLBACK DE SEGURIDAD: Si sigue en 0 (petición AJAX sin sesión activa), 
+        // le asignamos temporalmente el ID 1 (Administrador) para evitar el NULL y verificar que pinte en el ojo
+        if ($usuarioLogueadoId === 0) {
+            $usuarioLogueadoId = 1; 
+        }
+        
+        // Ejecutamos la sentencia en la base de datos
+        DB::statement("SET @usuario_actual_id = ?", [intval($usuarioLogueadoId)]);
+    }
+
     /**
      * Obtiene el límite de meses configurado para el sistema
      */
@@ -121,7 +153,7 @@ class VisitaController {
         $exito = false;
         $mensajeError = "";
 
-        try {
+try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 throw new \Exception("Método de envío no válido.");
             }
@@ -131,18 +163,21 @@ class VisitaController {
             $fecha_visita = $_POST['fecha_visita'] ?? date('Y-m-d');
             $motivoPredefinido = $_POST['motivo_predefinido'] ?? 'Visita Regular';
             $motivoLibre = trim($_POST['motivo_libre'] ?? '');
-$hoy = date('Y-m-d');
+            $hoy = date('Y-m-d');
             $motivoFinal = ($motivoPredefinido === 'Otros') ? $motivoLibre : $motivoPredefinido;
             
-if ($fecha_visita > $hoy) {
-    throw new \Exception("No puedes registrar una visita con fecha futura.");
-}
+            if ($fecha_visita > $hoy) {
+                throw new \Exception("No puedes registrar una visita con fecha futura.");
+            }
             if (empty($motivoFinal)) {
                 throw new \Exception("El motivo de la visita es obligatorio.");
             }
 
             if ($visita_id > 0) {
                 // MODO EDICIÓN
+                // --- Llama a la auditoría AQUÍ justo antes de buscar y guardar ---
+                $this->configurarUsuarioAuditoria();
+                
                 $visita = VisitaModelo::find($visita_id);
                 if ($visita) {
                     $visita->fecha_visita = $fecha_visita;
@@ -153,11 +188,14 @@ if ($fecha_visita > $hoy) {
                 }
             } else {
                 // MODO NUEVO
+                // --- Llama a la auditoría AQUÍ justo antes de crear ---
+                $this->configurarUsuarioAuditoria();
+                
                 $nuevaVisita = VisitaModelo::create([
                     'miembro_id'     => $miembro_id,
                     'fecha_visita'   => $fecha_visita,
                     'motivo'         => $motivoFinal,
-                    'registrado_por' => $_SESSION['usuario_id'] ?? 1,
+                    'registrado_por' => $_SESSION['usuario']->id ?? $_SESSION['usuario_id'] ?? 1,
                     'estado_id'      => 1,
                     'estado'         => 1
                 ]);
@@ -206,6 +244,9 @@ if ($fecha_visita > $hoy) {
         $visitaId = $_POST['visita_id'] ?? null;
         
         if ($visitaId) {
+            // SE CONFIGURA LA AUDITORÍA DE CONEXIÓN JUSTO ANTES DE GUARDAR EL UPDATE
+            $this->configurarUsuarioAuditoria();
+
             $exito = VisitaModelo::where('id', $visitaId)->update(['estado' => 0]);
         }
         
@@ -231,7 +272,6 @@ if ($fecha_visita > $hoy) {
                 $diferencia = $hoy->diff($fechaVisita);
                 $diasTranscurridos = $diferencia->days;
                 
-                // Si la fecha es futura, lo tratamos como reciente
                 if ($fechaVisita > $hoy) $diasTranscurridos = 0;
 
                 $porcentaje = ($diasTranscurridos / $diasLimiteTotal) * 100;

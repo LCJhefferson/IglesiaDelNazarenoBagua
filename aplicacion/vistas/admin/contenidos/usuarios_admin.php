@@ -1,37 +1,92 @@
 <?php
-use aplicacion\controladores\RegistroController;
+use aplicacion\controladores\UsuarioController;
 use Illuminate\Database\Capsule\Manager as DB;
 
-// ── PROCESAR REGISTRO ──
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'])) {
-    $controller = new RegistroController();
-    $resultado  = $controller->registrar(
-        $_POST['username'],
-        $_POST['password'],
-        $_POST['rol'],
-        $_POST['estado']
-    );
-    $status = $resultado ? 'exito=1' : 'error=1';
-    header("Location: /IglesiaDelNazarenoBagua/dashboard?seccion=usuarios_admin&$status");
+$controller = new UsuarioController();
+
+// ── ENDPOINT PARA CONSULTAR BITÁCORA VÍA AJAX ──
+if (isset($_GET['obtener_bitacora']) && !empty($_GET['usuario_id'])) {
+    header('Content-Type: application/json');
+    $logs = DB::table('bitacora')
+              ->where('usuario_id', $_GET['usuario_id'])
+              ->orderBy('fecha', 'DESC')
+              ->limit(10) // Limitamos a las últimas 10 actividades
+              ->get();
+    echo json_encode($logs);
     exit;
 }
 
-// ── OBTENER USUARIOS CON ELOQUENT ──
-// Obtenemos los usuarios como una colección de objetos stdClass
-$usuarios = DB::table('usuarios')->get();
+// ── PROCESAMIENTO DE FORMULARIOS POST ──
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    
+    // 1. Caso: Cambio de Contraseña (NUEVO)
+    if (isset($_POST['action']) && $_POST['action'] === 'cambiar_password' && isset($_POST['id'])) {
+        $resultado = $controller->cambiarPassword($_POST['id'], $_POST['nueva_password']);
+        
+        if ($resultado) {
+            // Registramos el cambio en la bitácora
+            DB::table('bitacora')->insert([
+                'usuario_id' => $_POST['id'],
+                'accion' => 'El administrador restableció la contraseña de este usuario.',
+                'fecha' => date('Y-m-d H:i:s')
+            ]);
+        }
+        
+        $status = $resultado ? 'exito=1' : 'error=1';
+        echo "<script>window.location.href = '/IglesiaDelNazarenoBagua/dashboard?seccion=usuarios_admin&$status';</script>";
+        exit;
+    }
 
-// ── CONTADORES USANDO ELOQUENT ──
+    // 2. Caso: Edición/Actualización de Usuario
+    if (isset($_POST['action']) && $_POST['action'] === 'editar' && isset($_POST['id'])) {
+        $resultado = $controller->actualizar(
+            $_POST['id'],
+            $_POST['username'],
+            $_POST['rol'],
+            $_POST['estado']
+        );
+        
+        if ($resultado) {
+            DB::table('bitacora')->insert([
+                'usuario_id' => $_POST['id'],
+                'accion' => "Datos actualizados. Rol: {$_POST['rol']}, Estado: {$_POST['estado']}.",
+                'fecha' => date('Y-m-d H:i:s')
+            ]);
+        }
+        
+        $status = $resultado ? 'exito=1' : 'error=1';
+        echo "<script>window.location.href = '/IglesiaDelNazarenoBagua/dashboard?seccion=usuarios_admin&$status';</script>";
+        exit;
+    }
+    
+    // 3. Caso: Registro de Nuevo Usuario
+    if (isset($_POST['username']) && !isset($_POST['action'])) {
+        $resultado  = $controller->registrar(
+            $_POST['username'],
+            $_POST['password'],
+            $_POST['rol'],
+            $_POST['estado']
+        );
+        $status = $resultado ? 'exito=1' : 'error=1';
+        echo "<script>window.location.href = '/IglesiaDelNazarenoBagua/dashboard?seccion=usuarios_admin&$status';</script>";
+        exit;
+    }
+}
+
+// ... El resto de tus consultas a $usuarios y mapas de diseño siguen exactamente igual ...
+$usuarios = DB::table('usuarios')->get();
 $total_usuarios       = $usuarios->count();
 $total_activos         = $usuarios->where('estado', 'activo')->count();
 $total_inactivos       = $usuarios->where('estado', 'inactivo')->count();
 
-// ── MAPAS DE DISEÑO ──
 $etiqueta_rol = ['1' => 'Admin', '2' => 'Pastor'];
 $clase_rol    = ['1' => 'rol-admin', '2' => 'rol-editor'];
 $color_avatar = ['1' => '#38d9a9', '2' => '#4f6ef7'];
 $etiqueta_estado = ['activo' => 'Activo', 'inactivo' => 'Inactivo'];
 $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'];
 ?>
+
+
 <!-- ── BARRA SUPERIOR ── -->
 
 <header class="barra-superior">
@@ -178,14 +233,20 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
         </td>
 
         <td>
-            <div class="celda-acciones" style="justify-content: center;">
+            <div class="celda-acciones" style="justify-content: center; gap: 6px;">
                 <button class="boton-icono" title="Editar"
                         onclick="abrirModalEditar(<?= $idUsuario ?>, '<?= addslashes($username) ?>', '<?= $rolId ?>', '<?= $estado ?>')">
                     <i class="fa-solid fa-pen"></i>
                 </button>
-                <button class="boton-icono peligro" title="Eliminar"
-                        onclick="abrirModalEliminar(<?= $idUsuario ?>, '<?= addslashes($username) ?>')">
-                    <i class="fa-solid fa-trash"></i>
+                
+                <button class="boton-icono" style="color: #4f6ef7;" title="Cambiar Contraseña"
+                        onclick="abrirModalPassword(<?= $idUsuario ?>, '<?= addslashes($username) ?>')">
+                    <i class="fa-solid fa-key"></i>
+                </button>
+
+                <button class="boton-icono" style="color: #1098ad;" title="Ver Actividad"
+                        onclick="abrirModalBitacora(<?= $idUsuario ?>, '<?= addslashes($username) ?>')">
+                    <i class="fa-solid fa-eye"></i>
                 </button>
             </div>
         </td>
@@ -252,23 +313,25 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
     <div class="caja-modal">
         <button class="cerrar-modal" onclick="cerrarModalEditar()">✕</button>
         <h3>✏️ Editar Usuario</h3>
-        <form method="POST" action="/IglesiaDelNazarenoBagua/actualizar_usuario.php">
+        <form method="POST" action="">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <input type="hidden" id="editarId" name="id"/>
+            <input type="hidden" name="action" value="editar" />
+            
             <div class="grupo-formulario">
                 <label>Username</label>
-                <input type="text" id="editarUsername" name="username" placeholder="Username"/>
+                <input type="text" id="editarUsername" name="username" placeholder="Username" required/>
             </div>
             <div class="grupo-formulario">
                 <label>Rol</label>
-                <select id="editarRol" name="rol">
+                <select id="editarRol" name="rol" required>
                     <option value="1">Admin</option>
                     <option value="2">Pastor</option>
                 </select>
             </div>
             <div class="grupo-formulario">
                 <label>Estado</label>
-                <select id="editarEstado" name="estado">
+                <select id="editarEstado" name="estado" required>
                     <option value="activo">Activo</option>
                     <option value="inactivo">Inactivo</option>
                 </select>
@@ -283,18 +346,44 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
     </div>
 </div>
 
-<!-- MODAL ELIMINAR -->
-<div class="superposicion-modal" id="modalEliminar">
+<div class="superposicion-modal" id="modalPassword">
     <div class="caja-modal">
-        <button class="cerrar-modal" onclick="cerrarModalEliminar()">✕</button>
-        <div class="icono-confirmacion"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <p class="texto-confirmacion" style="font-weight:700; font-size:1.05rem;">¿Eliminar este usuario?</p>
-        <p class="subtexto-confirmacion" id="textoEliminar">Esta acción no se puede deshacer.</p>
-        <div class="fila-botones-modal">
-            <button class="boton boton-contorno" onclick="cerrarModalEliminar()">Cancelar</button>
-            <button class="boton boton-peligro" onclick="confirmarEliminar()">
-                <i class="fa-solid fa-trash"></i> Sí, eliminar
-            </button>
+        <button class="cerrar-modal" onclick="cerrarModalPassword()">✕</button>
+        <h3>🔑 Restablecer Contraseña</h3>
+        <p class="subtexto-confirmacion" id="textoPassword" style="margin-bottom:15px; color: var(--texto-suave);"></p>
+        
+        <form method="POST" action="">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
+            <input type="hidden" id="passId" name="id" value="" />
+            <input type="hidden" name="action" value="cambiar_password" /> 
+            
+            <div class="grupo-formulario">
+                <label>Nueva Contraseña</label>
+                <input type="password" name="nueva_password" placeholder="Mínimo 8 caracteres" required minlength="8" />
+            </div>
+            
+            <div class="fila-botones-modal">
+                <button type="button" class="boton boton-contorno" onclick="cerrarModalPassword()">Cancelar</button>
+                <button type="submit" class="boton" style="background-color: #4f6ef7; color: white;">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar Nueva Clave
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="superposicion-modal" id="modalBitacora">
+    <div class="caja-modal" style="max-width: 550px;">
+        <button class="cerrar-modal" onclick="cerrarModalBitacora()">✕</button>
+        <h3>👁️ Registro de Actividad</h3>
+        <p style="margin-bottom: 15px; color: var(--texto-suave);">Historial reciente del usuario: <strong id="nombreUsuarioBitacora"></strong></p>
+        
+        <div id="listaBitacora" style="max-height: 300px; overflow-y: auto; border: 1px solid var(--borde); border-radius: 8px; padding: 10px; background: #fafafa;">
+            <p style="text-align:center; color:#888;">Cargando historial...</p>
+        </div>
+        
+        <div class="fila-botones-modal" style="margin-top: 15px;">
+            <button type="button" class="boton boton-contorno" onclick="cerrarModalBitacora()">Cerrar Ventana</button>
         </div>
     </div>
 </div>

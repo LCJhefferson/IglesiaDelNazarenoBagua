@@ -71,45 +71,7 @@ class ExportarCumpleanos {
         </html>";
         exit;
     }
-
-    /**
-     * Generador nativo de archivos CSV limpio y ordenado en celdas para Excel
-     */
-   /**
-     * Generador nativo de archivos CSV limpio y ordenado en celdas para Excel
-     */
-    public static function aCSV($datos) {
-        header('Content-Type: text/csv; charset=utf-8');
-        header("Content-Disposition: attachment; filename=reporte_cumples_" . date('Ymd') . ".csv");
-        header("Pragma: no-cache");
-        header("Expires: 0");
-        
-        $output = fopen('php://output', 'w');
-        
-        // 1. Emitir el BOM UTF-8 para que reconozca tildes y caracteres latinos
-        fwrite($output, "\xEF\xBB\xBF");
-        
-        // 2. CORRECCIÓN CLAVE: El salto de línea DEBE llevar comillas dobles ("\n") para procesarse bien
-        fwrite($output, "sep=;\n");
-
-        // Cabeceras de la tabla
-        fputcsv($output, ['Miembro / Cumpleañero', 'Teléfono', 'Fecha de Nacimiento', 'Edad Actual'], ';');
-
-        if (!empty($datos)) {
-            foreach ($datos as $fila) {
-                $formatted_date = !empty($fila['fecha_nacimiento']) ? date('d/m/Y', strtotime($fila['fecha_nacimiento'])) : '-';
-                fputcsv($output, [
-                    $fila['nombre_completo'] ?? '',
-                    $fila['telefono'] ?? '-',
-                    $formatted_date,
-                    ($fila['edad'] ?? '0') . " años"
-                ], ';');
-            }
-        }
-        
-        fclose($output);
-        exit;
-    }
+    
     /**
      * Genera un archivo PDF real con Dompdf y fuerza su DESCARGA AUTOMÁTICA
      */

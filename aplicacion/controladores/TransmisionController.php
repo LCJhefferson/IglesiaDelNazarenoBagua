@@ -8,10 +8,47 @@ class TransmisionController {
     private $pusher;
 
     public function __construct() {
-        // ... (configuración de Pusher igual que antes)
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        // ... (Tu configuración de Pusher se mantiene igual aquí debajo)
     }
 
-public function registrar() {
+    /**
+     * Solución al Warning: Redirecciona de forma limpia por HTTP o por JavaScript
+     */
+    /**
+ * Redirección híbrida y ULTRA-SEGURA
+ * Protegida contra XSS (Inyección de código) y Redirecciones Abiertas (Phishing)
+ */
+private function redireccionar(string $url): void {
+    // 1. Mitigación contra Redirecciones Abiertas (Open Redirection)
+    // Si la URL contiene un protocolo HTTP externo, validamos que pertenezca a nuestro servidor local
+    if (preg_match('/^https?:\/\//i', $url)) {
+        $hostPermitido = $_SERVER['HTTP_HOST']; // Captura 'localhost' o el dominio real de la iglesia en producción
+        $hostDestino = parse_url($url, PHP_URL_HOST);
+        
+        if ($hostDestino !== $hostPermitido) {
+            // Si intentan redirigir a un sitio externo no autorizado, los mandamos a la raíz segura
+            $url = "/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard";
+        }
+    }
+
+    // 2. Ejecutar redirección nativa si las cabeceras están limpias
+    if (!headers_sent()) {
+        header("Location: " . $url);
+        exit;
+    } else {
+        // 3. Mitigación ABSOLUTA contra XSS usando json_encode()
+        // json_encode sanitiza el string impidiendo que rompan las comillas del JS
+        $urlSeguraJs = json_encode($url, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        
+        echo "<script>window.location.href = " . $urlSeguraJs . ";</script>";
+        exit;
+    }
+}
+
+    public function registrar() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id_transmision'] ?? null;
             
@@ -21,12 +58,15 @@ public function registrar() {
                 $transmisionExistente = TransmisionModelo::find($id);
             }
 
-            // 2. Mapeamos los datos con validación 'Fallback' (si no vienen en el POST, conservamos lo que ya existía)
+            // Detectamos el ID de usuario de forma segura
+            $usuarioId = $_SESSION['usuario']->id ?? $_SESSION['usuario_id'] ?? 1;
+
+            // 2. Mapeamos los datos con validación 'Fallback'
             $datos = [
                 'titulo'      => $_POST['titulo'] ?? ($transmisionExistente ? $transmisionExistente->titulo : ''),
                 'descripcion' => $_POST['descripcion'] ?? ($transmisionExistente ? $transmisionExistente->descripcion : ''),
                 'estado_id'   => $_POST['estado_id'] ?? ($transmisionExistente ? $transmisionExistente->estado_id : 2),
-                'creado_por'  => $_SESSION['usuario_id'] ?? 1,
+                'creado_por'  => $usuarioId,
                 'fecha'       => date('Y-m-d H:i:s')
             ];
 
@@ -49,7 +89,6 @@ public function registrar() {
             } else {
                 // Actualizar o finalizar transmisión existente
                 if ($transmisionExistente) {
-                    // Si se pasa a estado 2 (Finalizado), podemos cerrar otros vivos preventivamente
                     if ($datos['estado_id'] == 2) {
                         TransmisionModelo::where('estado_id', 1)->update(['estado_id' => 2]);
                     }
@@ -59,18 +98,14 @@ public function registrar() {
                 }
             }
 
-            // 4. Redirección limpia (ya no fallará porque no hay warnings previos)
-            header("Location: index.php?vista=dashboard&seccion=transmision&msj=exito");
-            exit;
+            // 4. Redirección blindada usando el método híbrido
+            $this->redireccionar("index.php?vista=dashboard&seccion=transmision&msj=exito");
         }
     }
 
     public function listarTransmisiones() {
-        // --- EQUIVALENTE A: listarTodo() del DAO ---
-        // Usamos Eloquent para traer los datos y ordenarlos
         return TransmisionModelo::orderBy('id', 'desc')->get();
     }
-
 
     private function notificarCambio($tipo, $datos) {
         if ($this->pusher) {
@@ -101,6 +136,4 @@ public function registrar() {
 
         return !empty($videoId) ? "https://www.youtube.com/embed/" . $videoId : $url;
     }
-
-    
 }

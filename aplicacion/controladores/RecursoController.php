@@ -7,10 +7,36 @@ use aplicacion\services\RecursoThumbService;
 
 class RecursoController {
 
+    public function __construct() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    }
+
     /**
-     * Usamos 'iterable' en lugar de 'array' para soportar 
-     * Colecciones de Eloquent sin romper el tipado estricto de PHP.
+     * Redirección híbrida y ULTRA-SEGURA
+     * Protegida contra XSS (Inyección de código) y Redirecciones Abiertas (Phishing)
      */
+    private function redireccionar(string $url): void {
+        if (preg_match('/^https?:\/\//i', $url)) {
+            $hostPermitido = $_SERVER['HTTP_HOST'];
+            $hostDestino = parse_url($url, PHP_URL_HOST);
+            
+            if ($hostDestino !== $hostPermitido) {
+                $url = "/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin";
+            }
+        }
+
+        if (!headers_sent()) {
+            header("Location: " . $url);
+            exit;
+        } else {
+            $urlSeguraJs = json_encode($url, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+            echo "<script>window.location.href = " . $urlSeguraJs . ";</script>";
+            exit;
+        }
+    }
+
     public function listar(): iterable {
         return Recurso::listar();
     }
@@ -24,7 +50,6 @@ class RecursoController {
         $rutaArchivo = $_POST['ruta_actual'] ?? '';
         $tipoArchivo = $_POST['tipo_actual'] ?? 'doc';
 
-        // 1. Manejo seguro de subida de archivos
         if (!empty($_FILES['archivo_principal']['name']) && $_FILES['archivo_principal']['error'] === UPLOAD_ERR_OK) {
             $carpeta = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/admin/imagenes/recursos/';
             
@@ -32,7 +57,6 @@ class RecursoController {
                 mkdir($carpeta, 0755, true);
             }
             
-            // Sanitizar el nombre del archivo (solo letras, números, puntos y guiones)
             $nombreLimpio = preg_replace('/[^a-zA-Z0-9.\-_]/', '', basename($_FILES['archivo_principal']['name']));
             $nombreArchivo = time() . '_' . $nombreLimpio;
             $rutaFisica = $carpeta . $nombreArchivo;
@@ -44,7 +68,8 @@ class RecursoController {
             }
         }
 
-        // 2. Preparar y limpiar datos
+        $usuarioId = $_SESSION['usuario']->id ?? $_SESSION['usuario_id'] ?? null;
+
         $datos = [
             'titulo'         => trim(htmlspecialchars($_POST['titulo'] ?? '', ENT_QUOTES)),
             'descripcion'    => trim(htmlspecialchars($_POST['descripcion'] ?? '', ENT_QUOTES)),
@@ -52,92 +77,89 @@ class RecursoController {
             'tipo'           => $tipoArchivo,
             'ruta_archivo'   => $rutaArchivo,
             'enlace_youtube' => trim(filter_var($_POST['enlace_youtube'] ?? '', FILTER_SANITIZE_URL)),
-            'creado_por'     => $_SESSION['usuario_id'] ?? null,
+            'creado_por'     => $usuarioId,
         ];
 
-        // 3. Guardar en Base de Datos usando Eloquent
         if ($id) {
             Recurso::where('id', $id)->update($datos);
             RecursoThumbService::generar($id, $rutaArchivo, $tipoArchivo, $datos['enlace_youtube']);
         } else {
             $nuevoRecurso = Recurso::create($datos);
-            // Obtenemos el ID del objeto recién creado por Eloquent
             RecursoThumbService::generar($nuevoRecurso->id, $rutaArchivo, $tipoArchivo, $datos['enlace_youtube']);
         }
 
-        header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin&exito=1&pagina=archivos");
-        exit;
+        $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&exito=1&pagina=archivos");
     }
 
-    public function descargar(int $id): void {
+   public function descargar(int $id): void {
         $recurso = Recurso::find($id);
 
         if (!$recurso) {
-            header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin");
-            exit;
+            $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin");
+            return;
         }
 
-        // Eloquent usa propiedades de objeto (->), NO arreglos ([])
         if (empty($recurso->ruta_archivo)) {
             if (!empty($recurso->enlace_youtube)) {
                 Recurso::incrementarDescargas($id);
-                header('Location: ' . $recurso->enlace_youtube);
-                exit;
+                $this->redireccionar($recurso->enlace_youtube);
+                return;
             }
-            header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin");
-            exit;
+            $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin");
+            return;
         }
 
-        // 4. Seguridad: Prevenir Directory Traversal (Asegurar que el archivo exista en el directorio seguro)
         $ruta_abs = realpath($_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/' . $recurso->ruta_archivo);
         $base_dir = realpath($_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/admin/imagenes/recursos/');
 
-        // Verificamos que el archivo existe y que está estrictamente dentro de la carpeta permitida
         if (!$ruta_abs || !str_starts_with($ruta_abs, $base_dir) || !file_exists($ruta_abs)) {
-            header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin");
-            exit;
+            $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin");
+            return;
         }
 
         Recurso::incrementarDescargas($id);
 
-        // Limpiar buffers de salida para evitar que código HTML se filtre en el archivo y lo corrompa
+        // ====================================================================
+        // SOLUCIÓN DEFINITIVA: Limpiar el búfer radicalmente ANTES de los headers
+        // ====================================================================
         while (ob_get_level() > 0) {
             ob_end_clean();
         }
 
+        // Determinar el MIME type correcto
         $mime = mime_content_type($ruta_abs) ?: 'application/octet-stream';
+        
+        // Enviar cabeceras HTTP limpias
         header('Content-Type: ' . $mime);
         header('Content-Disposition: attachment; filename="' . basename($recurso->ruta_archivo) . '"');
         header('Content-Length: ' . filesize($ruta_abs));
         header('Cache-Control: no-cache, must-revalidate');
-        header('Pragma: public'); // Importante para compatibilidad de descargas en algunos navegadores
+        header('Pragma: public');
         
+        // Leer el archivo y cortar la ejecución inmediatamente
         readfile($ruta_abs);
         exit;
     }
 
     public function eliminar(int $id): void {
-        Recurso::moverAPapelera($id, $_SESSION['usuario_id'] ?? null);
-        header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin&exito=2&pagina=archivos");
-        exit;
+        $usuarioId = $_SESSION['usuario']->id ?? $_SESSION['usuario_id'] ?? null;
+        Recurso::moverAPapelera($id, $usuarioId);
+        $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&exito=2&pagina=archivos");
     }
 
     public function restaurar(int $papeleraId): void {
         RecursoPapelera::restaurar($papeleraId);
-        header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin&exito=3&pagina=papelera");
-        exit;
+        $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&exito=3&pagina=papelera");
     }
 
     public function eliminarDefinitivo(int $papeleraId): void {
         RecursoPapelera::eliminarDefinitivo($papeleraId);
-        header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin&exito=4&pagina=papelera");
-        exit;
+        $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&exito=4&pagina=papelera");
     }
 
     public function vaciarPapelera(): void {
         RecursoPapelera::vaciar();
-        header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin&exito=5&pagina=papelera");
-        exit;
+        $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&exito=5&pagina=papelera");
     }
 
     public function regenerarUno(int $id, string $ruta, string $tipo, string $youtube): void {

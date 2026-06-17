@@ -12,5 +12,8 @@ RewriteRule ^$ public/index.php?vista=inicio [L,QSA]
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
-# 3. Todo lo demás, enviarlo al Front Controller
+# 3. Regla específica para acciones amigables de recursos en el panel administrativo
+RewriteRule ^dashboard/recursos/([a-z\-]+)/([0-9]+)$ public/index.php?vista=dashboard&seccion=recurso_admin&$1=$2 [QSA,L]
+
+# 4. Todo lo demás, enviarlo al Front Controller
 RewriteRule ^(.*)$ public/index.php?vista=$1 [L,QSA]

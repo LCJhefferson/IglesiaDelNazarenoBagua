@@ -7,11 +7,43 @@ use aplicacion\modelos\NoticiaImagenModelo;
 class NoticiaController {
 
     public function __construct() {
-        // Ya no instanciamos el DAO, usamos los modelos estáticamente
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
     }
 
+   /**
+ * Redirección híbrida y ULTRA-SEGURA
+ * Protegida contra XSS (Inyección de código) y Redirecciones Abiertas (Phishing)
+ */
+private function redireccionar(string $url): void {
+    // 1. Mitigación contra Redirecciones Abiertas (Open Redirection)
+    // Si la URL contiene un protocolo HTTP externo, validamos que pertenezca a nuestro servidor local
+    if (preg_match('/^https?:\/\//i', $url)) {
+        $hostPermitido = $_SERVER['HTTP_HOST']; // Captura 'localhost' o el dominio real de la iglesia en producción
+        $hostDestino = parse_url($url, PHP_URL_HOST);
+        
+        if ($hostDestino !== $hostPermitido) {
+            // Si intentan redirigir a un sitio externo no autorizado, los mandamos a la raíz segura
+            $url = "/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard";
+        }
+    }
+
+    // 2. Ejecutar redirección nativa si las cabeceras están limpias
+    if (!headers_sent()) {
+        header("Location: " . $url);
+        exit;
+    } else {
+        // 3. Mitigación ABSOLUTA contra XSS usando json_encode()
+        // json_encode sanitiza el string impidiendo que rompan las comillas del JS
+        $urlSeguraJs = json_encode($url, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        
+        echo "<script>window.location.href = " . $urlSeguraJs . ";</script>";
+        exit;
+    }
+}
+
     public function mostrarNoticias() {
-        // Eloquent trae las noticias con estado 1 o 2, ordenadas, y adjunta su galería
         return NoticiaModelo::with('imagenesAdjuntas')
                             ->whereIn('estado', [1, 2])
                             ->orderBy('fecha_creacion', 'desc')
@@ -29,8 +61,7 @@ class NoticiaController {
         $noticia = NoticiaModelo::find($id);
         if ($noticia) {
             $noticia->update(['estado' => 0]); // Eliminado lógico
-            header("Location: /IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&eliminado=1");
-            exit();
+            $this->redireccionar("/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&eliminado=1");
         }
     }
 
@@ -38,95 +69,88 @@ class NoticiaController {
         $noticia = NoticiaModelo::find($id);
         if ($noticia) {
             $noticia->update(['estado' => $estado]);
-            header("Location: /IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias");
-            exit();
-        }
-    }
- public function guardarNoticia() {
-    $id = isset($_POST['id']) && !empty($_POST['id']) ? $_POST['id'] : null;
-
-    $carpetaDestino = $_SERVER['DOCUMENT_ROOT'] . "/IglesiaDelNazarenoBagua/public/admin/imagenes/noticias/";
-    if (!is_dir($carpetaDestino)) {
-        mkdir($carpetaDestino, 0755, true);
-    }
-
-    // --- NUEVO: PROCESAR IMÁGENES MARCADAS PARA ELIMINAR ---
-    // Esto lee el array que creamos con JavaScript (imagenes_a_eliminar[])
-    if (isset($_POST['imagenes_a_eliminar']) && is_array($_POST['imagenes_a_eliminar'])) {
-        foreach ($_POST['imagenes_a_eliminar'] as $idFotoBorrar) {
-            // Reutilizamos tu método existente para borrar físico y DB
-            $this->eliminarFotoGaleria($idFotoBorrar);
+            $this->redireccionar("/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias");
         }
     }
 
-    $rutaPortada = $_POST['imagen_actual'] ?? "";
-    
-    // Procesar imagen de portada
-    if (!empty($_FILES['imagen']['name'])) {
-        $extension  = strtolower(pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION));
-        $permitidos = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    public function guardarNoticia() {
+        $id = isset($_POST['id']) && !empty($_POST['id']) ? $_POST['id'] : null;
 
-        if (in_array($extension, $permitidos)) {
-            $nombreArchivo = time() . "_portada_" . basename($_FILES['imagen']['name']);
-            if (move_uploaded_file($_FILES['imagen']['tmp_name'], $carpetaDestino . $nombreArchivo)) {
-                $rutaPortada = "public/admin/imagenes/noticias/" . $nombreArchivo;
+        $carpetaDestino = $_SERVER['DOCUMENT_ROOT'] . "/IglesiaDelNazarenoBagua/public/admin/imagenes/noticias/";
+        if (!is_dir($carpetaDestino)) {
+            mkdir($carpetaDestino, 0755, true);
+        }
+
+        if (isset($_POST['imagenes_a_eliminar']) && is_array($_POST['imagenes_a_eliminar'])) {
+            foreach ($_POST['imagenes_a_eliminar'] as $idFotoBorrar) {
+                $this->eliminarFotoGaleria($idFotoBorrar);
             }
         }
-    }
 
-    $datos = [
-        'titulo'         => $_POST['titulo']    ?? '',
-        'resumen'        => $_POST['resumen']   ?? '',
-        'contenido'      => $_POST['contenido'] ?? '',
-        'imagen_portada' => $rutaPortada,
-        'video_link'     => $_POST['video']     ?? '',
-        'fecha_creacion' => $_POST['fecha']     ?? date("Y-m-d H:i:s")
-    ];
-
-    if ($id) {
-        $noticia = NoticiaModelo::find($id);
-        $noticia->update($datos);
-        $noticiaId = $id;
-        $param     = "actualizado=1";
-    } else {
-        $noticia = NoticiaModelo::create($datos);
-        $noticiaId = $noticia->id;
-        $param     = "guardado=1";
-    }
-
-    // --- PROCESAR GALERÍA (SUBIR NUEVAS IMÁGENES) ---
-    if ($noticiaId && !empty($_FILES['imagenes']['name'][0])) {
-        $permitidos = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+        $rutaPortada = $_POST['imagen_actual'] ?? "";
         
-        foreach ($_FILES['imagenes']['name'] as $i => $nombre) {
-            if ($_FILES['imagenes']['error'][$i] == 0) {
-                $ext = strtolower(pathinfo($nombre, PATHINFO_EXTENSION));
-                
-                if (in_array($ext, $permitidos)) {
-                    $nombreGaleria = time() . "_" . uniqid() . "_galeria_" . basename($nombre);
+        if (!empty($_FILES['imagen']['name'])) {
+            $extension  = strtolower(pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION));
+            $permitidos = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+
+            if (in_array($extension, $permitidos)) {
+                $nombreArchivo = time() . "_portada_" . basename($_FILES['imagen']['name']);
+                if (move_uploaded_file($_FILES['imagen']['tmp_name'], $carpetaDestino . $nombreArchivo)) {
+                    $rutaPortada = "public/admin/imagenes/noticias/" . $nombreArchivo;
+                }
+            }
+        }
+
+        $datos = [
+            'titulo'         => $_POST['titulo']    ?? '',
+            'resumen'        => $_POST['resumen']   ?? '',
+            'contenido'      => $_POST['contenido'] ?? '',
+            'imagen_portada' => $rutaPortada,
+            'video_link'     => $_POST['video']     ?? '',
+            'fecha_creacion' => $_POST['fecha']     ?? date("Y-m-d H:i:s")
+        ];
+
+        if ($id) {
+            $noticia = NoticiaModelo::find($id);
+            $noticia->update($datos);
+            $noticiaId = $id;
+            $param     = "actualizado=1";
+        } else {
+            $noticia = NoticiaModelo::create($datos);
+            $noticiaId = $noticia->id;
+            $param     = "guardado=1";
+        }
+
+        if ($noticiaId && !empty($_FILES['imagenes']['name'][0])) {
+            $permitidos = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+            
+            foreach ($_FILES['imagenes']['name'] as $i => $nombre) {
+                if ($_FILES['imagenes']['error'][$i] == 0) {
+                    $ext = strtolower(pathinfo($nombre, PATHINFO_EXTENSION));
                     
-                    if (move_uploaded_file($_FILES['imagenes']['tmp_name'][$i], $carpetaDestino . $nombreGaleria)) {
-                        $rutaArchivo = "public/admin/imagenes/noticias/" . $nombreGaleria;
+                    if (in_array($ext, $permitidos)) {
+                        $nombreGaleria = time() . "_" . uniqid() . "_galeria_" . basename($nombre);
                         
-                        NoticiaImagenModelo::create([
-                            'noticia_id' => $noticiaId,
-                            'imagen'     => $rutaArchivo 
-                        ]);
+                        if (move_uploaded_file($_FILES['imagenes']['tmp_name'][$i], $carpetaDestino . $nombreGaleria)) {
+                            $rutaArchivo = "public/admin/imagenes/noticias/" . $nombreGaleria;
+                            
+                            NoticiaImagenModelo::create([
+                                'noticia_id' => $noticiaId,
+                                'imagen'     => $rutaArchivo 
+                            ]);
+                        }
                     }
                 }
             }
         }
-    }
 
-    header("Location: /IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&{$param}");
-    exit();
-}
+        $this->redireccionar("/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&{$param}");
+    }
 
     public function eliminarFotoGaleria($idFoto) {
         $imagen = NoticiaImagenModelo::find($idFoto);
 
         if ($imagen) {
-            // USAMOS $imagen->imagen
             $rutaFisica = $_SERVER['DOCUMENT_ROOT'] . "/IglesiaDelNazarenoBagua/" . $imagen->imagen;
             
             if(file_exists($rutaFisica) && !empty($imagen->imagen)) {
