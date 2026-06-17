@@ -3,14 +3,24 @@ const pathSegments = window.location.pathname.split('/');
 const RUTA_PROYECTO = pathSegments[1] ? '/' + pathSegments[1] + '/' : '/';
 const RUTA_BASE = window.location.origin + RUTA_PROYECTO;
 
-// Variable global para controlar los límites de registros visibles por pestaña
-let limitesRender = { miembros: 10, visitas: 10, discipulado: 10, cumpleanos: 10 };
-let datosGlobalescache = {}; // Almacena la respuesta full para paginar en memoria sin saturar la BD
+// Control de paginación estructurada por pestaña
+let paginacion = {
+    miembros: { paginaActual: 1, porPagina: 10 }, 
+    visitas: { paginaActual: 1, porPagina: 10 },
+    discipulado: { paginaActual: 1, porPagina: 10 },
+    cumpleanos: { paginaActual: 1, porPagina: 10 }
+};
+let datosGlobalescache = {}; 
 let timeoutBusqueda = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Inicialización de selectores dinámicos desde la BD al cargar la página
     inicializarCondicionesMiembros();
+
+    // 2. CARGA AUTOMÁTICA DE DATOS
+    // Al entrar, cargamos los datos por defecto (sin filtros activos)
+    window.cargarVistaPrevia('miembros');
+
 
     // EVITAR RECARGA DE PÁGINA ACCIDENTAL: Si presionan ENTER en un buscador, que no se recargue la web
     const formDiscipulado = document.getElementById('form-discipulado');
@@ -45,6 +55,10 @@ window.cambiarPestaña = function(tipo, botonActivo) {
     if (panelAsociado) {
         panelAsociado.classList.add('active');
     }
+    // 🌟 NUEVO: Si la caché está vacía (es decir, nunca se han cargado datos), los trae automáticamente
+        if (!datosGlobalescache[tipo] || datosGlobalescache[tipo].length === 0) {
+            window.cargarVistaPrevia(tipo);
+        }
 };
 
 /**
@@ -101,10 +115,12 @@ window.cargarVistaPrevia = function(tipo) {
         return res.json();
     })
     .then(datos => {
-        // Guardamos en caché global el set completo para manejar el botón "Ver más"
         datosGlobalescache[tipo] = datos || [];
-        // Reseteamos el límite de vista inicial para esta consulta
-        limitesRender[tipo] = 100;
+        
+        // Al filtrar o cargar de nuevo, regresamos siempre a la primera página
+        if(paginacion[tipo]) {
+            paginacion[tipo].paginaActual = 1;
+        }
 
         window.renderizarBloqueTabla(tipo);
     })
@@ -229,15 +245,17 @@ window.ejecutarAutocomplete = function(tipo, input) {
 };
 
 /**
- * SISTEMA DE LIMPIEZA: Resetea el formulario, limpia autocompletes y VACÍA la tabla de forma segura
+ * SISTEMA DE LIMPIEZA: Resetea el formulario, limpia autocompletes e inputs ocultos,
+ * y recarga automáticamente todos los registros manteniendo la paginación activa.
  */
 window.limpiarFiltros = function(tipo) {
     const form = document.getElementById(`form-${tipo}`);
-    const tbody = document.querySelector(`#tabla-${tipo} tbody`);
     
     if (form) {
+        // 1. Restablece todos los selectores (<select>) a su primera opción ("Todos" / "Todas")
         form.reset(); 
         
+        // 2. Limpieza manual para los inputs de Autocomplete y sus IDs ocultos (Hidden)
         if (tipo === 'discipulado') {
             ['miembro', 'grupo', 'discipulador'].forEach(id => {
                 const inputTexto = document.getElementById(`input-${id}`);
@@ -253,25 +271,20 @@ window.limpiarFiltros = function(tipo) {
             if (inputTexto) inputTexto.value = '';
             if (inputHidden) inputHidden.value = '';
         }
-        if (tipo === 'miembros') {
-        const inputTexto = document.getElementById('input-miembro');
-        const inputHidden = document.getElementById('hidden-miembro');
-        if (inputTexto) inputTexto.value = '';
-        if (inputHidden) inputHidden.value = '';
-        
-        // Y luego de resetear, recarga la vista limpia
-        //window.cargarVistaPrevia('miembros');
-    }
-    }
 
-    if (tbody) {
-        const numColumnas = tipo === 'miembros' ? 7 : (tipo === 'visitas' ? 5 : (tipo === 'cumpleanos' ? 4 : 3));
-        tbody.innerHTML = `<tr><td colspan="${numColumnas}" style="text-align:center; padding:25px; color:#94a3b8; font-style: italic;">
-            Filtros limpiados. Use los buscadores o selectores para consultar registros específicos.
-        </td></tr>`;
+        if (tipo === 'miembros') {
+            const inputTexto = document.getElementById('input-miembro');
+            const inputHidden = document.getElementById('hidden-miembro');
+            if (inputTexto) inputTexto.value = '';
+            if (inputHidden) inputHidden.value = '';
+        }
+        
+        // 3. LA CLAVE: Tras dejar el formulario limpio, llamamos a cargarVistaPrevia.
+        // Al viajar los parámetros vacíos al backend, este traerá la totalidad de registros
+        // y el renderizador pintará la página 1 de manera inmediata.
+        window.cargarVistaPrevia(tipo);
     }
 };
-
 
 
 /**
@@ -282,16 +295,29 @@ window.renderizarBloqueTabla = function(tipo) {
     const datos = datosGlobalescache[tipo] || [];
     tbody.innerHTML = ''; 
 
+    const numColumnas = tipo === 'miembros' ? 7 : (tipo === 'visitas' ? 5 : (tipo === 'cumpleanos' ? 4 : 3));
+
     if (datos.length === 0) {
-        const numColumnas = tipo === 'miembros' ? 7 : (tipo === 'visitas' ? 5 : (tipo === 'cumpleanos' ? 4 : 3));
         tbody.innerHTML = `<tr><td colspan="${numColumnas}" style="text-align:center; padding:15px; color:#888;">No se encontraron registros para los filtros seleccionados</td></tr>`;
-        window.removerBotonVerMas(tipo);
+        window.removerControlesPaginacion(tipo);
         return;
     }
 
-    const limiteActual = limitesRender[tipo];
-    const datosVisibles = datos.slice(0, limiteActual);
+    // CÁLCULO DE PAGINACIÓN COMPACTA
+    const config = paginacion[tipo];
+    const totalRegistros = datos.length;
+    const totalPaginas = Math.ceil(totalRegistros / config.porPagina);
+    
+    // Si por alguna razón la página actual excede el total, la nivelamos
+    if (config.paginaActual > totalPaginas) config.paginaActual = totalPaginas;
+    if (config.paginaActual < 1) config.paginaActual = 1;
 
+    // Corte de datos en memoria (Ej: página 1 saca del 0 al 2)
+    const inicio = (config.paginaActual - 1) * config.porPagina;
+    const fin = inicio + config.porPagina;
+    const datosVisibles = datos.slice(inicio, fin);
+
+    // Inyección de filas en la tabla (Tu lógica exacta intacta)
     datosVisibles.forEach(fila => {
         const tr = document.createElement('tr');
         let columnas = [];
@@ -305,20 +331,12 @@ window.renderizarBloqueTabla = function(tipo) {
                 : `<span style="color: #ef4444; font-weight: bold;">Sin visitas</span><br><small style="color: #94a3b8;">${fila.dias_transcurridos || 'Requiere atención'}</small>`;
             columnas = [fila.nombre_completo || 'Sin Nombre', fila.direccion || 'Sin dirección', celdaFechaHtml, fila.motivo || 'Sin motivo', fila.estado || 'Pendiente'];
         } else if (tipo === 'discipulado') {
-            // MAPEO REGLAMENTARIO CORREGIDO Y ORDENADO AL MILÍMETRO
             let nombreMiembro = fila.integrante_nombre || 'Sin Nombre';
             let nombreGrupo = fila.grupo_nombre || 'Sin Grupo';
             let nombreLider = fila.discipulador_nombre || 'Sin asignar';
             let estadoTexto = fila.estado_alumno_texto || 'Sin estado';
-
-            // Armamos el bloque visual dinámico que AHORA VA EN LA COLUMNA 1 (Índice 0)
             let bloqueGrupoHtml = `<strong>${nombreGrupo}</strong><br><small style="color: #64748b;">Líder: ${nombreLider}</small>`;
-            
-            columnas = [
-                bloqueGrupoHtml,  // Columna 1 (index 0): Grupo de Crecimiento (con Líder abajo)
-                nombreMiembro,    // Columna 2 (index 1): Miembro / Alumno
-                estadoTexto       // Columna 3 (index 2): Estado Del Alumno
-            ];
+            columnas = [bloqueGrupoHtml, nombreMiembro, estadoTexto];
         } else if (tipo === 'cumpleanos') { 
             let fechaFormateada = '-';
             if (fila.fecha_nacimiento) {
@@ -333,7 +351,6 @@ window.renderizarBloqueTabla = function(tipo) {
 
         columnas.forEach((texto, index) => {
             const td = document.createElement('td');
-            // CORRECCIÓN DE ÍNDICE: En discipulado el HTML ahora está en la primera columna (index 0)
             if ((tipo === 'discipulado' && index === 0) || (tipo === 'visitas' && index === 2)) {
                 td.innerHTML = texto;
             } else {
@@ -346,38 +363,10 @@ window.renderizarBloqueTabla = function(tipo) {
         tbody.appendChild(tr);
     });
 
-    if (datos.length > limiteActual) {
-        window.mostrarBotonVerMas(tipo, datos.length - limiteActual);
-    } else {
-        window.removerBotonVerMas(tipo);
-    }
-};
-/**
- * Muestra un botón limpio debajo de la tabla indicando cuántos registros quedan pendientes
- */
-window.mostrarBotonVerMas = function(tipo, restantes) {
-    window.removerBotonVerMas(tipo);
-    const tabla = document.getElementById(`tabla-${tipo}`);
-    if (!tabla) return;
-
-    const btn = document.createElement('button');
-    btn.id = `btn-vermas-${tipo}`;
-    btn.className = 'btn-ver-mas'; 
-    btn.style = 'display: block; margin: 15px auto; padding: 8px 16px; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;';
-    btn.textContent = `Mostrar más registros (${restantes} restantes)`;
-    
-    btn.onclick = function() {
-        limitesRender[tipo] += 100; 
-        window.renderizarBloqueTabla(tipo);
-    };
-
-    tabla.parentNode.insertBefore(btn, tabla.nextSibling);
+    // Pintamos los nuevos controles inteligentes debajo de la tabla
+    window.renderizarControlesPaginacion(tipo, config.paginaActual, totalPaginas, totalRegistros);
 };
 
-window.removerBotonVerMas = function(tipo) {
-    const btn = document.getElementById(`btn-vermas-${tipo}`);
-    if (btn) btn.remove();
-};
 
 /**
  * Buscador Reactivo con protección Debounce para entrada directa por teclado
@@ -391,4 +380,63 @@ window.buscarEnTiempoReal = function(tipo, input) {
 
         window.cargarVistaPrevia(tipo);
     }, 300);
+};
+/**
+ * Genera la botonera estilizada de paginación clásica
+ */
+window.renderizarControlesPaginacion = function(tipo, paginaActual, totalPaginas, totalRegistros) {
+    window.removerControlesPaginacion(tipo);
+    const tabla = document.getElementById(`tabla-${tipo}`);
+    if (!tabla) return;
+
+    // Contenedor principal de la botonera
+    const container = document.createElement('div');
+    container.id = `paginacion-control-${tipo}`;
+    container.style = 'display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px auto; font-family: inherit;';
+
+    // Botón Anterior
+    const btnAnt = document.createElement('button');
+    btnAnt.innerHTML = '<i class="fas fa-chevron-left"></i> Anterior';
+    btnAnt.style = 'padding: 8px 14px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px; transition: 0.2s;';
+    if (paginaActual === 1) {
+        btnAnt.style.opacity = '0.5';
+        btnAnt.style.cursor = 'not-allowed';
+    } else {
+        btnAnt.onclick = function() {
+            paginacion[tipo].paginaActual--;
+            window.renderizarBloqueTabla(tipo);
+        };
+    }
+
+    // Texto de ubicación de páginas e indicadores numéricos
+    const textoInfo = document.createElement('span');
+    textoInfo.style = 'font-size: 14px; color: #475569; font-weight: 500;';
+    textoInfo.textContent = `Página ${paginaActual} de ${totalPaginas} (${totalRegistros} registros totales)`;
+
+    // Botón Siguiente
+    const btnSig = document.createElement('button');
+    btnSig.innerHTML = 'Siguiente <i class="fas fa-chevron-right"></i>';
+    btnSig.style = 'padding: 8px 14px; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px; transition: 0.2s;';
+    if (paginaActual === totalPaginas) {
+        btnSig.style.opacity = '0.5';
+        btnSig.style.cursor = 'not-allowed';
+    } else {
+        btnSig.onclick = function() {
+            paginacion[tipo].paginaActual++;
+            window.renderizarBloqueTabla(tipo);
+        };
+    }
+
+    // Construcción del nodo
+    container.appendChild(btnAnt);
+    container.appendChild(textoInfo);
+    container.appendChild(btnSig);
+
+    // Lo inyectamos exactamente debajo de la tabla correspondiente
+    tabla.parentNode.insertBefore(container, tabla.nextSibling);
+};
+
+window.removerControlesPaginacion = function(tipo) {
+    const el = document.getElementById(`paginacion-control-${tipo}`);
+    if (el) el.remove();
 };
