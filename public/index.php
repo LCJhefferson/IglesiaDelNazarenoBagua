@@ -22,32 +22,77 @@ if (file_exists($autoloadComposer)) {
 require_once __DIR__ . '/../aplicacion/core/Autoload.php';
 require_once __DIR__ . '/../aplicacion/config/database.php';
 
-// Importamos las clases necesarias para que el código sea más legible
 use aplicacion\core\Middleware;
 use aplicacion\controladores\AuthController;
 use aplicacion\controladores\VisitaController;
+use aplicacion\controladores\ReporteController;
+use aplicacion\modelos\Recurso;
 
 // 4. Determinar la vista (Ruta)
 $vista = $_GET['vista'] ?? 'dashboard'; 
 
 // --- CORRECCIÓN CRÍTICA DE RUTEO ---
-// Si el .htaccess capturó "public/dashboard" o "public/", lo limpiamos:
 if (strpos($vista, 'public/') === 0) {
-    $vista = substr($vista, 7); // Le quita los 7 caracteres de "public/"
+    $vista = substr($vista, 7);
 }
-// Si al limpiar quedó vacío, forzamos a que abra el dashboard
 if (empty($vista) || $vista === 'index.php') {
     $vista = 'dashboard';
 }
-// -----------------------------------
+
+// ============================================================================
+// INTERCEPCIÓN CRÍTICA: Descarga pública de recursos antes de cualquier renderizado
+// ============================================================================
+if ($vista === 'recursos' && !empty($_GET['descargar'])) {
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    
+    $recursoId = (int)$_GET['descargar'];
+    $recurso = Recurso::find($recursoId);
+    
+    if ($recurso) {
+        Recurso::incrementarDescargas($recursoId);
+        
+        // Si es enlace a YouTube
+        if (!empty($recurso->enlace_youtube)) {
+            if (!headers_sent()) {
+                header('Location: ' . $recurso->enlace_youtube);
+            } else {
+                echo "<script>window.location.href='" . $recurso->enlace_youtube . "';</script>";
+            }
+            exit;
+        }
+        
+        // Si es un archivo físico
+        if (!empty($recurso->ruta_archivo)) {
+            $ruta_abs = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/' . $recurso->ruta_archivo;
+            if (file_exists($ruta_abs)) {
+                $mime = mime_content_type($ruta_abs) ?: 'application/octet-stream';
+                header('Content-Type: ' . $mime);
+                header('Content-Disposition: attachment; filename="' . basename($ruta_abs) . '"');
+                header('Content-Length: ' . filesize($ruta_abs));
+                header('Cache-Control: no-cache, must-revalidate');
+                header('Pragma: public');
+                readfile($ruta_abs);
+                exit;
+            }
+        }
+    }
+    
+    // Si no existió el recurso, redirección limpia a la sección recursos
+    $urlFallback = URL . 'recursos';
+    if (!headers_sent()) {
+        header('Location: ' . $urlFallback);
+    } else {
+        echo "<script>window.location.href='" . $urlFallback . "';</script>";
+    }
+    exit;
+}
+// ============================================================================
 
 $raizProyecto = __DIR__ . '/..';
-/**
- * 5. ACCIONES DE SISTEMA (Peticiones rápidas o Logout)
- * Se ejecutan antes de cargar cualquier HTML.
- */
 
-// Logout: No requiere cargar interfaces
+// Logout
 if ($vista === 'logout') {
     (new AuthController())->logout();
     exit;
@@ -66,7 +111,39 @@ if ($vista === 'visitasMapJSON') {
     exit; 
 }
 
-// Procesamiento de Visitas (Guardar / Eliminar)
+// 1. Vista previa de tablas (AJAX)
+if ($vista === 'datos_reporte') {
+    \aplicacion\core\Middleware::apiAuth([1, 2]);
+    $reporteCtrl = new ReporteController();
+    $reporteCtrl->obtenerVistaPrevia();
+    exit;
+}
+
+// 2. Descargas directas (Excel, CSV, PDF)
+if ($vista === 'descargar_reporte') {
+    \aplicacion\core\Middleware::apiAuth([1, 2]);
+    $reporteCtrl = new ReporteController();
+    $reporteCtrl->descargarReporte();
+    exit;
+}
+
+// 3. Autocompletados dinámicos (Live Search)
+if ($vista === 'sugerencias_reporte') {
+    \aplicacion\core\Middleware::apiAuth([1, 2]);
+    $reporteCtrl = new ReporteController();
+    $reporteCtrl->sugerenciasAutocomplete();
+    exit;
+}
+
+// 4. Carga inicial de filtros
+if ($vista === 'inicializar_filtros_reporte') {
+    \aplicacion\core\Middleware::apiAuth([1, 2]);
+    $reporteCtrl = new ReporteController();
+    $reporteCtrl->inicializarFiltros();
+    exit;
+}
+
+// Procesamiento de Visitas
 $accionesVisitas = [
     'admin/guardarVisita'        => 'guardarVisita',
     'admin/guardarAjustesVisita' => 'guardarAjustesVisita',
@@ -77,46 +154,24 @@ if (isset($accionesVisitas[$vista])) {
     Middleware::auth();
     // Verificamos seguridad antes de procesar
     Middleware::csrfVerify();
-    
     $metodo = $accionesVisitas[$vista];
     (new VisitaController())->$metodo();
-    
-    // Asumimos que el controlador ya responde con header JSON y exit
     exit;
 }
 
 /**
- * 7. ENRUTADOR DE VISTAS (Renderizado)
- * Decide qué archivo físico cargar.
+ * 7. ENRUTADOR DE VISTAS
  */
-
 if ($vista === 'procesar_login') {
     $archivoVista = $raizProyecto . '/procesos/auth/procesar_login.php';
-} 
-// Si la ruta empieza con 'admin/' o es el dashboard
-else if (strpos($vista, 'admin/') === 0 || $vista === 'dashboard') {
+} else if (strpos($vista, 'admin/') === 0 || $vista === 'dashboard') {
     $archivoVista = $raizProyecto . '/aplicacion/vistas/admin/dashboard.php';
-} 
-// Vistas públicas (login, registro, etc)
-else {
+} else {
     $archivoVista = $raizProyecto . '/aplicacion/vistas/web/' . $vista . '.php';
 }
 
-/**
- * 8. EJECUCIÓN FINAL
- */
 if (file_exists($archivoVista)) {
     include $archivoVista;
 } else {
-    // Error 404 Personalizado
-    http_response_code(404);
-    echo "
-    <div style='max-width:600px; margin:50px auto; font-family:sans-serif; border:1px solid #ccc; padding:20px; border-radius:10px;'>
-        <h2 style='color:#dc2626;'>Error de Enrutamiento (404)</h2>
-        <p>Lo sentimos, la sección <b>" . htmlspecialchars($vista) . "</b> no está disponible.</p>
-        <hr>
-        <small style='color:gray;'>Ruta buscada: $archivoVista</small><br>
-        <a href='dashboard' style='display:inline-block; margin-top:10px;'>Volver al Panel</a>
-    </div>";
+    include __DIR__ . "aplicacion/vistas/web/404.php"; 
 }
-

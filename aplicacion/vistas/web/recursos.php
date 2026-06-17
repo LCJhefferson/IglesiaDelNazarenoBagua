@@ -1,33 +1,8 @@
 <?php
-// Quitamos 'use aplicacion\core\QueryBuilder;' porque ya no lo necesitamos
+// ARCHIVO: aplicacion/vistas/web/recursos.php
+
 use aplicacion\modelos\Recurso;
 use aplicacion\services\RecursoThumbService;
-
-if (!empty($_GET['descargar'])) {
-    $recurso = Recurso::find((int)$_GET['descargar']);
-    if ($recurso) {
-        Recurso::incrementarDescargas((int)$_GET['descargar']);
-        if (!empty($recurso['enlace_youtube'])) {
-            header('Location: ' . $recurso['enlace_youtube']);
-            exit;
-        }
-        if (!empty($recurso['ruta_archivo'])) {
-            $ruta_abs = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/' . $recurso['ruta_archivo'];
-            if (file_exists($ruta_abs)) {
-                while (ob_get_level() > 0) ob_end_clean();
-                $mime = mime_content_type($ruta_abs) ?: 'application/octet-stream';
-                header('Content-Type: ' . $mime);
-                header('Content-Disposition: attachment; filename="' . basename($ruta_abs) . '"');
-                header('Content-Length: ' . filesize($ruta_abs));
-                header('Cache-Control: no-cache, must-revalidate');
-                readfile($ruta_abs);
-                exit;
-            }
-        }
-    }
-    header('Location: ' . URL . 'recursos');
-    exit;
-}
 
 // 1. Cargamos los recursos y los forzamos a ser un ARRAY puro
 $recursos_raw = Recurso::listar();
@@ -53,12 +28,11 @@ if (!empty($pendientes)) {
 // Total de descargas
 $total_des = Recurso::sum('descargas');
 
-// 3. Conteo por categoría USANDO ELOQUENT PURE (Reemplaza a QueryBuilder)
+// 3. Conteo por categoría
 $cats_raw = Recurso::selectRaw('categoria, COUNT(*) AS total')
     ->groupBy('categoria')
     ->get();
 
-// Convertimos a array y extraemos la columna para tu vista
 $cats_array = ($cats_raw instanceof \Illuminate\Support\Collection) ? $cats_raw->toArray() : (array)$cats_raw;
 $categorias = array_column($cats_array, 'total', 'categoria');
 
@@ -73,6 +47,7 @@ $clase_slab  = ['pdf' => 'slab-pdf', 'img' => 'slab-img', 'vid' => 'slab-vid', '
 $label_tipo  = ['pdf' => 'PDF', 'img' => 'IMG', 'vid' => 'VIDEO', 'doc' => 'DOC'];
 $label_btn   = ['vid' => 'Ver recurso'];
 
+// El resto de tu código HTML permanece exactamente igual hacia abajo...
 ?>
 <!DOCTYPE html>
 <html lang="es">

@@ -1,0 +1,327 @@
+/* ==========================================================================
+   PALETA DE COLORES E INSTITUCIONAL (UI OPTIMIZADA)
+   ========================================================================== */
+:root {
+    --primary-color: #1e3a8a; /* Azul Marino Oscuro */
+    --primary-hover: #172554;
+    --bg-card: #ffffff;
+    --text-color: #1f2937;
+    --gray-border: #e5e7eb;
+    
+    /* Colores del Sistema y Acciones */
+    --clean-color: #d97706;  /* Ámbar Oscuro más elegante que el amarillo plano */
+    --clean-hover: #b45309;
+    --pdf-color: #ef4444;
+    --excel-color: #10b981;
+    --csv-color: #4b5563;    /* Gris Slate moderno */
+}
+
+/* ==========================================================================
+   BARRA DE PESTAÑAS (TABS)
+   ========================================================================== */
+.reportes-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 12px;
+}
+
+.tab-btn {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid var(--gray-border);
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.tab-btn i {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    transition: color 0.2s;
+}
+
+.tab-btn:hover {
+    background: #f1f5f9;
+    color: #334155;
+    border-color: #cbd5e1;
+}
+
+.tab-btn:hover i {
+    color: #64748b;
+}
+
+.tab-btn.active {
+    background: #0284c7; /* Azul interactivo vibrante */
+    color: white;
+    border-color: #0284c7;
+    box-shadow: 0 4px 12px -1px rgba(2, 132, 199, 0.35);
+}
+
+.tab-btn.active i {
+    color: white;
+}
+
+/* ==========================================================================
+   TARJETAS DE CONTENIDO (CARDS)
+   ========================================================================== */
+.card-reporte {
+    display: none;
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--gray-border);
+    animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-reporte.active {
+    display: block;
+}
+
+.card-header-reporte {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+}
+
+.card-reporte h2 {
+    font-size: 1.25rem;
+    color: var(--primary-color);
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   SISTEMA GRID INTELIGENTE (FILTROS OPTIMIZADOS)
+   ========================================================================== */
+.grid-filtros {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 24px;
+    align-items: end;
+    /* Ajuste responsivo base automático */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* Forzar que los campos de búsquedas largas ocupen más espacio si la fila se estira */
+.campo-largo {
+    grid-column: span 2;
+}
+@media (max-width: 768px) {
+    .campo-largo { grid-column: span 1; }
+}
+
+/* ⚡ SOLUCIÓN PARA CAMPOS CORTOS (Edades, Fechas): Evita que se estiren */
+.grupo-campos-cortos {
+    display: flex;
+    gap: 12px;
+    grid-column: span 1;
+    min-width: 220px;
+}
+
+.grupo-campos-cortos > div {
+    flex: 1;
+}
+
+/* Estilos de Campos e Inputs */
+.grid-filtros label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: 6px;
+    white-space: nowrap;
+}
+
+.grid-filtros label i {
+    color: #9ca3af;
+    margin-right: 4px;
+}
+
+.grid-filtros select, 
+.grid-filtros input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--text-color);
+    background-color: #f9fafb;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    height: 40px; /* Homogeneidad de altura */
+}
+
+.grid-filtros select:focus, 
+.grid-filtros input:focus {
+    outline: none;
+    border-color: #0284c7;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+/* ==========================================================================
+   BOTONES Y ACCIONES
+   ========================================================================== */
+.contenedor-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+    border-top: 1px dashed var(--gray-border);
+    padding-top: 16px;
+}
+
+.btn-limpiar, .btn-exportar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 16px;
+    height: 38px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-limpiar {
+    background-color: var(--clean-color);
+}
+.btn-limpiar:hover {
+    background-color: var(--clean-hover);
+}
+
+.btn-exportar {
+    min-width: 90px;
+}
+.btn-exportar:active, .btn-limpiar:active {
+    transform: scale(0.96);
+}
+
+.btn-pdf { background-color: var(--pdf-color); }
+.btn-pdf:hover { background-color: #dc2626; }
+
+.btn-excel { background-color: var(--excel-color); }
+.btn-excel:hover { background-color: #059669; }
+
+.btn-csv { background-color: var(--csv-color); }
+.btn-csv:hover { background-color: #4b5563; }
+
+/* ==========================================================================
+   AUTOCOMPLETE DROPDOWN (FLOTANTE SOBRE TABLAS)
+   ========================================================================== */
+.autocomplete-container {
+    position: relative;
+}
+
+.autocomplete-resultados {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    margin-top: 4px;
+    z-index: 9999; /* Forzado absoluto sobre cabeceras de tablas */
+    max-height: 210px;
+    overflow-y: auto;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.autocomplete-item {
+    padding: 10px 14px;
+    font-size: 13.5px;
+    color: var(--text-color);
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.15s;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover {
+    background-color: #f0f4ff;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   TABLAS DE VISTA PREVIA PROFESIONALES
+   ========================================================================== */
+.tabla-preview {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 12px;
+    font-size: 13.5px;
+    text-align: left;
+    border: 1px solid var(--gray-border);
+    border-radius: 8px;
+    overflow: hidden; /* Aplica el border-radius a las esquinas de las tablas */
+}
+
+.tabla-preview th {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    font-weight: 600;
+    padding: 12px 14px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+}
+
+.tabla-preview td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--gray-border);
+    color: #4b5563;
+    background-color: #ffffff;
+}
+
+.tabla-preview tr:last-child td {
+    border-bottom: none; /* Estética limpia al final de la tabla */
+}
+
+.tabla-preview tr:hover td {
+    background-color: #f8fafc; /* Iluminación sutil de fila */
+    color: #0f172a;
+}
+
+/* Bloque Informativo Adicional */
+.info-bloque {
+    background-color: #eff6ff;
+    border-left: 4px solid #2563eb;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 24px;
+    font-size: 13.5px;
+    color: #1e40af;
+    font-weight: 500;
+}

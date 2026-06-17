@@ -8,12 +8,25 @@
 use aplicacion\core\Middleware;
 use aplicacion\controladores\DiscipuladoController;
 
+// ── ENDPOINT PARA CONSULTAR BITÁCORA VÍA AJAX (ANTES DE CUALQUIER SALIDA HTML) ──
+if (isset($_GET['obtener_bitacora']) && !empty($_GET['usuario_id'])) {
+    header('Content-Type: application/json');
+    if (ob_get_length()) ob_clean(); 
+    
+    $logs = Illuminate\Database\Capsule\Manager::table('bitacora')
+              ->where('usuario_id', $_GET['usuario_id'])
+              ->orderBy('fecha', 'DESC')
+              ->limit(10)
+              ->get();
+              
+    echo json_encode($logs);
+    exit; // Detiene la ejecución para que no se imprima el diseño HTML del panel
+}
+
 // 1. INICIAR SEGURIDAD (Middleware ya configurado profesionalmente)
-// No usamos session_start() aquí porque el Middleware lo hace con seguridad mejorada.
 Middleware::auth([1, 2]); 
 
 // 2. GENERAR TOKEN CSRF
-// Se mantiene igual durante toda la sesión para evitar que el formulario expire.
 $csrfToken = Middleware::csrfGenerate();
 
 // 3. CAPTURAR LA SECCIÓN ACTUAL
@@ -36,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['eliminar_grupo']) || i
 
 /**
  * MAPEO DE ASSETS (CSS y JS)
- * Esto mantiene el HTML limpio y carga solo lo necesario.
  */
 $estilos = [
     'inicioAdmin'            => 'inicioAdmin.css',
@@ -44,6 +56,7 @@ $estilos = [
     'noticias'               => 'noticias.css',
     'membresia'              => 'membresia.css',
     'recurso_admin'          => 'recurso_admin.css',
+    'reportes'               => 'reportes.css',
     'reguistro_usuario'      => 'reguistro_usuario.css',
     'usuarios_admin'         => 'usuarios_admin.css',
     'visitasListar'          => 'visitasListar.css',
@@ -59,6 +72,7 @@ $scripts = [
     'usuarios_admin'         => 'usuarios_admin.js',
     'visitasMap'             => 'visitasMap.js',
     'recurso_admin'          => 'recurso_admin.js',
+    'reportes'               => 'reportes.js',
     'reguistro_usuario'      => 'reguistro_usuario.js',
     'membresia'              => 'membresia.js',
     'transmision'            => 'transmision.js',
@@ -87,10 +101,8 @@ $scripts = [
     
     <script>
     const CSRF_TOKEN = '<?= $csrfToken ?>';
-</script>
-<meta name="csrf-token" content="<?= $csrfToken ?>">
-
-
+    </script>
+    <meta name="csrf-token" content="<?= $csrfToken ?>">
 </head>
 <body>
 
@@ -106,7 +118,10 @@ $scripts = [
             // VALIDACIÓN DE PERMISOS EXTRA
             $vistasAdmin = ['usuarios_admin', 'inv_reguistro_usuario'];
             if (in_array(strtolower($vistaInterna), $vistasAdmin) && $_SESSION['rol_id'] !== 1) {
-                include __DIR__ . "/contenidos/error_permisos.php"; 
+                echo "<div style='padding:30px; text-align:center; background:white; border-radius:8px; border: 1px solid #ffc9c9;'>
+                        <h3 style='color:#e03131;'><i class='fa-solid fa-ban'></i> Acceso Denegado</h3>
+                        <p style='color:#555;'>No tienes los permisos suficientes para gestionar usuarios.</p>
+                      </div>";
             } else {
                 // RUTA HACIA EL ARCHIVO DE CONTENIDO
                 $rutaContenido = __DIR__ . "/contenidos/" . $vistaInterna . ".php";
@@ -114,11 +129,7 @@ $scripts = [
                 if (file_exists($rutaContenido)) {
                     include $rutaContenido;
                 } else {
-                    echo "<div class='error-404'>
-                            <h3>Archivo no encontrado</h3>
-                            <p>La sección <b>" . htmlspecialchars($vista) . "</b> no existe físicamente en el servidor.</p>
-                            <code>Ruta: $rutaContenido</code>
-                          </div>";
+                    include __DIR__ . "/../web/404.php"; 
                 }
             }
             ?> 

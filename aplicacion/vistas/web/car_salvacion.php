@@ -19,10 +19,10 @@
     <div class="bloque">
         
         <div class="texto">
-            <h2>¿Eres bueno?</h2>
+            <h2>¿Acaso eres bueno?</h2>
             <p>
                 Muchas personas creen que son buenas, pero la Biblia dice: <br>
-                <b>Como está escrito: No hay justo, ni aun uno; (Romanos 3:10).</b>
+                <b>No hay justo, ni aun uno; (Romanos 3:10).</b>
 
             </p>
             <p>
@@ -60,7 +60,30 @@
             <img src="imagen/1.png" alt="Cruz">
         </div>
 
+ <!-- BLOQUE 3 -->
     </div>
+        <div class="bloque">
+        
+        <div class="texto">
+            <h2>¿  ?</h2>
+            <p>
+                Muchas personas creen que son buenas, pero la Biblia dice: <br>
+                <b>No hay justo, ni aun uno; (Romanos 3:10).</b>
+
+            </p>
+            <p>
+                Todos hemos pecado y estamos separados de Dios.
+                No importa cuántas buenas obras hagamos,
+                no alcanzan para cumplir la santidad de Dios.
+            </p>
+        </div>
+
+        <div class="imagen">
+            <img src="imagen/1.png" alt="Persona reflexionando">
+        </div>
+
+    </div>
+
 
 </section>
 
