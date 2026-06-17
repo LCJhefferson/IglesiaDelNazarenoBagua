@@ -18,17 +18,30 @@ class ReporteVisitas {
         $diasLimiteTotal = ($mesesLimite > 0 ? $mesesLimite : 1) * 30;
         $hoy = new DateTime();
 
-        // 2. Traer miembros activos mediante Query Builder Directo para blindar contra fallos del ORM
-        $miembros = Capsule::table('miembros')
+        // 2. Traer miembros activos mediante Query Builder Directo
+        $queryMiembros = Capsule::table('miembros')
             ->where('estado', 1)
-            ->select('id', 'nombres', 'apellidos', 'direccion')
-            ->get();
+            ->select('id', 'nombres', 'apellidos', 'direccion');
 
+        // NUEVO FILTRO: Búsqueda reactiva por Nombre o Apellido (Amigable)
+        if (!empty($filtros['buscar_nombre'])) {
+            $buscar = trim($filtros['buscar_nombre']);
+            $queryMiembros->where(function($q) use ($buscar) {
+                $q->where('nombres', 'LIKE', "%{$buscar}%")
+                  ->orWhere('apellidos', 'LIKE', "%{$buscar}%");
+            });
+        }
+
+        $miembros = $queryMiembros->get();
         $datosProcesados = [];
 
         // 3. Procesar datos e inyectar estados dinámicos basados en la lógica del sistema
         foreach ($miembros as $m) {
-            
+            if (!empty($filtros['buscar_nombre'])) {
+                $b = strtolower($filtros['buscar_nombre']);
+                $nom = strtolower($m->nombres . ' ' . $m->apellidos);
+                if (strpos($nom, $b) === false) continue;
+            }
             // Construimos la consulta para la última visita de este miembro en particular
             $queryVisita = Capsule::table('visitas')
                 ->where('miembro_id', $m->id)
@@ -60,6 +73,7 @@ class ReporteVisitas {
                 continue;
             }
 
+            // Mantenemos el formato original YYYY-MM-DD para realizar el ordenamiento posterior de forma segura
             $fechaReal = $ultimaVisita ? $ultimaVisita->fecha_visita : null;
             $estadoTexto = '';
 
@@ -82,10 +96,8 @@ class ReporteVisitas {
                 } else {
                     $estadoTexto = 'Pendiente crítico';
                 }
-                $fechaFormateada = date('d/m/Y', strtotime($fechaReal));
             } else {
                 $estadoTexto = 'Pendiente crítico';
-                $fechaFormateada = 'Sin visitas';
             }
 
             // Filtro dinámico por Estado
@@ -95,21 +107,20 @@ class ReporteVisitas {
                 }
             }
 
-            // Estructura limpia e indexada perfectamente para el JavaScript y los Exportadores
+            // Estructura limpia. Guardamos 'fecha_orden' nativa para el usort y enviamos 'ultima_visita' ya formateada en d/m/Y
             $datosProcesados[] = [
                 'nombre_completo' => trim($m->nombres . ' ' . $m->apellidos),
                 'direccion'       => $m->direccion ?: 'Sin dirección',
-                'ultima_visita'   => $fechaFormateada,
+                'ultima_visita'   => $fechaReal ? date('d/m/Y', strtotime($fechaReal)) : 'Sin visitas',
+                'fecha_orden'     => $fechaReal ?: '0000-00-00', // Campo auxiliar de ordenamiento seguro
                 'motivo'          => $ultimaVisita ? ($ultimaVisita->motivo ?: 'Sin motivo') : 'Sin visitas',
                 'estado'          => $estadoTexto
             ];
         }
 
-        // 4. Ordenar el resultado final: Visitas más recientes primero
+        // 4. Ordenar el resultado final de manera segura: Visitas más recientes primero
         usort($datosProcesados, function($a, $b) {
-            $fA = $a['ultima_visita'] === 'Sin visitas' ? 0 : strtotime(str_replace('/', '-', $a['ultima_visita']));
-            $fB = $b['ultima_visita'] === 'Sin visitas' ? 0 : strtotime(str_replace('/', '-', $b['ultima_visita']));
-            return $fB <=> $fA;
+            return strcmp($b['fecha_orden'], $a['fecha_orden']);
         });
 
         return $datosProcesados;

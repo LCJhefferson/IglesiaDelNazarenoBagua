@@ -1,41 +1,55 @@
 <?php
-namespace aplicacion\servicios\reportes;
+namespace aplicacion\services\reports;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 class ReporteCumpleanos {
 
     public static function generar($filtros) {
+        // Base de la consulta calculando la edad dinámicamente en SQL
         $query = Capsule::table('miembros')
-            ->select('nombres', 'apellidos', 'fecha_nacimiento', 'telefono')
+            ->select(
+                'id',
+                Capsule::raw("CONCAT(nombres, ' ', apellidos) as nombre_completo"),
+                'telefono',
+                'fecha_nacimiento',
+                Capsule::raw("TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) as edad")
+            )
             ->whereNotNull('fecha_nacimiento');
 
-        // Filtro por Mes de Onomástico
-        if (!empty($filtros['mes_cumple'])) {
-            $query->whereRaw('MONTH(fecha_nacimiento) = ?', [$filtros['mes_cumple']]);
+        // 1. Filtro por Mes (Modificado para soportar la opción 'todos')
+        if (!empty($filtros['mes_cumpleanos'])) {
+            if ($filtros['mes_cumpleanos'] !== 'todos') {
+                $query->whereRaw('MONTH(fecha_nacimiento) = ?', [$filtros['mes_cumpleanos']]);
+            }
         }
 
-        // Filtro opcional por Rango Exacto de Fecha
-        if (!empty($filtros['fecha_inicio'])) {
-            $query->where('fecha_nacimiento', '>=', $filtros['fecha_inicio']);
-        }
-        if (!empty($filtros['fecha_fin'])) {
-            $query->where('fecha_nacimiento', '<=', $filtros['fecha_fin']);
+        // 2. Filtro por Miembro específico (Autocomplete)
+        if (!empty($filtros['miembro_id'])) {
+            $query->where('id', $filtros['miembro_id']);
         }
 
-        $resultados = $query->get();
-        $datosProcesados = [];
-
-        foreach ($resultados as $r) {
-            $edad = date_diff(date_create($r->fecha_nacimiento), date_create('today'))->y;
-            $datosProcesados[] = [
-                'nombre_completo'  => $r->nombres . ' ' . $r->apellidos,
-                'fecha_cumpleanos' => date('d/m/Y', strtotime($r->fecha_nacimiento)),
-                'edad_actual'      => $edad . ' años',
-                'telefono'         => $r->telefono ?: 'S/N'
-            ];
+        // 3. Filtros por rangos de Edad
+        if (!empty($filtros['edad_min'])) {
+            $query->whereRaw("TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) >= ?", [$filtros['edad_min']]);
+        }
+        if (!empty($filtros['edad_max'])) {
+            $query->whereRaw("TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) <= ?", [$filtros['edad_max']]);
         }
 
-        return $datosProcesados;
+        // ORDENAMIENTO INTELIGENTE: 
+        // Si eligen 'todos', se ordena por MES y luego por DÍA. Si eligen un mes, solo por DÍA.
+        if (isset($filtros['mes_cumpleanos']) && $filtros['mes_cumpleanos'] === 'todos') {
+            $query->orderByRaw('MONTH(fecha_nacimiento) ASC')
+                  ->orderByRaw('DAY(fecha_nacimiento) ASC');
+        } else {
+            $query->orderByRaw('DAY(fecha_nacimiento) ASC');
+        }
+
+        return $query->get()
+                     ->map(function($item) {
+                         return (array) $item;
+                     })
+                     ->toArray();
     }
 }

@@ -8,7 +8,11 @@ require_once __DIR__ . '/../services/reports/ReporteVisitas.php';
 require_once __DIR__ . '/../services/reports/ExportarVisitas.php';
 require_once __DIR__ . '/../services/reports/ReporteDiscipulado.php';
 require_once __DIR__ . '/../services/reports/ExportarDiscipulado.php';
+require_once __DIR__ . '/../services/reports/ReporteCumpleanos.php';
+require_once __DIR__ . '/../services/reports/ExportarCumpleanos.php'; // <-- CORRECCIÓN: Falta cargar el exportador
 
+use aplicacion\services\reports\ReporteCumpleanos;
+use aplicacion\services\reports\ExportarCumpleanos; // <-- CORRECCIÓN: Falta el use
 use aplicacion\services\reports\ReporteDiscipulado;
 use aplicacion\services\reports\ExportarDiscipulado;
 use aplicacion\modelos\ReporteModel;
@@ -38,7 +42,7 @@ class ReporteController {
     public function sugerenciasAutocomplete() {
         header('Content-Type: application/json');
         
-        $tipo = $_GET['tipo'] ?? ''; // miembros, grupos, discipuladores
+        $tipo = $_GET['tipo'] ?? ''; 
         $term = $_GET['term'] ?? '';
         $resultados = [];
 
@@ -54,13 +58,12 @@ class ReporteController {
 
     /**
      * Endpoint encargado de las condiciones dinámicas al cargar la página
-     * CORREGIDO: Carga tanto las condiciones de miembros como los estados de discipulado maestro
      */
     public function inicializarFiltros() {
         header('Content-Type: application/json');
         echo json_encode([
             'condiciones'       => ReporteModel::obtenerCondiciones(),
-            'estados_discipulo' => ReporteModel::obtenerEstadosDiscipulo() // <-- Llenado exclusivo de la nueva tabla
+            'estados_discipulo' => ReporteModel::obtenerEstadosDiscipulo()
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -73,34 +76,24 @@ class ReporteController {
         $formato     = $_GET['formato'] ?? 'excel';
         $filtros     = $_GET; 
 
-        // Conseguimos la data filtrada usando el archivo de consulta respectivo
         $datos = $this->conseguirDatosPorMódulo($tipoReporte, $filtros);
 
-        // Despachamos al exportador correcto según el tipo de reporte solicitado
         if ($tipoReporte === 'miembros') {
-            if ($formato === 'excel') {
-                ExportarMiembros::aExcel($datos);
-            } elseif ($formato === 'csv') {
-                ExportarMiembros::aCSV($datos);
-            } elseif ($formato === 'pdf') {
-                ExportarMiembros::aPDF($datos);
-            }
+            if ($formato === 'excel') ExportarMiembros::aExcel($datos);
+            elseif ($formato === 'csv') ExportarMiembros::aCSV($datos);
+            elseif ($formato === 'pdf') ExportarMiembros::aPDF($datos);
         } elseif ($tipoReporte === 'visitas') {
-            if ($formato === 'excel') {
-                ExportarVisitas::aExcel($datos);
-            } elseif ($formato === 'csv') {
-                ExportarVisitas::aCSV($datos);
-            } elseif ($formato === 'pdf') {
-                ExportarVisitas::aPDF($datos);
-            }
-        } elseif ($tipoReporte === 'discipulado') { // <-- Soporte de exportación añadido
-            if ($formato === 'excel') {
-                ExportarDiscipulado::aExcel($datos);
-            } elseif ($formato === 'csv') {
-                ExportarDiscipulado::aCSV($datos);
-            } elseif ($formato === 'pdf') {
-                ExportarDiscipulado::aPDF($datos);
-            }
+            if ($formato === 'excel') ExportarVisitas::aExcel($datos);
+            elseif ($formato === 'csv') ExportarVisitas::aCSV($datos);
+            elseif ($formato === 'pdf') ExportarVisitas::aPDF($datos);
+        } elseif ($tipoReporte === 'discipulado') { 
+            if ($formato === 'excel') ExportarDiscipulado::aExcel($datos);
+            elseif ($formato === 'csv') ExportarDiscipulado::aCSV($datos);
+            elseif ($formato === 'pdf') ExportarDiscipulado::aPDF($datos);
+        } elseif ($tipoReporte === 'cumpleanos') { 
+            if ($formato === 'excel') ExportarCumpleanos::aExcel($datos);
+            elseif ($formato === 'csv') ExportarCumpleanos::aCSV($datos);
+            elseif ($formato === 'pdf') ExportarCumpleanos::aPDF($datos);
         }
         
         exit;
@@ -115,8 +108,10 @@ class ReporteController {
                 return ReporteMiembros::generar($filtros);
             case 'visitas':
                 return ReporteVisitas::generar($filtros);
-            case 'discipulado': // <-- Enlace directo al nuevo servicio modular
+            case 'discipulado': 
                 return ReporteDiscipulado::generar($filtros);
+            case 'cumpleanos': // <-- CORRECCIÓN: Habías dejado el caso en blanco
+                return ReporteCumpleanos::generar($filtros);
             default:
                 return [];
         }

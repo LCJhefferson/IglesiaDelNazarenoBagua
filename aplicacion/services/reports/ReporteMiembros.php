@@ -1,5 +1,5 @@
 <?php
-namespace aplicacion\services\reports; // <-- Corregido a reports
+namespace aplicacion\services\reports; 
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 
@@ -20,6 +20,11 @@ class ReporteMiembros {
                 Capsule::raw("COALESCE(condiciones_miembro.nombre, 'Sin asignar') as condicion"),
                 Capsule::raw("CASE WHEN miembros.estado = 1 THEN 'Activo' ELSE 'Inactivo' END as estado")
             ]);
+            
+        // CORREGIDO: Se cambia 'id' por 'miembros.id' para evitar ambigüedades con el Join
+        if (!empty($filtros['miembro_id'])) {
+            $query->where('miembros.id', '=', $filtros['miembro_id']); 
+        }
 
         // Filtro por Condición
         if (!empty($filtros['condicion'])) {
