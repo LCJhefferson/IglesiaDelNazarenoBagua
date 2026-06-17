@@ -15,12 +15,14 @@
         </a>
     </div>
 
+    <?php if (isset($_SESSION['rol_id']) && $_SESSION['rol_id'] === 1): ?>
     <div class="menu-item">
         <a href="index.php?vista=dashboard&seccion=usuarios_admin" class="menu-title direct-link">
             <i class="fas fa-users"></i>
             Usuarios
         </a>
     </div>
+    <?php endif; ?>
 
     <div class="menu-item">
         <a href="index.php?vista=dashboard&seccion=recurso_admin" class="menu-title direct-link">

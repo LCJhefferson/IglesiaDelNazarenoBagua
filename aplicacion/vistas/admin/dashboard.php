@@ -104,7 +104,8 @@ $scripts = [
         <section class="content" id="contenedor-vista">
             <?php
             // VALIDACIÓN DE PERMISOS EXTRA
-            if ($vistaInterna === 'usuarios_admin' && $_SESSION['rol_id'] !== 1) {
+            $vistasAdmin = ['usuarios_admin', 'inv_reguistro_usuario'];
+            if (in_array(strtolower($vistaInterna), $vistasAdmin) && $_SESSION['rol_id'] !== 1) {
                 include __DIR__ . "/contenidos/error_permisos.php"; 
             } else {
                 // RUTA HACIA EL ARCHIVO DE CONTENIDO
