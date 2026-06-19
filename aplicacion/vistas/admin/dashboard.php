@@ -67,6 +67,7 @@ $estilos = [
 ];
 
 $scripts = [
+    'inicioAdmin'            => 'inicioAdmin.js',
     'NewUsuario'             => 'NewUsuario.js',
     'noticias'               => 'noticias.js',
     'usuarios_admin'         => 'usuarios_admin.js',

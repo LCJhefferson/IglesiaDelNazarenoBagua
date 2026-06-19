@@ -1,236 +1,252 @@
-
 /* ==========================================
-   CONTENEDOR 
+   CONTENEDOR GLOBAL
    ========================================== */
 .gestion-container {
-    background-color: #f0f2f7; /* Color de fondo suave solicitado */
     min-height: 100vh;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    padding: 10px 20px;
 }
 
-
 /* ==========================================
-   BARRA DE FILTROS - DISCIPULADO GRUPOS
+   BARRA DE FILTROS (DISTRIBUCIÓN OPTIMIZADA)
    ========================================== */
 .filter-bar {
     background: #ffffff;
-    padding: 15px 20px;
-    border-radius: 15px;
+    padding: 10px 15px;
+    border-radius: 12px;
     display: flex;
-    /* Gap controlado para que no estén tan distantes */
-    gap: 15px; 
-    margin-bottom: 30px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    gap: 12px; 
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     align-items: center;
-    /* Evita saltos de línea innecesarios en escritorio */
-    flex-wrap: nowrap; 
+    flex-wrap: nowrap; /* Mantiene la barra en una sola línea en escritorios */
 }
 
-/* 1. Buscador: Proporción larga pero pegada */
+/* 1. Buscador de Texto: Toma la mayor cantidad de espacio libre */
 #buscarGrupo {
-    flex: 2 !important; 
+    flex: 2 1 250px; /* Crece proporcionalmente, base mínima sugerida de 250px */
     width: 100%;
 }
 
-/* 2. Contenedor de Selectores (si usas un div envoltorio o los elementos directos) */
-/* Si tus select están sueltos en el HTML, esto los mantendrá unidos */
-#filtroNivel, #filtroDiscipulador {
-    flex: 0 0 200px; /* Ancho fijo para que no se estiren demasiado */
-    min-width: 150px;
+/* 2. Filtro de Discipulador: Espacio intermedio para nombres y apellidos largos */
+#filtroDiscipulador {
+    flex: 1 1 220px; /* Ancho base expandible para evitar truncados drásticos */
+    min-width: 180px;
     cursor: pointer;
 }
 
-/* Estilos de inputs y selects unificados */
+/* 3. Filtros Cortos: Espacio fijo y compacto (Nivel y Estado) */
+#filtroNivel, 
+#filtroEstado {
+    flex: 0 0 140px; /* No crecen, no se achican más allá de 140px */
+    min-width: 120px;
+    cursor: pointer;
+}
+
+/* 4. Botón Limpiar: Compacto, ajustado a su contenido */
+.filter-bar button {
+    flex: 0 0 auto; /* Ajuste perfecto al tamaño del texto e icono */
+    white-space: nowrap; /* Evita que el texto del botón salte de línea */
+}
+
+/* Estilos comunes unificados para Inputs y Selects */
 .filter-bar input, 
 .filter-bar select {
-    padding: 12px 16px;
+    padding: 8px 12px;
     border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 0.95rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
     color: #1a1f36;
     outline: none;
     transition: all 0.2s ease;
     background-color: #ffffff;
 }
 
-/* Estados Focus */
 .filter-bar input:focus, 
 .filter-bar select:focus {
     border-color: #4f6ef7;
     box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1);
 }
 
-/* RESPONSIVO: Para que no se rompa en pantallas pequeñas */
-@media (max-width: 1024px) {
-    .filter-bar {
-        flex-wrap: wrap;
-    }
-    
-    #buscarGrupo {
-        flex: 0 0 100% !important;
-    }
-
-    #filtroNivel, #filtroDiscipulador {
-        flex: 1; /* En tablets se reparten el ancho 50/50 */
-        max-width: none;
-    }
-}
-
-@media (max-width: 600px) {
-    #filtroNivel, #filtroDiscipulador {
-        flex: 0 0 100%; /* En celulares uno debajo de otro */
-    }
-}
 /* ==========================================
-   DISEÑO DE CARDS (REJILLA)
+   DISEÑO DE CARDS COMPACTAS
    ========================================== */
 .grupos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Más columnas por fila */
+    gap: 18px; /* Espacio más optimizado */
 }
 
 .card-grupo {
     background: #ffffff;
-    border-radius: 20px;
-    padding: 24px;
+    border-radius: 14px; /* Más sutil */
+    padding: 16px; /* Reducido de 24px */
     border: 1px solid #e2e8f0;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .card-grupo:hover {
-    transform: translateY(-8px);
-    border-color: #4f6ef7; /* Borde azul al pasar el mouse */
+    transform: translateY(-4px);
+    border-color: #4f6ef7;
+    box-shadow: 0 10px 15px -3px rgba(79, 110, 247, 0.1);
 }
 
 .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
-/* Badges con Paleta de Colores */
 .badge-nivel {
-    background-color: #6b7a99; /* Gris azulado solicitado */
+    background-color: #6b7a99;
     color: #ffffff;
-    padding: 6px 12px;
-    border-radius: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
     font-weight: 700;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
 }
 
-/* Estados */
-.status-activo { background-color: #38d9a9; color: #1a1f36; } /* Verde menta neón */
-.status-inactivo { background-color: #f03e3e; color: #ffffff; } /* Rojo solicitado */
-.status-concluido { background-color: #f59f00; color: #ffffff; } /* Naranja/Ámbar solicitado */
-
 .badge-estado {
-    padding: 6px 14px;
+    padding: 4px 10px;
     border-radius: 50px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 800;
     text-transform: uppercase;
 }
 
+.status-activo { background-color: #e6fcf5; color: #0ca678; } /* Colores más modernos y suaves */
+.status-inactivo { background-color: #fff5f5; color: #e03131; }
+.status-concluido { background-color: #fff9db; color: #f08c00; }
+
+
+
+
+/* ==========================================
+   LÍNEA SUPERIOR DE COLOR SEGÚN EL ESTADO
+   ========================================== */
+
+/* Añadimos un borde superior un poco más grueso a la card */
+.card-grupo {
+    border-top: 4px solid #e2e8f0; /* Borde gris base por si acaso */
+}
+
+.card-grupo:has(.status-activo) {
+    border-top: 4px solid #0ca678;
+}
+
+.card-grupo:has(.status-inactivo) {
+    border-top: 4px solid #e03131;
+}
+
+.card-grupo:has(.status-concluido) {
+    border-top: 4px solid #f08c00;
+}
+
 .card-body h3 {
-    font-size: 1.5rem;
+    font-size: 1.2rem; /* Más balanceado */
     color: #1a1f36;
-    margin: 0 0 12px 0;
+    margin: 0 0 8px 0;
+    font-weight: 600;
 }
 
 .discipulador {
     color: #6b7a99;
     font-weight: 500;
+    font-size: 0.85rem;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    margin-bottom: 10px;
 }
 
 .info-stats {
-    margin-top: 15px;
-    padding: 12px;
-    background: #f0f2f7;
-    border-radius: 12px;
-    color: #4f6ef7; /* Azul para resaltar estadísticas */
-    font-weight: 700;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    color: #4f6ef7;
+    font-weight: 600;
+    font-size: 0.85rem;
 }
 
-/* Acciones en Card */
+/* Acciones Rediseñadas */
 .card-actions {
     display: flex;
-    gap: 12px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
 }
 
 .btn-edit {
-    flex: 2;
-    background-color: #e2e8f0;
-    color: #1a1f36;
+    flex: 1;
+    background-color: #f1f5f9;
+    color: #334155;
     border: none;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 8px;
+    border-radius: 6px;
     font-weight: 600;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: background 0.2s;
 }
 
-.btn-edit:hover { background-color: #cbd5e0; }
+.btn-edit:hover { background-color: #e2e8f0; }
 
 .btn-delete {
-    flex: 1;
-    background-color: #f03e3e; /* Botón eliminar rojo */
-    color: #ffffff;
-    text-align: center;
-    padding: 10px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: opacity 0.2s;
+    background-color: #fff5f5; 
+    color: #e03131;
+    border: 1px solid #ffe3e3;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.btn-delete:hover { opacity: 0.8; }
+.btn-delete:hover { 
+    background-color: #e03131;
+    color: #ffffff;
+}
 
 /* ==========================================
-   MODAL REDISEÑADO
+   MODALES UNIFICADOS Y ANIMADOS
    ========================================== */
 .modal {
     display: none;
     position: fixed;
     z-index: 9999;
     left: 0; top: 0; width: 100%; height: 100%;
-      background-color: rgba(27, 27, 61, 0.185); /* desenfoque*/
-    backdrop-filter: blur(8px);
+    background-color: rgba(15, 23, 42, 0.3); 
+    backdrop-filter: blur(4px);
     align-items: center;
     justify-content: center;
-}
-
-.close-modal {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: #6b7a99;
-    cursor: pointer;
-    transition: color 0.2s;
 }
 
 .modal-content {
     background: #ffffff;
     width: 100%;
-    max-width: 550px;
-    border-radius: 24px;
+    max-width: 500px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    animation: modalSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-confirm-content {
+    max-width: 360px;
+    text-align: center;
+    padding: 24px;
 }
 
 .modal-header {
-    background: #f0f2f7;
-    padding: 25px 30px;
-    border-bottom: 1px solid #e2e8f0;
+    background: #ffffff;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f5f9;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -238,65 +254,123 @@
 
 .modal-header h3 {
     margin: 0;
-    font-size: 1.4rem;
-    color: #1a1f36;
+    font-size: 1.15rem;
+    color: #0f172a;
 }
 
 .modal-body-unified {
-    padding: 30px;
+    padding: 20px 24px;
 }
 
-.form-group {
-    margin-bottom: 20px;
-}
-
+.form-group { margin-bottom: 14px; }
 .form-group label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-weight: 600;
-    color: #6b7a99;
-    font-size: 0.9rem;
+    color: #475569;
+    font-size: 0.85rem;
 }
-
 .form-group input, .form-group select {
     width: 100%;
-    padding: 12px;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 1rem;
-    color: #1a1f36;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
 }
 
 .modal-footer {
-    padding: 20px 30px;
-    background: #f0f2f7;
+    padding: 14px 24px;
+    background: #f8fafc;
     display: flex;
-    gap: 15px;
+    gap: 10px;
     justify-content: flex-end;
 }
 
 .btn-save {
-    background-color: #2f9e44;
+    background-color: #22c55e;
     color: #ffffff;
     border: none;
-    padding: 12px 25px;
-    border-radius: 10px;
+    padding: 10px 18px;
+    border-radius: 8px;
     font-weight: 600;
+    font-size: 0.9rem;
     cursor: pointer;
 }
 
 .btn-cancel {
     background-color: #ffffff;
-    color: #6b7a99;
+    color: #64748b;
     border: 1px solid #e2e8f0;
-    padding: 12px 25px;
-    border-radius: 10px;
+    padding: 10px 18px;
+    border-radius: 8px;
     font-weight: 600;
+    font-size: 0.9rem;
     cursor: pointer;
+}
+
+/* ==========================================
+   SISTEMA DE TOAST NOTIFICATION (FLOTANTE)
+   ========================================== */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    background: #ffffff;
+    color: #1e293b;
+    padding: 12px 18px;
+    border-radius: 10px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-left: 4px solid #22c55e; /* Verde por defecto */
+    transform: translateX(120%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast.show { transform: translateX(0); }
+.toast.toast-error { border-left-color: #ef4444; }
+.toast.toast-info { border-left-color: #3b82f6; }
+.toast i { font-size: 1.1rem; }
+
+@keyframes modalSlideIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* RESPONSIVO TOTALMENTE CONTROLADO */
+@media (max-width: 1100px) {
+    .filter-bar { 
+        flex-wrap: wrap; /* Permite saltar de línea si la pantalla es angosta */
+    }
+    #buscarGrupo { 
+        flex: 1 1 100% !important; /* El buscador toma toda la fila superior */
+    }
+    #filtroDiscipulador {
+        flex: 1 1 40%; /* El resto de filtros se divide equitativamente abajo */
+    }
+    #filtroNivel, #filtroEstado {
+        flex: 1 1 20%;
+    }
+}
+
+@media (max-width: 650px) {
+    /* En pantallas móviles, cada filtro ocupa su propia fila para máxima usabilidad */
+    #filtroNivel, 
+    #filtroDiscipulador, 
+    #filtroEstado,
+    .filter-bar button { 
+        flex: 0 0 100% !important; 
+        text-align: center;
+        justify-content: center;
+    }
 }

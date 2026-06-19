@@ -1,152 +1,303 @@
-
-/* Contenedor principal corregido */
-.stats-grid {
-    display: grid;
-    /* Forzamos 4 columnas de igual tamaño */
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 20px;
-    margin-bottom: 30px;
-    padding: 10px 0;
-    align-items: stretch; /* Asegura que todas las tarjetas tengan la misma altura */
+/* =========================================================================
+   0. BOTÓN DE REPORTES E INTERFAZ
+   ========================================================================= */
+/* Contenedor opcional para controlar la ubicación */
+.reportes-container {
+    margin: 15px 0;
+    display: inline-block; /* Hace que el contenedor solo ocupe el tamaño del botón */
 }
 
-/* Tarjeta individual corregida */
+/* Estilos principales del botón de Reportes */
+.btn-reportes-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px; /* Separación entre el icono de factura y el texto */
+    background-color: #3b82f6; /* Color azul elegante a juego con tu panel */
+    color: #ffffff; /* Texto e icono en color blanco */
+    text-decoration: none; /* Quita la línea de enlace subrayada */
+    padding: 10px 20px; /* Margen interno para darle cuerpo al botón */
+    font-size: 14px;
+    font-weight: 600; /* Texto ligeramente seminegrita */
+    border-radius: 8px; /* Bordes suavemente redondeados */
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2); /* Sutil sombra azul de fondo */
+    transition: all 0.25s ease; /* Transición suave para los efectos */
+    cursor: pointer;
+}
+
+/* Efecto visual al pasar el cursor (Hover) */
+.btn-reportes-link:hover {
+    background-color: #2563eb; /* Un azul un poco más oscuro al apuntarlo */
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); /* La sombra se expande dando efecto de elevación */
+    transform: translateY(-2px); /* El botón sube 2 píxeles de forma elegante */
+}
+
+/* Efecto visual al hacer clic (Active) */
+.btn-reportes-link:active {
+    transform: translateY(0); /* Regresa a su posición original al presionarlo */
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+/* Estilo específico para el icono dentro del botón */
+.btn-reportes-link i {
+    font-size: 16px;
+    transition: transform 0.25s ease;
+}
+
+/* Detalle interactivo: el icono se inclina un poco al pasar el mouse */
+.btn-reportes-link:hover i {
+    transform: scale(1.1);
+}
+
+/* =========================================================================
+   1. REJILLA DE TARJETAS (KPIS SUPERIORES - ACTUALIZADO A 5 COLUMNAS)
+   ========================================================================= */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* Redistribuido a 5 columnas perfectas */
+    gap: 20px;
+    margin-bottom: 25px;
+    align-items: stretch;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column; /* Alinea el valor arriba y la etiqueta abajo de forma ordenada */
+    justify-content: center;
+    width: 100%;
+}
+/* Forzamos a que el número y la etiqueta se organicen en su propio renglón */
 .stat-card {
     background: #ffffff;
     padding: 20px;
     border-radius: 12px;
     display: flex;
-    align-items: center;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
-    border: 1px solid #f1f5f9;
-    /* Altura mínima para uniformidad */
-    min-height: 100px; 
-    width: 100%;
+    align-items: center; /* Centra verticalmente el icono, número y texto */
+    box-shadow: 0 4px 16px rgba(148, 163, 184, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #e2e8f0;
+    min-height: 90px; 
     box-sizing: border-box;
 }
 
-/* Ajuste para pantallas medianas (Tablets) */
-@media (max-width: 1100px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* Ajuste para pantallas pequeñas (Celulares) */
-@media (max-width: 600px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
 .stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(148, 163, 184, 0.12);
 }
 
-/* Iconos Dinámicos */
 .stat-icon {
-    width: 55px;
-    height: 55px;
-    border-radius: 12px;
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 22px;
+    font-size: 20px;
     margin-right: 15px;
-    flex-shrink: 0; /* Evita que el icono se deforme */
+    flex-shrink: 0;
 }
 
-/* Colores por categoría (DAO) */
-.stat-icon.miembros { background: #e0f2fe; color: #0369a1; }
-.stat-icon.grupos    { background: #fef3c7; color: #92400e; }
-.stat-icon.visitas   { background: #dcfce7; color: #166534; }
-.stat-icon.recursos  { background: #f3e8ff; color: #6b21a8; }
+/* Paleta de colores institucionales para los iconos */
+.stat-icon.miembros           { background: #dbeafe; color: #1e40af; }
+.stat-icon.miembros-inactivos { background: #f1f5f9; color: #475569; } /* ¡NUEVO! Gris Pizarra limpio */
+.stat-icon.grupos             { background: #fef3c7; color: #92400e; }
+.stat-icon.visitas            { background: #d1fae5; color: #065f46; }
+.stat-icon.recursos           { background: #f3e8ff; color: #6b21a8; }
 
-/* Información de texto en tarjetas */
-.stat-info {
-    display: flex;
-    flex-direction: column;
-}
-
+/* Modificación sutil para separar el número de la etiqueta */
 .stat-value {
-    font-size: 24px;
-    font-weight: 800;
-    color: #1e293b;
+    font-size: 26px;
+    font-weight: 700;
+    color: #0f172a;
     line-height: 1;
+    margin-bottom: 2px; /* Pequeña separación inferior antes del texto */
+    display: block; /* Asegura que el número sea su propia línea */
 }
 
 .stat-label {
     color: #64748b;
-    font-size: 13px;
-    font-weight: 500;
-    text-transform: uppercase;
-    margin-top: 4px;
-}
-
-
-
-
-
-
-/* Tabla de Actividad Reciente */
-.recent-activity {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.recent-activity h3 {
-    margin-bottom: 20px;
-    color: #1e293b;
-    font-size: 18px;
-}
-
-.styled-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.styled-table th {
-    background-color: #f8fafc;
-    color: #64748b;
+    font-size: 11px; /* Bajamos un pixel para que quepa perfectamente en la celda */
     font-weight: 600;
     text-transform: uppercase;
-    font-size: 12px;
-    padding: 12px 15px;
+    letter-spacing: 0.3px;
+    line-height: 1.3; /* Le da un respiro al texto si llega a ocupar dos líneas por el tamaño */
+    display: block;
+}
+
+/* =========================================================================
+   2. DISTRIBUCIÓN DE BLOQUES DEL DASHBOARD
+   ========================================================================= */
+/* Fila Central: Ahora con 3 Gráficos Circulares Simétricos */
+.charts-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Dividido perfectamente en 3 columnas iguales */
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+/* Fila Inferior: Gráfico de Barras Amplio + Tabla de Actividad */
+.dashboard-layout-bottom {
+    display: grid;
+    grid-template-columns: 6fr 4fr; /* 60% Barras, 40% Tabla */
+    gap: 25px;
+}
+
+/* Contenedor Base Compartido para Bloques */
+.dashboard-card {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 16px rgba(148, 163, 184, 0.05);
+    box-sizing: border-box;
+}
+
+.custom-chart-box {
+    height: 350px; /* Altura uniforme para los contenedores circulares */
+}
+
+.dashboard-card h3 {
+    margin: 0 0 4px 0;
+    color: #0f172a;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.widget-subtitle {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0 0 20px 0;
+}
+
+/* =========================================================================
+   3. ENVOLTURAS INTERNAS PARA CHART.JS
+   ========================================================================= */
+/* Área para Gráficos Circulares (Donas) */
+.chart-canvas-wrapper {
+    position: relative;
+    height: 240px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Área para Gráfico de Barras */
+.chart-canvas-wrapper-bar {
+    position: relative;
+    height: 250px;
+    width: 100%;
+}
+
+.no-data-msg {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    text-align: center;
+    font-style: italic;
+}
+
+/* =========================================================================
+   4. TABLA DE ACTIVIDAD RECIENTE (GROSORES UNIFICADOS)
+   ========================================================================= */
+.tabla-container-mini {
+    overflow-x: auto;
+}
+
+.tabla-moderna-dashboard {
+    width: 100%;
+    border-collapse: collapse;
     text-align: left;
-    border-bottom: 2px solid #edf2f7;
 }
 
-.styled-table td {
-    padding: 15px;
-    border-bottom: 1px solid #f1f5f9;
+.tabla-moderna-dashboard th {
+    background-color: #f8fafc;
     color: #475569;
-    font-size: 14px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 16px;
+    border-bottom: 2px solid #e2e8f0; /* Mismo grosor institucional */
 }
 
-.styled-table tbody tr:hover {
-    background-color: #f9fafb;
+.tabla-moderna-dashboard td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0; /* Coherencia con Discipulado y Visitas */
+    color: #334155;
+    font-size: 0.9rem;
+    vertical-align: middle;
 }
 
-/* Responsividad para móviles */
-@media (max-width: 1024px) {
+.tabla-moderna-dashboard tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Detalles de las celdas */
+.user-info-mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar-circle-mini {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #64748b, #475569);
+    color: white;
+    font-weight: 600;
+    font-size: 0.8rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fecha-celda {
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.badge-motivo {
+    background-color: #f1f5f9;
+    color: #334155;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid #e2e8f0;
+    display: inline-block;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* =========================================================================
+   5. MEDIA QUERIES (RESPONSIVIDAD COMPLETAMENTE INTEGRADA)
+   ========================================================================= */
+@media (max-width: 1200px) {
     .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr); /* Organiza las 5 cards en filas de 3 en tablets */
+    }
+    .charts-row, .dashboard-layout-bottom {
+        grid-template-columns: 1fr; /* Apila todo verticalmente en pantallas medianas/tablets */
+        gap: 20px;
+    }
+    .custom-chart-box {
+        height: auto;
+        min-height: 330px;
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) { /* Corregido de 7680px a 768px */
     .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Un KPI por fila en móviles para legibilidad */
     }
-    .welcome-banner {
-        flex-direction: column;
-        text-align: center;
-    }
-    .welcome-image {
-        display: none;
+    .dashboard-card {
+        padding: 16px; /* Más compacto en teléfonos */
     }
 }

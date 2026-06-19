@@ -56,10 +56,9 @@ function editarGrupo(datos) {
     document.getElementById('nivel_grupo').value = datos.nivel;
     document.getElementById('estado_id').value = datos.estado_id;
 
-    // --- CORRECCIÓN AQUÍ ---
     const selectD = document.getElementById('discipulador_id');
     if (selectD) {
-        // Obtenemos el ID de forma a prueba de fallos, buscando en las propiedades posibles
+        // Obtenemos el ID de forma a prueba de fallos
         const idLider = datos.discipulador_id || datos.lider_id || (datos.discipulador ? datos.discipulador.id : '');
         selectD.value = idLider;
         
@@ -68,7 +67,6 @@ function editarGrupo(datos) {
             $(selectD).trigger('change');
         }
     }
-    // -----------------------
 
     // Cambiamos el atributo 'name' para que el controlador PHP detecte 'editar_grupo'
     const btnGuardar = document.getElementById('btnGuardarAction');
@@ -91,30 +89,29 @@ function cerrarModalGrupo() {
 /**
  * Filtro dinámico para las CARDS de grupos
  */
-/**
- * Filtro dinámico para las CARDS de grupos
- */
 function filtrarGrupos() {
     const busqueda = document.getElementById('buscarGrupo').value.toLowerCase().trim();
     const nivelFiltro = document.getElementById('filtroNivel').value.toLowerCase().trim();
     const liderFiltro = document.getElementById('filtroDiscipulador').value.toLowerCase().trim();
+    const estadoFiltro = document.getElementById('filtroEstado').value.toLowerCase().trim(); // <-- NUEVO
     
     const cards = document.querySelectorAll('.card-grupo');
 
     cards.forEach(card => {
-        // Datos de la card
-        const nombreGrupo = card.querySelector('h3').innerText.toLowerCase();
-        const nivelTexto = card.querySelector('.badge-nivel').innerText.toLowerCase().replace('nivel', '').trim();
-        // Buscamos el nombre del discipulador en el párrafo correspondiente
-        const liderTexto = card.querySelector('.discipulador').innerText.toLowerCase().trim();
+        // Obtenemos los datos desde los atributos data-* de la card
+        const nombreGrupo = card.getAttribute('data-nombre') || "";
+        const nivelTexto = card.getAttribute('data-nivel').toLowerCase().trim();
+        const liderTexto = card.getAttribute('data-lider') || "";
+        const estadoTexto = card.getAttribute('data-estado') || ""; // <-- NUEVO
 
-        // Validaciones
+        // Evaluamos las condiciones
         const coincideNombre = nombreGrupo.includes(busqueda);
-        const coincideNivel = (nivelFiltro === "") || (nivelTexto === nivelFiltro.toLowerCase());
+        const coincideNivel = (nivelFiltro === "") || (nivelTexto === nivelFiltro);
         const coincideLider = (liderFiltro === "") || (liderTexto.includes(liderFiltro));
+        const coincideEstado = (estadoFiltro === "") || (estadoTexto === estadoFiltro); // <-- NUEVO
 
-        // Aplicar filtro
-        if (coincideNombre && coincideNivel && coincideLider) {
+        // Mostramos u ocultamos la card según corresponda
+        if (coincideNombre && coincideNivel && coincideLider && coincideEstado) {
             card.style.display = "";
             card.style.opacity = "1";
         } else {
@@ -125,11 +122,88 @@ function filtrarGrupos() {
 }
 
 /**
- * Cerrar modal al hacer clic en el fondo oscuro
+ * Abre el modal de confirmación personalizado para eliminar un grupo
+ * @param {number} id - ID del grupo a eliminar
+ * @param {string} nombre - Nombre del grupo para mostrar en el mensaje
+ */
+function confirmarEliminarGrupo(id, nombre) {
+    const modal = document.getElementById('modalConfirmarEliminar');
+    const txtNombre = document.getElementById('nombreGrupoEliminar');
+    const btnEliminar = document.getElementById('enlaceEliminarSeguro');
+
+    if (modal && txtNombre && btnEliminar) {
+        txtNombre.textContent = nombre;
+        // Configuramos la URL exacta de redirección con el ID seleccionado
+        btnEliminar.href = `?seccion=DiscipuladoGrupos&eliminar_grupo=${id}`;
+        modal.style.display = 'flex';
+    }
+}
+
+/**
+ * Cierra el modal de confirmación de eliminación
+ */
+function cerrarModalEliminar() {
+    const modal = document.getElementById('modalConfirmarEliminar');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+/**
+ * UNIFICADO: Cerrar cualquier modal al hacer clic en el fondo oscuro externo
  */
 window.onclick = function(event) {
-    const modal = document.getElementById('modalGrupo');
-    if (event.target == modal) {
+    const modalGrupo = document.getElementById('modalGrupo');
+    const modalEliminar = document.getElementById('modalConfirmarEliminar');
+    
+    if (event.target === modalGrupo) {
         cerrarModalGrupo();
     }
+    if (event.target === modalEliminar) {
+        cerrarModalEliminar();
+    }
+}
+
+/**
+ * Crea y muestra un mensaje emergente (Toast) que desaparece automáticamente
+ * @param {string} mensaje - Texto a mostrar
+ * @param {string} tipo - 'success', 'error', o 'info'
+ */
+function mostrarNotificacion(mensaje, tipo = 'success') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${tipo}`;
+    
+    // Cambiar icono según el estado
+    let icono = '<i class="fas fa-check-circle" style="color: #22c55e;"></i>';
+    if (tipo === 'error') icono = '<i class="fas fa-times-circle" style="color: #ef4444;"></i>';
+    if (tipo === 'info') icono = '<i class="fas fa-info-circle" style="color: #3b82f6;"></i>';
+
+    toast.innerHTML = `${icono} <span>${mensaje}</span>`;
+    container.appendChild(toast);
+
+    // Animación de entrada fluida
+    setTimeout(() => toast.classList.add('show'), 50);
+
+    // Desvanecer y remover automáticamente a los 4 segundos
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+
+/**
+ * NUEVO: Resetea todos los valores de los selectores de filtro
+ * y vuelve a mostrar la grilla completa de grupos.
+ */
+function limpiarFiltros() {
+    document.getElementById('buscarGrupo').value = "";
+    document.getElementById('filtroNivel').value = "";
+    document.getElementById('filtroDiscipulador').value = "";
+    document.getElementById('filtroEstado').value = "";
+
+    // Ejecuta el filtrado con parámetros vacíos para restablecer la vista
+    filtrarGrupos();
 }

@@ -3,16 +3,15 @@ use aplicacion\controladores\DiscipuladoController;
 use aplicacion\core\Middleware;
 
 $controller = new DiscipuladoController();
-// 1. Procesar acciones (Asignar/Quitar integrante)
 $controller->manejarPeticion();
 
-// 2. Obtener datos mediante Eloquent
 $datos = $controller->obtenerDatosVista('DiscipuladoIntegrantes');
 
-$integrantes = $datos['integrantes']; // Colección de objetos DiscipuladoIntegrante
+$integrantes = $datos['integrantes']; 
 $todos_miembros = $datos['todos_miembros'];
 $todos_grupos = $datos['todos_grupos'];
 $discipuladores = $datos['discipuladores'];
+$estados_alumno = $datos['estados_alumno']; // Traemos los estados individuales
 
 $total_integrantes = $integrantes->count();
 $csrfToken = Middleware::csrfGenerate();
@@ -37,8 +36,6 @@ $csrfToken = Middleware::csrfGenerate();
         </button>
     </div>
 </header>
-
-
 
 <div class="gestion-container">
     <div class="filter-bar">
@@ -65,6 +62,17 @@ $csrfToken = Middleware::csrfGenerate();
                     </option>
                 <?php endforeach; ?>
             </select>
+
+            <select id="filtroEstado" onchange="filtrarTablaIntegrantes()">
+                <option value="todos">Todos los Estados</option>
+                <?php foreach ($estados_alumno as $est): ?>
+                    <option value="<?= $est->id; ?>"><?= htmlspecialchars($est->nombre); ?></option>
+                <?php endforeach; ?>
+            </select>
+
+            <button type="button" class="btn-cancel" style="padding: 8px 15px; display: inline-flex; align-items: center; gap: 5px; height: 100%;" onclick="limpiarFiltrosIntegrantes()">
+                <i class="fas fa-undo-alt"></i> Limpiar
+            </button>
         </div>
     </div>
 
@@ -75,6 +83,7 @@ $csrfToken = Middleware::csrfGenerate();
                     <th>Nombre del Integrante</th>
                     <th>Grupo Asignado</th>
                     <th>Nivel</th>
+                    <th>Estado Alumno</th>
                     <th>Discipulador</th>
                     <th style="text-align:center;">Acciones</th>
                 </tr>
@@ -82,21 +91,25 @@ $csrfToken = Middleware::csrfGenerate();
             <tbody id="cuerpoTablaIntegrantes">
                 <?php if ($integrantes->isEmpty()): ?>
                     <tr class="no-data-row">
-                        <td colspan="5" class="no-data-table" style="text-align:center; padding:30px;">No hay integrantes asignados.</td>
+                        <td colspan="6" class="no-data-table" style="text-align:center; padding:30px;">No hay integrantes asignados.</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($integrantes as $i): 
-                        // Acceso vía relaciones Eloquent
                         $nombreMiembro = $i->miembro->nombres . ' ' . $i->miembro->apellidos;
                         $nombreGrupo   = $i->grupo->nombre ?? 'Sin Grupo';
                         $nivelGrupo    = $i->grupo->nivel ?? '-';
                         $idLider       = $i->grupo->discipulador_id ?? '';
                         $nombreLider   = $i->grupo->discipulador ? ($i->grupo->discipulador->nombres . ' ' . $i->grupo->discipulador->apellidos) : 'No asignado';
+                        
+                        // Obtenemos los datos del estado del alumno
+                        $idEstadoAlumno = $i->estado_discipulo_id ?? 1;
+                        $nombreEstadoAlumno = $i->estadoAlumno->nombre ?? 'En Proceso';
                     ?>
                     <tr class="fila-integrante" 
                         data-nombre="<?= strtolower(htmlspecialchars($nombreMiembro)) ?>"
                         data-nivel="<?= htmlspecialchars($nivelGrupo) ?>"
-                        data-lider="<?= htmlspecialchars($idLider) ?>">
+                        data-lider="<?= htmlspecialchars($idLider) ?>"
+                        data-estado="<?= htmlspecialchars($idEstadoAlumno) ?>">
                         
                         <td>
                             <div class="user-info">
@@ -107,16 +120,25 @@ $csrfToken = Middleware::csrfGenerate();
                         <td><span class="badge-grupo-name"><?= htmlspecialchars($nombreGrupo) ?></span></td>
                         <td><span class="badge-nivel-small"><?= htmlspecialchars($nivelGrupo) ?></span></td>
                         <td>
+                            <span class="badge-status state-<?= $idEstadoAlumno ?>"><?= htmlspecialchars($nombreEstadoAlumno) ?></span>
+                        </td>
+                        <td>
                             <span class="lider-name">
                                 <i class="fas fa-chalkboard-teacher"></i> <?= htmlspecialchars($nombreLider) ?>
                             </span>
                         </td>
                         <td style="text-align:center;">
-                            <a href="dashboard?seccion=DiscipuladoIntegrantes&quitar_integrante=<?= $i->id ?>" 
-                               class="btn-remove" 
-                               onclick="return confirm('¿Quitar a este miembro del grupo?')">
-                                <i class="fas fa-user-minus"></i> Quitar
-                            </a>
+                            <div style="display: flex; gap: 6px; justify-content: center;">
+                                <button type="button" class="btn-edit" style="padding: 5px 10px; font-size: 13px;"
+                                        onclick="abrirModalEstadoAlumno(<?= $i->id ?>, <?= $idEstadoAlumno ?>, '<?= htmlspecialchars($nombreMiembro) ?>')">
+                                    <i class="fas fa-user-cog"></i> Estado
+                                </button>
+
+                                <button type="button" class="btn-remove" 
+                                        onclick="confirmarQuitarIntegrante(<?= $i->id ?>, '<?= htmlspecialchars($nombreMiembro, ENT_QUOTES) ?>')">
+                                    <i class="fas fa-user-minus"></i> Quitar
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -167,4 +189,102 @@ $csrfToken = Middleware::csrfGenerate();
     </div>
 </div>
 
+<div id="modalEstadoAlumno" class="modal">
+    <div class="modal-content" style="max-width: 420px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-user-cog"></i> Estado del Discípulo</h3>
+            <span class="close-modal" onclick="cerrarModalEstadoAlumno()">&times;</span>
+        </div>
+
+        <form method="POST" action="dashboard?seccion=DiscipuladoIntegrantes">
+            <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+            <input type="hidden" name="integrante_id" id="modal_integrante_id">
+            
+            <div class="modal-body-unified">
+                <div class="form-group">
+                    <label>Discípulo:</label>
+                    <input type="text" id="modal_alumno_nombre" class="form-select-standard" readonly style="background-color: #f8fafc; font-weight: 600; color:#334155;">
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-info-circle"></i> Nuevo Estado del Alumno</label>
+                    <select name="estado_discipulo_id" id="modal_estado_select" class="form-select-standard" required>
+                        <?php foreach($estados_alumno as $est): ?>
+                            <option value="<?= $est->id ?>"><?= htmlspecialchars($est->nombre) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="modal-footer" style="margin-top: 20px;">
+                    <button type="button" class="btn-cancel" onclick="cerrarModalEstadoAlumno()">Cancelar</button>
+                    <button type="submit" name="actualizar_estado_integrante" class="btn-save">Actualizar Estado</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modalConfirmarQuitar" class="modal">
+    <div class="modal-content" style="max-width: 420px; text-align: center;">
+        <div class="modal-header" style="justify-content: center; border-bottom: none; padding-bottom: 10px;">
+            <h3 style="flex-direction: column; gap: 8px;">
+                <i class="fas fa-exclamation-triangle" style="color: #ef4444; background: #fef2f2; font-size: 1.8rem; padding: 15px; border-radius: 50px;"></i>
+                ¿Quitar del Grupo?
+            </h3>
+        </div>
+        <div class="modal-body-unified" style="padding: 10px 35px 25px 35px;">
+            <p style="color: #4a5568; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                ¿Estás seguro de que deseas remover a <strong id="nombreIntegranteQuitar" style="color: #1a1f36;"></strong> de su grupo de discipulado asignado?
+            </p>
+        </div>
+        <div class="modal-footer" style="background-color: #ffffff; border-top: none; justify-content: center; gap: 12px; padding-bottom: 30px;">
+            <button type="button" class="btn-cancel" onclick="cerrarModalQuitar()" style="padding: 12px 24px;">Cancelar</button>
+            <a id="enlaceQuitarSeguro" href="#" class="btn-save" style="background: linear-gradient(135deg, #e03131, #f03e3e); box-shadow: 0 4px 15px rgba(224, 49, 49, 0.3); text-decoration: none; padding: 12px 24px; display: inline-flex; align-items: center; justify-content: center;">
+                Quitar
+            </a>
+        </div>
+    </div>
+</div>
+
 <script src="public/js/DiscipuladoIntegrantes.js"></script>
+<div id="toast-container" class="toast-container"></div>
+
+<?php if (isset($_GET['status'])): ?>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mapeo preciso según la acción detectada por el controlador PHP
+        const estados = {
+            'asignado': { 
+                msg: '¡Vínculo establecido con éxito en el grupo de discipulado!', 
+                tipo: 'success', 
+                icono: 'fa-link' 
+            },
+            'actualizado': { 
+                msg: '¡El estado del discípulo se actualizó correctamente!', 
+                tipo: 'success', 
+                icono: 'fa-user-check' 
+            },
+            'eliminado': { 
+                msg: '¡El integrante fue removido del grupo de discipulado!', 
+                tipo: 'success', 
+                icono: 'fa-trash-alt' 
+            },
+            'error': { 
+                msg: 'Hubo un error al procesar la solicitud. Intente nuevamente.', 
+                tipo: 'error', 
+                icono: 'fa-times-circle' 
+            }
+        };
+
+        const statusKey = '<?= htmlspecialchars($_GET['status'], ENT_QUOTES) ?>';
+        if (estados[statusKey]) {
+            // Invoca la función global del Toast
+            mostrarToastNotificacion(estados[statusKey].msg, estados[statusKey].tipo, estados[statusKey].icono);
+            
+            // Limpia los parámetros de la URL para evitar re-ejecuciones al recargar la página
+            const nuevaUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.search.replace(/&status=[^&]*/g, "");
+            window.history.replaceState({ path: nuevaUrl }, '', nuevaUrl);
+        }
+    });
+</script>
+<?php endif; ?>

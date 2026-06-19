@@ -14,7 +14,7 @@ class GrupoDiscipulado extends Model {
 
     // Relación con el estado
     public function estado() {
-        return $this->belongsTo(EstadoDiscipulado::class, 'estado_id');
+        return $this->belongsTo(EstadoGrupoDiscipulado::class, 'estado_id');
     }
 
     // Relación con los integrantes asignados

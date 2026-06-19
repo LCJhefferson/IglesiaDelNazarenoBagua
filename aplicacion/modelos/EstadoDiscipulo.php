@@ -2,7 +2,7 @@
 namespace aplicacion\modelos;
 use Illuminate\Database\Eloquent\Model;
 
-class EstadoDiscipulado extends Model {
-    protected $table = 'estados_discipulado';
+class EstadoDiscipulo extends Model {
+    protected $table = 'estados_discipulo';
     public $timestamps = false;
 }

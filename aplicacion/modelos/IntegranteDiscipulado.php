@@ -4,7 +4,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class IntegranteDiscipulado extends Model {
     protected $table = 'discipulado_integrantes';
-    protected $fillable = ['miembro_id', 'grupo_id'];
+    protected $fillable = ['miembro_id', 'grupo_id', 'estado_discipulo_id'];
     public $timestamps = false;
 
     public function miembro() {
@@ -13,5 +13,10 @@ class IntegranteDiscipulado extends Model {
 
     public function grupo() {
         return $this->belongsTo(GrupoDiscipulado::class, 'grupo_id');
+    }
+
+    // Relación con el estado individual del alumno (estados_discipulo)
+    public function estadoAlumno() {
+        return $this->belongsTo(EstadoDiscipulo::class, 'estado_discipulo_id');
     }
 }

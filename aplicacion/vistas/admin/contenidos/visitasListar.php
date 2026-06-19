@@ -4,8 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-
-// 1. Definimos el Token CSRF (Ajusta 'csrf_token' al nombre real que uses en tu sistema)
+// 1. Definimos el Token CSRF
 $csrfToken = $_SESSION['csrf_token'] ?? ''; 
 
 use aplicacion\controladores\VisitaController;
@@ -35,19 +34,16 @@ foreach ($miembrosTodos as $m) {
     if ($filtroNombre !== '' && stripos($m['miembro_nombre'], $filtroNombre) === false) {
         continue;
     }
-   // Lógica corregida para el filtro de motivos
+    
     if ($filtroMotivo !== '') {
         $motivoActual = $m['ultimo_motivo'] ?? '';
-        // Definimos cuáles son las opciones estrictas
         $motivosPredefinidos = ['Visita Regular', 'Por Enfermedad', 'Evangelística'];
 
         if ($filtroMotivo === 'Otros') {
-            // Si elige 'Otros', descartamos los registros que tengan un motivo predefinido o que estén vacíos/Ninguno
             if (in_array($motivoActual, $motivosPredefinidos) || $motivoActual === 'Ninguno' || $motivoActual === '') {
                 continue; 
             }
         } else {
-            // Si elige uno de los normales, exigimos coincidencia exacta
             if ($motivoActual !== $filtroMotivo) {
                 continue;
             }
@@ -95,39 +91,46 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1'):
     <table>
         <tbody id="ajax-tbody-bridge">
             <?php foreach ($miembrosFiltrados as $m): ?>
-                <tr>
-                    <td style="font-weight: 500;"><?= htmlspecialchars($m['miembro_nombre']) ?></td>
-                    <td><small><i class="fa-solid fa-location-dot"></i></small> <?= htmlspecialchars($m['direccion'] ?? 'Sin dirección') ?></td>
-                    <td style="font-size:0.9rem; font-weight: 600;"><?= $m['ultima_fecha_formateada'] ?></td>
-                    <td><?= htmlspecialchars($m['ultimo_motivo'] ?? 'Ninguno') ?></td>
+                <tr class="fila-integrante">
+                    <td>
+                        <div class="user-info">
+                            <div class="avatar-circle"><?= strtoupper(substr($m['miembro_nombre'], 0, 1)) ?></div>
+                            <span style="font-weight: 500;"><?= htmlspecialchars($m['miembro_nombre']) ?></span>
+                        </div>
+                    </td>
+                    <td><small><i class="fa-solid fa-location-dot" style="color: #64748b; margin-right: 2px;"></i></small> <?= htmlspecialchars($m['direccion'] ?? 'Sin dirección') ?></td>
+                    <td style="font-size:0.9rem; font-weight: 600; color: #334155;"><?= $m['ultima_fecha_formateada'] ?></td>
+                    <td><span class="badge-grupo-name"><?= htmlspecialchars($m['ultimo_motivo'] ?? 'Ninguno') ?></span></td>
                     <td>
                         <span class="badge-estado <?= $m['clase_css'] ?>">
                             <i class="fa-solid <?= $m['icono'] ?>"></i> <?= $m['estado_texto'] ?>
                         </span>
                     </td>
-                    <td style="text-align:center; display: flex; justify-content: center; gap: 6px;">
-                        <button class="btn-accion btn-visitar" title="Registrar" 
-                                onclick="abrirModalVisita(<?= (int)$m['miembro_id'] ?>, '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>')">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
-
-                        <?php if (!empty($m['ultima_visita_id'])): ?>
-                            <button class="btn-accion" style="background:#f59e0b; color:white;" title="Editar"
-                                    onclick="abrirModalEditar(
-                                        <?= (int)($m['ultima_visita_id'] ?? 0) ?>, 
-                                        <?= (int)$m['miembro_id'] ?>, 
-                                        '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>', 
-                                        '<?= !empty($m['fecha_real']) ? date('Y-m-d', strtotime($m['fecha_real'])) : '' ?>', 
-                                        '<?= addslashes(htmlspecialchars($m['ultimo_motivo'] ?? '', ENT_QUOTES)) ?>'
-                                    )">
-                                <i class="fa-solid fa-pen-to-square"></i>
+                    <td style="text-align:center;">
+                        <div style="display: flex; gap: 6px; justify-content: center;">
+                            <button class="btn-accion btn-visitar" title="Registrar" 
+                                    onclick="abrirModalVisita(<?= (int)$m['miembro_id'] ?>, '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>')">
+                                <i class="fa-solid fa-plus"></i>
                             </button>
 
-                            <button class="btn-accion btn-eliminar-visita" title="Eliminar"
-                                    onclick="abrirModalEliminar(<?= (int)($m['ultima_visita_id'] ?? 0) ?>, '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>')">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        <?php endif; ?>
+                            <?php if (!empty($m['ultima_visita_id'])): ?>
+                                <button class="btn-accion btn-edit" title="Editar"
+                                        onclick="abrirModalEditar(
+                                            <?= (int)($m['ultima_visita_id'] ?? 0) ?>, 
+                                            <?= (int)$m['miembro_id'] ?>, 
+                                            '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>', 
+                                            '<?= !empty($m['fecha_real']) ? date('Y-m-d', strtotime($m['fecha_real'])) : '' ?>', 
+                                            '<?= addslashes(htmlspecialchars($m['ultimo_motivo'] ?? '', ENT_QUOTES)) ?>'
+                                        )">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+
+                                <button class="btn-accion btn-remove btn-eliminar-visita" title="Eliminar"
+                                        onclick="abrirModalEliminar(<?= (int)($m['ultima_visita_id'] ?? 0) ?>, '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>')">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            <?php endif; ?>
+                        </div>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -136,32 +139,24 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1'):
 <?php 
     exit; 
 endif; 
-// ==========================================
-// FIN RESPUESTA AJAX
-// ==========================================
 ?>
 
 <header class="barra-superior">
-<div class="barra-info">
-    <h1>
-        <i class="fa-solid fa-clipboard-check"></i>Seguimiento de Visitas a Miembros
-    </h1>
-    <p>Monitorea las visitas pastorales y realiza seguimiento a los miembros de la congregación</p>
-</div>
-
-<div class="barra-acciones">
-    <div class="badge-info">
-        <i class="fa-solid fa-calendar-days"></i>
-        Rango actual:
-        <?= $mesesLimiteActual ?>
-        meses
+    <div class="barra-info">
+        <h1><i class="fa-solid fa-clipboard-check"></i>Seguimiento de Visitas a Miembros</h1>
+        <p>Monitorea las visitas pastorales y realiza seguimiento a los miembros de la congregación</p>
     </div>
-    <button class="boton boton-secundario" onclick="abrirModalAjustes()">
-        <i class="fa-solid fa-gear"></i>Ajustar Rango
-    </button>
-</div>
-</header>
 
+    <div class="barra-acciones">
+        <div class="badge-info">
+            <i class="fa-solid fa-calendar-days"></i>
+            Rango actual: <?= $mesesLimiteActual ?> meses
+        </div>
+        <button class="boton boton-primario" onclick="abrirModalAjustes()">
+            <i class="fa-solid fa-gear"></i> Ajustar Rango
+        </button>
+    </div>
+</header>
 
 <div class="cuadricula-estadisticas" id="contenedor-stats">
   <div class="tarjeta-estadistica"><div class="icono-estadistica verde"><i class="fa-solid fa-circle-check"></i></div><div class="datos-estadistica"><div class="valor"><?= $conteo['reciente'] ?></div><div class="etiqueta">Visitado reciente</div></div></div>
@@ -172,9 +167,9 @@ endif;
 
 <div class="filtros">
     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; width: 100%;">
-        <input type="text" id="filtroNombre" placeholder="Buscar por nombre..." value="<?= htmlspecialchars($filtroNombre) ?>" oninput="filtrarVisitas()" style="flex: 1; min-width: 180px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+        <input type="text" id="filtroNombre" placeholder="Buscar por nombre..." value="<?= htmlspecialchars($filtroNombre) ?>" oninput="filtrarVisitas()">
 
-        <select id="filtroMotivo" onchange="filtrarVisitas()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        <select id="filtroMotivo" onchange="filtrarVisitas()">
             <option value="">Todos los motivos</option>
             <option value="Visita Regular" <?= $filtroMotivo == 'Visita Regular' ? 'selected' : '' ?>>Visita Regular</option>
             <option value="Por Enfermedad" <?= $filtroMotivo == 'Por Enfermedad' ? 'selected' : '' ?>>Por Enfermedad</option>
@@ -182,7 +177,7 @@ endif;
             <option value="Otros" <?= $filtroMotivo == 'Otros' ? 'selected' : '' ?>>Otros</option>
         </select>
 
-        <select id="filtroEstado" onchange="filtrarVisitas()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+        <select id="filtroEstado" onchange="filtrarVisitas()">
             <option value="">Todos los estados</option>
             <option value="reciente" <?= $filtroEstado == 'reciente' ? 'selected' : '' ?>>Visitado reciente</option>
             <option value="intermedio" <?= $filtroEstado == 'intermedio' ? 'selected' : '' ?>>Visitado intermedio</option>
@@ -190,83 +185,82 @@ endif;
             <option value="critico" <?= $filtroEstado == 'critico' ? 'selected' : '' ?>>Pendiente crítico</option>
         </select>
 
-        <select id="filtroModo" onchange="filtrarVisitas()" style="padding: 8px; border-radius: 6px; border: 2px solid #3b82f6; font-weight: 600; color: #1e3a8a;">
+        <select id="filtroModo" onchange="filtrarVisitas()" style="border: 2px solid #3b82f6; font-weight: 600; color: #1e3a8a;">
             <option value="ultimo" <?= $filtroModo == 'ultimo' ? 'selected' : '' ?>>Último registro por miembro</option>
             <option value="todos" <?= $filtroModo == 'todos' ? 'selected' : '' ?>>Todos los registros</option>
         </select>
         
-        <button onclick="limpiarFiltros()" class="btn-accion" style="background:#ef4444; color:white; padding:8px 15px; border:none; cursor:pointer; border-radius:6px; display: flex; align-items: center; gap: 5px;" title="Limpiar filtros">
-             Limpiar
+        <button onclick="limpiarFiltros()" class="btn-cancel" style="padding: 8px 15px; display: inline-flex; align-items: center; gap: 5px; height: 100%; border-radius: 8px; font-weight: 500;" title="Limpiar filtros">
+             <i class="fas fa-undo-alt"></i> Limpiar
         </button>
     </div>
 </div>
 
-<table>
-  <thead id="tabla-visitas-head">
-    <tr>
-        <th>Miembro</th>
-        <th>Dirección</th>
-        <th id="th-fecha"><?= ($filtroModo === 'todos') ? 'Fecha Registro' : 'Última Visita' ?></th>
-        <th id="th-motivo"><?= ($filtroModo === 'todos') ? 'Motivo Visita' : 'Motivo Último' ?></th>
-        <th>Estado</th>
-        <th style="text-align:center">Acciones</th>
-    </tr>
-  </thead>
-  <tbody id="tabla-visitas-cuerpo">
-    <?php foreach ($miembrosFiltrados as $m): ?>
+<div class="tabla-container">
+    <table class="tabla-moderna">
+      <thead id="tabla-visitas-head">
         <tr>
-          <td style="font-weight: 500;"><?= htmlspecialchars($m['miembro_nombre']) ?></td>
-          <td><small><i class="fa-solid fa-location-dot"></i></small> <?= htmlspecialchars($m['direccion'] ?? 'Sin dirección') ?></td>
-          <td style="font-size:0.9rem; font-weight: 600;"><?= $m['ultima_fecha_formateada'] ?></td>
-          <td><?= htmlspecialchars($m['ultimo_motivo'] ?? 'Ninguno') ?></td>
-          <td>
-              <span class="badge-estado <?= $m['clase_css'] ?>">
-                  <i class="fa-solid <?= $m['icono'] ?>"></i> <?= $m['estado_texto'] ?>
-              </span>
-          </td>
-          <td style="text-align:center; display: flex; justify-content: center; gap: 6px;">
-              <button class="btn-accion btn-visitar" title="Registrar" 
-                      onclick="abrirModalVisita(<?= (int)$m['miembro_id'] ?>, '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>')">
-                  <i class="fa-solid fa-plus"></i>
-              </button>
-
-              <?php if (!empty($m['ultima_visita_id'])): ?>
-                  <?php 
-                        // Usamos 'fecha_real', que es la llave correcta enviada desde el Controlador
-                        $fechaCruda = $m['fecha_real'] ?? '';
-                        // Formateamos estrictamente a YYYY-MM-DD para el input type="date"
-                        $fechaParaInput = !empty($fechaCruda) ? date('Y-m-d', strtotime($fechaCruda)) : '';
-                    ?>
-
-                    <button class="btn-accion" style="background:#f59e0b; color:white;" title="Editar"
-                            onclick="abrirModalEditar(
-                                <?= (int)$m['ultima_visita_id'] ?>, 
-                                <?= (int)$m['miembro_id'] ?>, 
-                                '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>', 
-                                '<?= $fechaParaInput ?>', 
-                                '<?= addslashes(htmlspecialchars($m['ultimo_motivo'] ?? '', ENT_QUOTES)) ?>'
-                            )">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
-
-                  <button class="btn-accion btn-eliminar-visita" title="Eliminar"
-                          onclick="abrirModalEliminar(<?= (int)$m['ultima_visita_id'] ?>, '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>')">
-                      <i class="fa-solid fa-trash-can"></i>
-                  </button>
-              <?php endif; ?>
-
-
-          </td>
+            <th>Miembro</th>
+            <th>Dirección</th>
+            <th id="th-fecha"><?= ($filtroModo === 'todos') ? 'Fecha Registro' : 'Última Visita' ?></th>
+            <th id="th-motivo"><?= ($filtroModo === 'todos') ? 'Motivo Visita' : 'Motivo Último' ?></th>
+            <th>Estado</th>
+            <th style="text-align:center">Acciones</th>
         </tr>
-    <?php endforeach; ?>
-  </tbody>
-</table>
+      </thead>
+      <tbody id="tabla-visitas-cuerpo">
+        <?php foreach ($miembrosFiltrados as $m): ?>
+            <tr class="fila-integrante">
+              <td>
+                <div class="user-info">
+                    <div class="avatar-circle"><?= strtoupper(substr($m['miembro_nombre'], 0, 1)) ?></div>
+                    <span><?= htmlspecialchars($m['miembro_nombre']) ?></span>
+                </div>
+              </td>
+              <td><small><i class="fa-solid fa-location-dot" style="color: #64748b; margin-right: 2px;"></i></small> <?= htmlspecialchars($m['direccion'] ?? 'Sin dirección') ?></td>
+              <td style="font-size:0.9rem; font-weight: 600; color: #334155;"><?= $m['ultima_fecha_formateada'] ?></td>
+              <td><span class="badge-grupo-name"><?= htmlspecialchars($m['ultimo_motivo'] ?? 'Ninguno') ?></span></td>
+              <td>
+                  <span class="badge-estado <?= $m['clase_css'] ?>">
+                      <i class="fa-solid <?= $m['icono'] ?>"></i> <?= $m['estado_texto'] ?>
+                  </span>
+              </td>
+              <td style="text-align:center;">
+                  <div style="display: flex; gap: 6px; justify-content: center;">
+                      <button class="btn-accion btn-visitar" title="Registrar" 
+                              onclick="abrirModalVisita(<?= (int)$m['miembro_id'] ?>, '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>')">
+                          <i class="fa-solid fa-plus"></i>
+                      </button>
 
+                      <?php if (!empty($m['ultima_visita_id'])): ?>
+                          <?php 
+                                $fechaCruda = $m['fecha_real'] ?? '';
+                                $fechaParaInput = !empty($fechaCruda) ? date('Y-m-d', strtotime($fechaCruda)) : '';
+                            ?>
 
+                            <button class="btn-accion btn-edit" title="Editar"
+                                    onclick="abrirModalEditar(
+                                        <?= (int)$m['ultima_visita_id'] ?>, 
+                                        <?= (int)$m['miembro_id'] ?>, 
+                                        '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>', 
+                                        '<?= $fechaParaInput ?>', 
+                                        '<?= addslashes(htmlspecialchars($m['ultimo_motivo'] ?? '', ENT_QUOTES)) ?>'
+                                    )">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
 
-
-
-
+                          <button class="btn-accion btn-remove btn-eliminar-visita" title="Eliminar"
+                                  onclick="abrirModalEliminar(<?= (int)$m['ultima_visita_id'] ?>, '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>')">
+                              <i class="fa-solid fa-trash-can"></i>
+                          </button>
+                      <?php endif; ?>
+                  </div>
+              </td>
+            </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+</div>
 
 <div id="modalVisita" class="modal" style="display: none;">
     <div class="modal-contenido">
@@ -296,36 +290,14 @@ endif;
                 </div>
             </div>
             <div class="modal-acciones">
-                <button type="button" class="btn-accion" onclick="cerrarModalVisita()">Cancelar</button>
-                <button type="submit" class="btn-accion btn-visitar" id="btnSubmitVisita">
+                <button type="button" class="btn-cancel" onclick="cerrarModalVisita()">Cancelar</button>
+                <button type="submit" class="btn-save btn-visitar" id="btnSubmitVisita">
                     <i class="fa-solid fa-floppy-disk"></i> <span id="btnTextVisita">Guardar Registro</span>
                 </button>
             </div>
         </form>
     </div>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 <div id="modalAjustes" class="modal" style="display: none;">
     <div class="modal-contenido">
@@ -340,8 +312,8 @@ endif;
                 <input type="number" id="numMeses" name="meses_limite" value="<?= $mesesLimiteActual ?>" min="1" max="24" required>
             </div>
             <div class="modal-acciones">
-                <button type="button" class="btn-accion" onclick="cerrarModalAjustes()">Cancelar</button>
-                <button type="submit" class="btn-accion btn-visitar" style="background:#64748b;"><i class="fa-solid fa-rotate"></i> Actualizar Rangos</button>
+                <button type="button" class="btn-cancel" onclick="cerrarModalAjustes()">Cancelar</button>
+                <button type="submit" class="btn-save" style="background:#64748b;"><i class="fa-solid fa-rotate"></i> Actualizar Rangos</button>
             </div>
         </form>
     </div>
@@ -360,12 +332,14 @@ endif;
         <form id="formEliminarVisita">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES) ?>">
             <input type="hidden" name="visita_id" id="modalEliminarVisitaId">
-            <div class="modal-acciones" style="display:flex; justify-content:center; gap:15px;">
-                <button type="button" class="btn-accion" onclick="cerrarModalEliminar()">Cancelar</button>
-                <button type="button" class="btn-accion" onclick="procesarEliminacionLogica()" style="background:#ef4444; color:white; padding:10px 20px; font-weight:600;">
+            <div class="modal-acciones" style="display:flex; justify-content:center; gap:12px;">
+                <button type="button" class="btn-cancel" onclick="cerrarModalEliminar()">Cancelar</button>
+                <button type="button" class="btn-save" onclick="procesarEliminacionLogica()" style="background: linear-gradient(135deg, #e03131, #f03e3e); box-shadow: 0 4px 15px rgba(224, 49, 49, 0.3);">
                     <i class="fa-solid fa-trash"></i> Suprimir
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<script src="public/js/VisitasListar.js"></script>

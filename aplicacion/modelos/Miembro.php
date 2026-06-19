@@ -28,4 +28,8 @@ class Miembro extends Model {
     public function visitas() {
         return $this->hasMany(VisitaModelo::class, 'miembro_id', 'id');
     }
+    // Relación Uno a Muchos: Un miembro (discipulador) puede liderar muchos grupos
+    public function gruposDiscipulado() {
+        return $this->hasMany(GrupoDiscipulado::class, 'discipulador_id', 'id');
+    }
 }
