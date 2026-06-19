@@ -20,7 +20,7 @@ if (isset($_GET['obtener_bitacora']) && !empty($_GET['usuario_id'])) {
               ->get();
               
     echo json_encode($logs);
-    exit; // Detiene la ejecución para que no se imprima el diseño HTML del panel
+    exit; 
 }
 
 // 1. INICIAR SEGURIDAD (Middleware ya configurado profesionalmente)
@@ -31,10 +31,10 @@ $csrfToken = Middleware::csrfGenerate();
 
 // 3. CAPTURAR LA SECCIÓN ACTUAL
 $vista = $_GET['seccion'] ?? 'inicioAdmin';
-$vistaInterna = str_replace(['.', '/'], '', $vista); // Seguridad: evitar Path Traversal
+// Seguridad Avanzada: Permitir únicamente caracteres alfanuméricos y guiones bajos (Evita Path Traversal de raíz)
+$vistaInterna = preg_replace('/[^a-zA-Z0-9_]/', '', $vista); 
 
-
-// 4. PROCESAMIENTO DE PETICIONES
+// 4. PROCESAMIENTO DE PETICIONES POST / ACCIONES DE BORRADO
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['eliminar_grupo']) || isset($_GET['quitar_integrante'])) {
     
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {

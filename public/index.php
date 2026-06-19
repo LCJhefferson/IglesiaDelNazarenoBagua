@@ -26,6 +26,7 @@ use aplicacion\core\Middleware;
 use aplicacion\controladores\AuthController;
 use aplicacion\controladores\VisitaController;
 use aplicacion\controladores\ReporteController;
+use aplicacion\controladores\RecursoController;
 use aplicacion\modelos\Recurso;
 
 // 4. Determinar la vista (Ruta)
@@ -40,7 +41,7 @@ if (empty($vista) || $vista === 'index.php') {
 }
 
 // ============================================================================
-// INTERCEPCIÓN CRÍTICA: Descarga pública de recursos antes de cualquier renderizado
+// INTERCEPCIÓN CRÍTICA 1: Descarga pública de recursos antes de cualquier renderizado
 // ============================================================================
 if ($vista === 'recursos' && !empty($_GET['descargar'])) {
     while (ob_get_level() > 0) {
@@ -53,7 +54,6 @@ if ($vista === 'recursos' && !empty($_GET['descargar'])) {
     if ($recurso) {
         Recurso::incrementarDescargas($recursoId);
         
-        // Si es enlace a YouTube
         if (!empty($recurso->enlace_youtube)) {
             if (!headers_sent()) {
                 header('Location: ' . $recurso->enlace_youtube);
@@ -63,7 +63,6 @@ if ($vista === 'recursos' && !empty($_GET['descargar'])) {
             exit;
         }
         
-        // Si es un archivo físico
         if (!empty($recurso->ruta_archivo)) {
             $ruta_abs = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/' . $recurso->ruta_archivo;
             if (file_exists($ruta_abs)) {
@@ -79,7 +78,6 @@ if ($vista === 'recursos' && !empty($_GET['descargar'])) {
         }
     }
     
-    // Si no existió el recurso, redirección limpia a la sección recursos
     $urlFallback = URL . 'recursos';
     if (!headers_sent()) {
         header('Location: ' . $urlFallback);
@@ -87,6 +85,22 @@ if ($vista === 'recursos' && !empty($_GET['descargar'])) {
         echo "<script>window.location.href='" . $urlFallback . "';</script>";
     }
     exit;
+}
+
+// ============================================================================
+// INTERCEPCIÓN CRÍTICA 2: Descarga desde el Panel Administrativo (Solución al Error)
+// ============================================================================
+if (($vista === 'dashboard' || strpos($vista, 'admin/') === 0) 
+    && ($_GET['seccion'] ?? '') === 'recurso_admin' 
+    && !empty($_GET['descargar'])) {
+    
+    // Validamos autenticación antes de procesar la descarga privada
+    Middleware::auth([1, 2]);
+    
+    $recursoId = (int)$_GET['descargar'];
+    $controller = new RecursoController();
+    $controller->descargar($recursoId);
+    exit; // Asegura que jamás se pinte el HTML si entra aquí
 }
 // ============================================================================
 
@@ -100,8 +114,6 @@ if ($vista === 'logout') {
 
 /**
  * 6. ENDPOINTS DE API / AJAX
- * Si la petición es para el mapa o guardar datos vía AJAX, 
- * respondemos y cortamos la ejecución (exit).
  */
 
 // Datos JSON para el Mapa
@@ -152,7 +164,6 @@ $accionesVisitas = [
 
 if (isset($accionesVisitas[$vista])) {
     Middleware::auth();
-    // Verificamos seguridad antes de procesar
     Middleware::csrfVerify();
     $metodo = $accionesVisitas[$vista];
     (new VisitaController())->$metodo();
