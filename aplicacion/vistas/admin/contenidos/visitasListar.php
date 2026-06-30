@@ -9,6 +9,10 @@ $csrfToken = $_SESSION['csrf_token'] ?? '';
 
 use aplicacion\controladores\VisitaController;
 
+// Variables de sesión para RBAC
+$rolIdActual = (int)($_SESSION['rol_id'] ?? 0);
+$usuarioIdActual = (int)($_SESSION['usuario']->id ?? $_SESSION['usuario_id'] ?? 1);
+
 // Instanciamos el Controlador
 $visitaController = new VisitaController();
 
@@ -114,21 +118,28 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1'):
                             </button>
 
                             <?php if (!empty($m['ultima_visita_id'])): ?>
-                                <button class="btn-accion btn-edit" title="Editar"
-                                        onclick="abrirModalEditar(
-                                            <?= (int)($m['ultima_visita_id'] ?? 0) ?>, 
-                                            <?= (int)$m['miembro_id'] ?>, 
-                                            '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>', 
-                                            '<?= !empty($m['fecha_real']) ? date('Y-m-d', strtotime($m['fecha_real'])) : '' ?>', 
-                                            '<?= addslashes(htmlspecialchars($m['ultimo_motivo'] ?? '', ENT_QUOTES)) ?>'
-                                        )">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                </button>
+                                <?php
+                                    $esRolMenor = !in_array($rolIdActual, [1, 2]);
+                                    $esPropietario = ((int)($m['registrado_por'] ?? 0) === $usuarioIdActual);
+                                    $puedeEditarEliminar = (!$esRolMenor || $esPropietario);
+                                ?>
+                                <?php if ($puedeEditarEliminar): ?>
+                                    <button class="btn-accion btn-edit" title="Editar"
+                                            onclick="abrirModalEditar(
+                                                <?= (int)($m['ultima_visita_id'] ?? 0) ?>, 
+                                                <?= (int)$m['miembro_id'] ?>, 
+                                                '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>', 
+                                                '<?= !empty($m['fecha_real']) ? date('Y-m-d', strtotime($m['fecha_real'])) : '' ?>', 
+                                                '<?= addslashes(htmlspecialchars($m['ultimo_motivo'] ?? '', ENT_QUOTES)) ?>'
+                                            )">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
 
-                                <button class="btn-accion btn-remove btn-eliminar-visita" title="Eliminar"
-                                        onclick="abrirModalEliminar(<?= (int)($m['ultima_visita_id'] ?? 0) ?>, '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>')">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
+                                    <button class="btn-accion btn-remove btn-eliminar-visita" title="Eliminar"
+                                            onclick="abrirModalEliminar(<?= (int)($m['ultima_visita_id'] ?? 0) ?>, '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>')">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </td>
@@ -236,23 +247,29 @@ endif;
                           <?php 
                                 $fechaCruda = $m['fecha_real'] ?? '';
                                 $fechaParaInput = !empty($fechaCruda) ? date('Y-m-d', strtotime($fechaCruda)) : '';
+                                
+                                $esRolMenor = !in_array($rolIdActual, [1, 2]);
+                                $esPropietario = ((int)($m['registrado_por'] ?? 0) === $usuarioIdActual);
+                                $puedeEditarEliminar = (!$esRolMenor || $esPropietario);
                             ?>
 
-                            <button class="btn-accion btn-edit" title="Editar"
-                                    onclick="abrirModalEditar(
-                                        <?= (int)$m['ultima_visita_id'] ?>, 
-                                        <?= (int)$m['miembro_id'] ?>, 
-                                        '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>', 
-                                        '<?= $fechaParaInput ?>', 
-                                        '<?= addslashes(htmlspecialchars($m['ultimo_motivo'] ?? '', ENT_QUOTES)) ?>'
-                                    )">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
+                            <?php if ($puedeEditarEliminar): ?>
+                                <button class="btn-accion btn-edit" title="Editar"
+                                        onclick="abrirModalEditar(
+                                            <?= (int)$m['ultima_visita_id'] ?>, 
+                                            <?= (int)$m['miembro_id'] ?>, 
+                                            '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>', 
+                                            '<?= $fechaParaInput ?>', 
+                                            '<?= addslashes(htmlspecialchars($m['ultimo_motivo'] ?? '', ENT_QUOTES)) ?>'
+                                        )">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
 
-                          <button class="btn-accion btn-remove btn-eliminar-visita" title="Eliminar"
-                                  onclick="abrirModalEliminar(<?= (int)$m['ultima_visita_id'] ?>, '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>')">
-                              <i class="fa-solid fa-trash-can"></i>
-                          </button>
+                                <button class="btn-accion btn-remove btn-eliminar-visita" title="Eliminar"
+                                        onclick="abrirModalEliminar(<?= (int)$m['ultima_visita_id'] ?>, '<?= addslashes(htmlspecialchars($m['miembro_nombre'], ENT_QUOTES)) ?>')">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            <?php endif; ?>
                       <?php endif; ?>
                   </div>
               </td>

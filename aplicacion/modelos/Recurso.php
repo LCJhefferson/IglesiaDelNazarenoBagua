@@ -19,16 +19,22 @@ class Recurso extends Model {
         'ruta_archivo', 
         'enlace_youtube', 
         'ruta_thumb', 
-        'descargas'
+        'descargas',
+        'creado_por',
+        'editado_por'
     ];
 
     // Constantes de validación (se mantienen igual)
     public const TIPOS_VALIDOS      = ['pdf', 'img', 'vid', 'doc', 'yt'];
     public const CATEGORIAS_VALIDAS = ['predica', 'estudio', 'musica', 'devocional', 'evento'];
 
-    /** Lista todos los recursos ordenados por fecha descendente */
+    /** Lista todos los recursos ordenados por fecha descendente y trae el autor y editor */
     public static function listar() {
-        return self::orderBy('fecha_creacion', 'DESC')->get();
+        return self::select('recursos.*', 'u1.username as autor_nombre', 'u2.username as editor_nombre')
+            ->leftJoin('usuarios as u1', 'recursos.creado_por', '=', 'u1.id')
+            ->leftJoin('usuarios as u2', 'recursos.editado_por', '=', 'u2.id')
+            ->orderBy('recursos.fecha_creacion', 'DESC')
+            ->get();
     }
 
     /** Recursos por categoría con paginación */
@@ -48,13 +54,13 @@ class Recurso extends Model {
         return (int) self::sum('descargas');
     }
 
-    /** Incrementa el contador de descargas */
+    /** Incrementa el contador de descargas (Protegido contra fallas en el modelo) */
     public static function incrementarDescargas(int $id): bool {
         $recurso = self::find($id);
         if (!$recurso) return false;
         
-        $recurso->descargas = $recurso->descargas + 1;
-        return $recurso->save();
+        $recurso->increment('descargas');
+        return true;
     }
 
     /**
@@ -76,6 +82,7 @@ class Recurso extends Model {
                 'ruta_archivo'      => $recurso->ruta_archivo,
                 'enlace_youtube'    => $recurso->enlace_youtube,
                 'ruta_thumb'        => $recurso->ruta_thumb,
+                'creado_por'        => $recurso->creado_por,
                 'eliminado_por'     => $usuarioId,
                 'fecha_eliminacion' => date('Y-m-d H:i:s'),
             ]);

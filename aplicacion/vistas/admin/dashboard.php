@@ -24,7 +24,7 @@ if (isset($_GET['obtener_bitacora']) && !empty($_GET['usuario_id'])) {
 }
 
 // 1. INICIAR SEGURIDAD (Middleware ya configurado profesionalmente)
-Middleware::auth([1, 2]); 
+Middleware::auth([1, 2, 9, 11, 12]); 
 
 // 2. GENERAR TOKEN CSRF
 $csrfToken = Middleware::csrfGenerate();
@@ -33,6 +33,41 @@ $csrfToken = Middleware::csrfGenerate();
 $vista = $_GET['seccion'] ?? 'inicioAdmin';
 // Seguridad Avanzada: Permitir únicamente caracteres alfanuméricos y guiones bajos (Evita Path Traversal de raíz)
 $vistaInterna = preg_replace('/[^a-zA-Z0-9_]/', '', $vista); 
+
+// ── RBAC: VALIDACIÓN DE ACCESO POR ROL (antes de cualquier salida HTML) ──
+$rolId = (int)($_SESSION['rol_id'] ?? 0);
+$vistaCheck = strtolower($vistaInterna);
+
+// Definir vistas permitidas por cada rol restringido (lista blanca estricta)
+$vistasPermitidasPorRol = [
+    9  => ['inicioadmin', 'discipuladogrupos', 'discipuladointegrantes'],                                   // Discipulador
+    11 => ['inicioadmin', 'recurso_admin', 'membresia', 'noticias', 'discipuladogrupos', 'discipuladointegrantes', 'reportes'],  // Secretaria
+    12 => ['inicioadmin', 'visitaslistar', 'visitasmap'],                                                    // Grupo de Visitas
+];
+$vistasBloqueadasPorRol = [
+    // Secretaria ahora usa lista blanca, ya no necesita lista negra
+];
+
+$accesoPermitido = true;
+
+if (isset($vistasPermitidasPorRol[$rolId])) {
+    if ($vistasPermitidasPorRol[$rolId] !== null) {
+        // Rol con lista blanca (solo puede ver estas vistas)
+        $accesoPermitido = in_array($vistaCheck, $vistasPermitidasPorRol[$rolId]);
+    }
+}
+if (isset($vistasBloqueadasPorRol[$rolId])) {
+    // Rol con lista negra (puede ver todo excepto estas)
+    if (in_array($vistaCheck, $vistasBloqueadasPorRol[$rolId])) {
+        $accesoPermitido = false;
+    }
+}
+
+// Si no tiene permiso, redirigir silenciosamente al inicio (sin mostrar error)
+if (!$accesoPermitido) {
+    header('Location: /IglesiaDelNazarenoBagua/dashboard?seccion=inicioAdmin');
+    exit;
+}
 
 // 4. PROCESAMIENTO DE PETICIONES POST / ACCIONES DE BORRADO
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['eliminar_grupo']) || isset($_GET['quitar_integrante'])) {
@@ -116,22 +151,14 @@ $scripts = [
     <main class="main-area">
         <section class="content" id="contenedor-vista">
             <?php
-            // VALIDACIÓN DE PERMISOS EXTRA
-            $vistasAdmin = ['usuarios_admin', 'inv_reguistro_usuario'];
-            if (in_array(strtolower($vistaInterna), $vistasAdmin) && $_SESSION['rol_id'] !== 1) {
-                echo "<div style='padding:30px; text-align:center; background:white; border-radius:8px; border: 1px solid #ffc9c9;'>
-                        <h3 style='color:#e03131;'><i class='fa-solid fa-ban'></i> Acceso Denegado</h3>
-                        <p style='color:#555;'>No tienes los permisos suficientes para gestionar usuarios.</p>
-                      </div>";
+            // RUTA HACIA EL ARCHIVO DE CONTENIDO
+            // (La validación RBAC ya se realizó arriba, antes del HTML. Si llegamos aquí, el acceso es válido.)
+            $rutaContenido = __DIR__ . "/contenidos/" . $vistaInterna . ".php";
+            
+            if (file_exists($rutaContenido)) {
+                include $rutaContenido;
             } else {
-                // RUTA HACIA EL ARCHIVO DE CONTENIDO
-                $rutaContenido = __DIR__ . "/contenidos/" . $vistaInterna . ".php";
-                
-                if (file_exists($rutaContenido)) {
-                    include $rutaContenido;
-                } else {
-                    include __DIR__ . "/../web/404.php"; 
-                }
+                include __DIR__ . "/../web/404.php"; 
             }
             ?> 
         </section>

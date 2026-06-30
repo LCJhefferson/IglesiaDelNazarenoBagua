@@ -7,7 +7,7 @@ class Middleware {
      * Protege vistas HTML: redirige al login si no hay sesión válida.
      * $rolesPermitidos vacío = cualquier rol autenticado.
      */
-    public static function auth(array $rolesPermitidos = [1, 2]): void {
+    public static function auth(array $rolesPermitidos = [1, 2, 9, 11, 12]): void {
         self::startSession();
         if (empty($_SESSION['usuario'])) {
             header('Location: ' . URL . 'login');
@@ -22,7 +22,7 @@ class Middleware {
     /**
      * Protege endpoints API: responde JSON 401/403 si no hay sesión válida.
      */
-    public static function apiAuth(array $rolesPermitidos = [1, 2]): void {
+    public static function apiAuth(array $rolesPermitidos = [1, 2, 9, 11, 12]): void {
         self::startSession();
         if (empty($_SESSION['usuario'])) {
             Response::error('No autorizado', 401);

@@ -79,9 +79,9 @@ $total_usuarios       = $usuarios->count();
 $total_activos         = $usuarios->where('estado', 'activo')->count();
 $total_inactivos       = $usuarios->where('estado', 'inactivo')->count();
 
-$etiqueta_rol = ['1' => 'Admin', '2' => 'Pastor'];
-$clase_rol    = ['1' => 'rol-admin', '2' => 'rol-editor'];
-$color_avatar = ['1' => '#38d9a9', '2' => '#4f6ef7'];
+$etiqueta_rol = ['1' => 'Admin', '2' => 'Pastor', '9' => 'Discipulador', '11' => 'Secretaria', '12' => 'Grupo de Visitas'];
+$clase_rol    = ['1' => 'rol-admin', '2' => 'rol-editor', '9' => 'rol-lector', '11' => 'rol-lector', '12' => 'rol-lector'];
+$color_avatar = ['1' => '#38d9a9', '2' => '#4f6ef7', '9' => '#f59f00', '11' => '#e64980', '12' => '#15aabf'];
 $etiqueta_estado = ['activo' => 'Activo', 'inactivo' => 'Inactivo'];
 $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'];
 ?>
@@ -172,6 +172,9 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
                     <option value="todos">Todos los roles</option>
                     <option value="1">Admin</option>
                     <option value="2">Pastor</option>
+                    <option value="9">Discipulador</option>
+                    <option value="11">Secretaria</option>
+                    <option value="12">Grupo de Visitas</option>
                 </select>
             </div>
         </div>
@@ -289,6 +292,9 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
                     <option value="">Selecciona un rol</option>
                     <option value="1">Admin</option>
                     <option value="2">Pastor</option>
+                    <option value="9">Discipulador</option>
+                    <option value="11">Secretaria</option>
+                    <option value="12">Grupo de Visitas</option>
                 </select>
             </div>
             <div class="grupo-formulario">
@@ -327,6 +333,9 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
                 <select id="editarRol" name="rol" required>
                     <option value="1">Admin</option>
                     <option value="2">Pastor</option>
+                    <option value="9">Discipulador</option>
+                    <option value="11">Secretaria</option>
+                    <option value="12">Grupo de Visitas</option>
                 </select>
             </div>
             <div class="grupo-formulario">

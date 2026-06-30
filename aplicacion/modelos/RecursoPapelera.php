@@ -17,12 +17,16 @@ class RecursoPapelera extends Model {
     protected $fillable = [
         'recurso_id', 'titulo', 'descripcion', 'categoria', 
         'tipo', 'ruta_archivo', 'enlace_youtube', 'ruta_thumb', 
-        'eliminado_por', 'fecha_eliminacion'
+        'creado_por', 'eliminado_por', 'fecha_eliminacion'
     ];
 
     /** Lista todos los recursos en papelera */
     public static function listar() {
-        return self::orderBy('fecha_eliminacion', 'DESC')->get();
+        return self::select('recursos_papelera.*', 'u1.username as autor_nombre', 'u2.username as eliminador_nombre')
+            ->leftJoin('usuarios as u1', 'recursos_papelera.creado_por', '=', 'u1.id')
+            ->leftJoin('usuarios as u2', 'recursos_papelera.eliminado_por', '=', 'u2.id')
+            ->orderBy('recursos_papelera.fecha_eliminacion', 'DESC')
+            ->get();
     }
 
     /**
@@ -42,7 +46,7 @@ class RecursoPapelera extends Model {
                 'ruta_archivo'   => $registro->ruta_archivo,
                 'enlace_youtube' => $registro->enlace_youtube,
                 'ruta_thumb'     => $registro->ruta_thumb,
-                'creado_por'     => $registro->eliminado_por,
+                'creado_por'     => $registro->creado_por,
                 'descargas'      => 0,
             ]);
 

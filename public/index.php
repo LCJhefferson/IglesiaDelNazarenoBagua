@@ -95,7 +95,7 @@ if (($vista === 'dashboard' || strpos($vista, 'admin/') === 0)
     && !empty($_GET['descargar'])) {
     
     // Validamos autenticación antes de procesar la descarga privada
-    Middleware::auth([1, 2]);
+    Middleware::auth([1, 2, 11]);  // Admin, Pastor, Secretaria
     
     $recursoId = (int)$_GET['descargar'];
     $controller = new RecursoController();
@@ -118,14 +118,14 @@ if ($vista === 'logout') {
 
 // Datos JSON para el Mapa
 if ($vista === 'visitasMapJSON') {
-    Middleware::auth();
+    Middleware::auth([1, 2, 12]);  // Solo Admin, Pastor, Grupo de Visitas
     (new VisitaController())->obtenerDatosMapaJSON();
     exit; 
 }
 
 // 1. Vista previa de tablas (AJAX)
 if ($vista === 'datos_reporte') {
-    \aplicacion\core\Middleware::apiAuth([1, 2]);
+    \aplicacion\core\Middleware::apiAuth([1, 2, 11]);
     $reporteCtrl = new ReporteController();
     $reporteCtrl->obtenerVistaPrevia();
     exit;
@@ -133,7 +133,7 @@ if ($vista === 'datos_reporte') {
 
 // 2. Descargas directas (Excel, CSV, PDF)
 if ($vista === 'descargar_reporte') {
-    \aplicacion\core\Middleware::apiAuth([1, 2]);
+    \aplicacion\core\Middleware::apiAuth([1, 2, 11]);
     $reporteCtrl = new ReporteController();
     $reporteCtrl->descargarReporte();
     exit;
@@ -141,7 +141,7 @@ if ($vista === 'descargar_reporte') {
 
 // 3. Autocompletados dinámicos (Live Search)
 if ($vista === 'sugerencias_reporte') {
-    \aplicacion\core\Middleware::apiAuth([1, 2]);
+    \aplicacion\core\Middleware::apiAuth([1, 2, 11]);
     $reporteCtrl = new ReporteController();
     $reporteCtrl->sugerenciasAutocomplete();
     exit;
@@ -149,7 +149,7 @@ if ($vista === 'sugerencias_reporte') {
 
 // 4. Carga inicial de filtros
 if ($vista === 'inicializar_filtros_reporte') {
-    \aplicacion\core\Middleware::apiAuth([1, 2]);
+    \aplicacion\core\Middleware::apiAuth([1, 2, 11]);
     $reporteCtrl = new ReporteController();
     $reporteCtrl->inicializarFiltros();
     exit;
@@ -163,7 +163,7 @@ $accionesVisitas = [
 ];
 
 if (isset($accionesVisitas[$vista])) {
-    Middleware::auth();
+    Middleware::auth([1, 2, 12]);  // Solo Admin, Pastor, Grupo de Visitas
     Middleware::csrfVerify();
     $metodo = $accionesVisitas[$vista];
     (new VisitaController())->$metodo();

@@ -79,6 +79,15 @@ $ruta_base = '/IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin';
 
 function tarjeta_archivo(array $archivo, string $ruta_base): string {
     global $icono_tipo, $clase_tipo, $etiqueta_tipo;
+    $rolIdActual = (int)($_SESSION['rol_id'] ?? 0);
+    $usuarioIdActual = (int)($_SESSION['usuario']->id ?? $_SESSION['usuario_id'] ?? 1);
+    
+    $esAdminPastor = in_array($rolIdActual, [1, 2]);
+    $puedeManipularTodo = in_array($rolIdActual, [1, 2, 11]);
+    $esPropietario = ((int)($archivo['creado_por'] ?? 0) === $usuarioIdActual);
+    
+    $puedeEditarEliminar = ($puedeManipularTodo || $esPropietario);
+
     $tipo     = $archivo['tipo'];
     $icono    = $icono_tipo[$tipo]    ?? '📁';
     $clase    = $clase_tipo[$tipo]    ?? 'doc';
@@ -103,8 +112,20 @@ function tarjeta_archivo(array $archivo, string $ruta_base): string {
     $js_ruta        = addslashes($archivo['ruta_archivo']   ?? '');
     $js_youtube     = addslashes($archivo['enlace_youtube'] ?? '');
 
+    $info_autor = '';
+    if ($esAdminPastor) {
+        $nombreAutor = htmlspecialchars($archivo['autor_nombre'] ?? 'Desconocido');
+        $info_autor = '<div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;"><i class="fa-solid fa-user-pen"></i> Subido por: <strong>' . $nombreAutor . '</strong>';
+        
+        if (!empty($archivo['editor_nombre'])) {
+            $nombreEditor = htmlspecialchars($archivo['editor_nombre']);
+            $info_autor .= ' | <i class="fa-solid fa-pencil"></i> Editado por: <strong>' . $nombreEditor . '</strong>';
+        }
+        $info_autor .= '</div>';
+    }
+
     $card_extra = $thumb_url !== '' ? ' has-preview' : '';
-    return '
+    $html = '
     <div class="tarjeta-archivo' . $card_extra . '" data-tipo="' . htmlspecialchars($tipo) . '">
         <div class="miniatura-archivo ' . $clase . '">
             ' . $preview_min . '
@@ -114,13 +135,16 @@ function tarjeta_archivo(array $archivo, string $ruta_base): string {
         <div class="info-archivo">
             <div>
                 <div class="nombre-archivo">' . htmlspecialchars($archivo['titulo']) . '</div>
-                <div class="meta-archivo">' . htmlspecialchars($archivo['categoria']) . ' · ' . htmlspecialchars($archivo['fecha_creacion']) . '</div>
+                <div class="meta-archivo">' . htmlspecialchars($archivo['categoria']) . ' · ' . htmlspecialchars($archivo['fecha_creacion']) . $info_autor . '</div>
             </div>
             <div class="acciones-archivo">
                 <a href="' . $ruta_base . '&descargar=' . $id . '"
                    class="boton boton-contorno" title="Descargar">
                     <i class="fa-solid fa-download"></i>
-                </a>
+                </a>';
+
+    if ($puedeEditarEliminar) {
+        $html .= '
                 <button class="boton boton-primario" title="Editar"
                     onclick="abrirModalEditar(
                         ' . $id . ',
@@ -136,10 +160,15 @@ function tarjeta_archivo(array $archivo, string $ruta_base): string {
                 <button class="boton boton-peligro" title="Mover a papelera"
                     onclick="confirmarEliminar(' . $id . ', \'' . $js_titulo . '\')">
                     <i class="fa-solid fa-trash"></i>
-                </button>
+                </button>';
+    }
+
+    $html .= '
             </div>
         </div>
     </div>';
+
+    return $html;
 }
 
 function tarjeta_publica(array $archivo, string $ruta_base): string {
@@ -448,6 +477,9 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
                                     <?= htmlspecialchars($item['categoria'] ?? '') ?><br>
                                     <i class="fa-solid fa-clock"></i>
                                     Eliminado: <?= htmlspecialchars($item['fecha_eliminacion'] ?? '') ?>
+                                    <?php if (in_array((int)($_SESSION['rol_id'] ?? 0), [1, 2])): ?>
+                                        <br><i class="fa-solid fa-user-minus"></i> Eliminado por: <strong><?= htmlspecialchars($item['eliminador_nombre'] ?? 'Desconocido') ?></strong>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                             <div class="acciones-papelera">

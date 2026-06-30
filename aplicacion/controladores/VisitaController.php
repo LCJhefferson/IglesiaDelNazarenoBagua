@@ -75,7 +75,8 @@ class VisitaController {
                     'miembro_nombre'   => trim($v->miembro->nombres . ' ' . $v->miembro->apellidos),
                     'direccion'        => $v->miembro->direccion,
                     'fecha_real'       => $v->fecha_visita,
-                    'ultimo_motivo'    => $v->motivo
+                    'ultimo_motivo'    => $v->motivo,
+                    'registrado_por'   => $v->registrado_por
                 ];
             }
         } else {
@@ -95,6 +96,7 @@ class VisitaController {
                     'fecha_real'       => $ultimaVisita ? $ultimaVisita->fecha_visita : null,
                     'ultima_visita_id' => $ultimaVisita ? $ultimaVisita->id : null,
                     'ultimo_motivo'    => $ultimaVisita ? $ultimaVisita->motivo : null,
+                    'registrado_por'   => $ultimaVisita ? $ultimaVisita->registrado_por : null,
                 ];
             }
 
@@ -180,6 +182,13 @@ try {
                 
                 $visita = VisitaModelo::find($visita_id);
                 if ($visita) {
+                    // RBAC para Grupo de Visitas
+                    $rolIdActual = (int)($_SESSION['rol_id'] ?? 0);
+                    $usuarioIdActual = (int)($_SESSION['usuario']->id ?? $_SESSION['usuario_id'] ?? 1);
+                    if (!in_array($rolIdActual, [1, 2]) && (int)$visita->registrado_por !== $usuarioIdActual) {
+                        throw new \Exception("No tienes permiso para editar visitas registradas por otros usuarios.");
+                    }
+
                     $visita->fecha_visita = $fecha_visita;
                     $visita->motivo = $motivoFinal;
                     $exito = $visita->save();
@@ -247,7 +256,19 @@ try {
             // SE CONFIGURA LA AUDITORÍA DE CONEXIÓN JUSTO ANTES DE GUARDAR EL UPDATE
             $this->configurarUsuarioAuditoria();
 
-            $exito = VisitaModelo::where('id', $visitaId)->update(['estado' => 0]);
+            $visita = VisitaModelo::find($visitaId);
+            if ($visita) {
+                // RBAC para Grupo de Visitas
+                $rolIdActual = (int)($_SESSION['rol_id'] ?? 0);
+                $usuarioIdActual = (int)($_SESSION['usuario']->id ?? $_SESSION['usuario_id'] ?? 1);
+                if (!in_array($rolIdActual, [1, 2]) && (int)$visita->registrado_por !== $usuarioIdActual) {
+                    if (ob_get_length()) ob_clean();
+                    header('Content-Type: application/json');
+                    echo json_encode(['ok' => false, 'error' => "No tienes permiso para eliminar visitas registradas por otros usuarios."]);
+                    exit;
+                }
+                $exito = VisitaModelo::where('id', $visitaId)->update(['estado' => 0]);
+            }
         }
         
         if (ob_get_length()) ob_clean();

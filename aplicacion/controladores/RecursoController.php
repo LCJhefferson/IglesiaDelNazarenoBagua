@@ -85,10 +85,25 @@ class RecursoController {
             'tipo'           => $tipoArchivo,
             'ruta_archivo'   => $rutaArchivo,
             'enlace_youtube' => trim(filter_var($_POST['enlace_youtube'] ?? '', FILTER_SANITIZE_URL)),
-            'creado_por'     => $usuarioId,
         ];
+        
+        if (!$id) {
+            $datos['creado_por'] = $usuarioId;
+        } else {
+            $datos['editado_por'] = $usuarioId;
+        }
 
         if ($id) {
+            // RBAC validación
+            $recursoExistente = Recurso::find($id);
+            if ($recursoExistente) {
+                $rolIdActual = (int)($_SESSION['rol_id'] ?? 0);
+                if (!in_array($rolIdActual, [1, 2, 11]) && (int)$recursoExistente->creado_por !== (int)$usuarioId) {
+                    $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&error=permiso");
+                    return;
+                }
+            }
+
             Recurso::where('id', $id)->update($datos);
             RecursoThumbService::generar($id, $rutaArchivo, $tipoArchivo, $datos['enlace_youtube']);
         } else {
@@ -151,6 +166,17 @@ class RecursoController {
 
     public function eliminar(int $id): void {
         $usuarioId = $_SESSION['usuario']->id ?? $_SESSION['usuario_id'] ?? null;
+        
+        // RBAC validación
+        $recursoExistente = Recurso::find($id);
+        if ($recursoExistente) {
+            $rolIdActual = (int)($_SESSION['rol_id'] ?? 0);
+            if (!in_array($rolIdActual, [1, 2, 11]) && (int)$recursoExistente->creado_por !== (int)$usuarioId) {
+                $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&error=permiso");
+                return;
+            }
+        }
+
         Recurso::moverAPapelera($id, $usuarioId);
         $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&exito=2&pagina=archivos");
     }
