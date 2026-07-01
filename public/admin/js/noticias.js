@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────
    VARIABLES GLOBALES
 ───────────────────────────────────────── */
-let archivosGaleria = []; // Almacena temporalmente los archivos de la galería
+let archivosGaleria = []; 
 
 /* ─────────────────────────────────────────
    INICIALIZACIÓN
@@ -30,15 +30,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (grid)     grid.style.display     = "grid";
     }, 600);
 
-    /* ── MODAL ── */
     window.abrirModal = function(editar = false) {
         modal.classList.add("active");
         modal.style.display = "flex";
 
         if (!editar) {
             form.reset();
-            archivosGaleria = []; // Limpiamos el array
-            window.sincronizarInputGaleria(); // Limpiamos el input real
+            archivosGaleria = [];
+            window.sincronizarInputGaleria(); 
             
             document.getElementById("id_noticia").value    = "";
             document.getElementById("imagen_actual").value = "";
@@ -72,7 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.classList.remove("active");
         modal.style.display = "none";
         
-        // ¡NUEVO!: Limpiamos las imágenes en cola si el usuario cancela
         archivosGaleria = []; 
         window.sincronizarInputGaleria();
     };
@@ -81,7 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === modal) window.cerrarModal();
     });
 
-    /* ── PORTADA ── */
     if(inputPortada) {
         inputPortada.addEventListener("change", function() {
             if (this.files && this.files[0]) {
@@ -90,7 +87,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ── GALERÍA (SELECCIÓN POR CLIC) ── */
     if(inputMulti) {
         inputMulti.addEventListener("change", function() {
             const nuevosArchivos = Array.from(this.files);
@@ -100,7 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* Preview en tiempo real */
     const fTitulo = document.getElementById("f-titulo");
     if(fTitulo) {
         fTitulo.addEventListener("input", (e) => {
@@ -115,7 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* Modal confirmar: cerrar al clic fuera */
     const mc = document.getElementById("modal-confirmar");
     if (mc) mc.addEventListener("click", (e) => { if (e.target === mc) window.cerrarConfirmar(); });
 });
@@ -129,17 +123,14 @@ window.renderizarListaGaleria = function() {
     const listaAdjuntos = document.getElementById("lista-imagenes");
     const txtMulti      = document.getElementById("txt-multi");
     
-    // Limpiamos solo los elementos temporales (nuevos)
     document.querySelectorAll(".item-nuevo-temp").forEach(el => el.remove());
 
     archivosGaleria.forEach((file, index) => {
         const li = document.createElement("li");
         
-        // Misma estructura pero con borde punteado azul (indicador de que es nuevo)
         li.className = "item-nuevo-temp";
         li.style.cssText = "display: inline-flex; flex-direction: column; align-items: center; width: 110px; margin-right: 15px; margin-bottom: 15px; position: relative; border: 1px dashed #3b82f6; padding: 5px; border-radius: 8px; background: #eff6ff; vertical-align: top;";
 
-        // Usamos FileReader para ver la miniatura antes de subirla
         const reader = new FileReader();
         reader.onload = (e) => {
             li.innerHTML = `
@@ -167,12 +158,11 @@ window.renderizarListaGaleria = function() {
 };
 
 window.quitarImagenNueva = function(index) {
-    archivosGaleria.splice(index, 1); // Quitamos del array
-    window.renderizarListaGaleria();  // Refrescamos la vista
-    window.sincronizarInputGaleria(); // Sincronizamos el input para PHP
+    archivosGaleria.splice(index, 1); 
+    window.renderizarListaGaleria(); 
+    window.sincronizarInputGaleria();
 };
 
-// Función crítica para inyectar los archivos al input real del formulario
 window.sincronizarInputGaleria = function() {
     const inputMulti = document.getElementById("imagenes");
     if (!inputMulti) return;
@@ -216,7 +206,7 @@ window.dropGaleria = function(e) {
     if (files.length > 0) {
         archivosGaleria = [...archivosGaleria, ...files];
         window.renderizarListaGaleria();
-        window.sincronizarInputGaleria(); // Vital para que PHP reciba lo que arrastras
+        window.sincronizarInputGaleria();
     }
 };
 
@@ -241,7 +231,7 @@ window.confirmarEliminar = function(id, titulo) {
     modalConfirmar.style.display = "flex";
 
     document.getElementById("btn-confirmar-ok").onclick = function() {
-        window.location.href = `/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&eliminar=${id}&csrf_token=${encodeURIComponent(CSRF_TOKEN)}`;
+        window.location.href = `/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&eliminar=${id}`;
     };
 };
 
@@ -376,10 +366,8 @@ if (n.imagenes_adjuntas && n.imagenes_adjuntas.length > 0) {
     n.imagenes_adjuntas.forEach(img => {
         const li = document.createElement("li");
         
-        // Estilos para que cada ítem parezca una "tarjeta" cuadrada
         li.style.cssText = "display: inline-flex; flex-direction: column; align-items: center; width: 110px; margin-right: 15px; margin-bottom: 15px; position: relative; border: 1px solid #e5e7eb; padding: 5px; border-radius: 8px; background: #f9fafb; vertical-align: top;";
         
-        // Obtenemos el nombre del archivo
         let nombreArchivo = img.imagen.split('/').pop();
 
         li.innerHTML = `
@@ -445,25 +433,21 @@ window.filtrarNoticias = function() {
    MARCAR IMAGEN PARA ELIMINAR (SIN MODAL)
 ───────────────────────────────────────── */
 window.borrarImagenGaleria = function(idImagen, elementoBtn) {
-    // 1. Buscamos el formulario al que pertenece esta imagen
     const form = elementoBtn.closest('form');
 
-    // 2. Creamos un campo de texto oculto para guardar el ID de la imagen a borrar
     if (form) {
         const inputOculto = document.createElement('input');
         inputOculto.type = 'hidden';
-        inputOculto.name = 'imagenes_a_eliminar[]'; // Los corchetes [] indican que será un array (lista) en PHP
+        inputOculto.name = 'imagenes_a_eliminar[]'; 
         inputOculto.value = idImagen;
         form.appendChild(inputOculto);
     }
 
-    // 3. Ocultamos y eliminamos el cuadrito de la imagen visualmente
     const itemImagen = elementoBtn.parentElement;
     if (itemImagen) {
         itemImagen.remove();
     }
 
-    // 4. (Opcional) Un pequeño aviso de que se marcaron los cambios
     if (typeof window.mostrarToast === 'function') {
         window.mostrarToast("Marcada para eliminar (Guarda para aplicar)", "info");
     }
