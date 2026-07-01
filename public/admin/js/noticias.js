@@ -241,7 +241,7 @@ window.confirmarEliminar = function(id, titulo) {
     modalConfirmar.style.display = "flex";
 
     document.getElementById("btn-confirmar-ok").onclick = function() {
-        window.location.href = `/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&eliminar=${id}`;
+        window.location.href = `/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&eliminar=${id}&csrf_token=${encodeURIComponent(CSRF_TOKEN)}`;
     };
 };
 

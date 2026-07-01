@@ -151,7 +151,7 @@ function cerrarModalEditar() {
 function confirmarEliminar(id, nombre) {
     document.getElementById('textoConfirmarEliminar').innerHTML =
         '"<strong>' + nombre + '</strong>" se moverá a la papelera y podrás restaurarlo después.';
-    document.getElementById('enlaceConfirmarEliminar').href = RUTA_RECURSOS + '&eliminar=' + id;
+    document.getElementById('enlaceConfirmarEliminar').href = RUTA_RECURSOS + '&eliminar=' + id + '&csrf_token=' + encodeURIComponent(CSRF_TOKEN);
     document.getElementById('modalConfirmarEliminar').classList.add('activo');
 }
 function cerrarModalConfirmar() {
@@ -161,7 +161,7 @@ function cerrarModalConfirmar() {
 function confirmarEliminarDefinitivo(id, nombre) {
     document.getElementById('textoConfirmarDefinitivo').innerHTML =
         'Esta acción <strong>no se puede deshacer</strong>. "' + nombre + '" se eliminará de forma permanente.';
-    document.getElementById('enlaceConfirmarDefinitivo').href = RUTA_RECURSOS + '&eliminar_definitivo=' + id;
+    document.getElementById('enlaceConfirmarDefinitivo').href = RUTA_RECURSOS + '&eliminar_definitivo=' + id + '&csrf_token=' + encodeURIComponent(CSRF_TOKEN);
     document.getElementById('modalConfirmarDefinitivo').classList.add('activo');
 }
 function cerrarModalDefinitivo() {
@@ -169,7 +169,7 @@ function cerrarModalDefinitivo() {
 }
 
 function confirmarVaciarPapelera() {
-    document.getElementById('enlaceVaciarPapelera').href = RUTA_RECURSOS + '&vaciar_papelera=1';
+    document.getElementById('enlaceVaciarPapelera').href = RUTA_RECURSOS + '&vaciar_papelera=1' + '&csrf_token=' + encodeURIComponent(CSRF_TOKEN);
     document.getElementById('modalVaciarPapelera').classList.add('activo');
 }
 function cerrarModalVaciarPapelera() {

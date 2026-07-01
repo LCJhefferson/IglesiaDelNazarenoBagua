@@ -134,7 +134,7 @@ function confirmarEliminarGrupo(id, nombre) {
     if (modal && txtNombre && btnEliminar) {
         txtNombre.textContent = nombre;
         // Configuramos la URL exacta de redirección con el ID seleccionado
-        btnEliminar.href = `?seccion=DiscipuladoGrupos&eliminar_grupo=${id}`;
+        btnEliminar.href = `?seccion=DiscipuladoGrupos&eliminar_grupo=${id}&csrf_token=${encodeURIComponent(CSRF_TOKEN)}`;
         modal.style.display = 'flex';
     }
 }

@@ -202,7 +202,7 @@ function confirmarQuitarIntegrante(id, nombre) {
     if (modal && txtNombre && btnQuitar) {
         txtNombre.textContent = nombre;
         // Asignamos la dirección de acción correspondiente al controlador PHP
-        btnQuitar.href = `dashboard?seccion=DiscipuladoIntegrantes&quitar_integrante=${id}`;
+        btnQuitar.href = `dashboard?seccion=DiscipuladoIntegrantes&quitar_integrante=${id}&csrf_token=${encodeURIComponent(CSRF_TOKEN)}`;
         modal.style.display = 'flex';
     }
 }
