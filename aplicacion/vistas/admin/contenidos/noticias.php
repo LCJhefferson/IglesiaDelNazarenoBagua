@@ -1,6 +1,11 @@
 <?php
+use aplicacion\core\Middleware;
 use aplicacion\controladores\NoticiaController;
 $controller = new NoticiaController();
+
+if (isset($_GET['eliminar_foto']) || isset($_GET['ocultar']) || isset($_GET['mostrar']) || isset($_GET['eliminar'])) {
+    Middleware::csrfVerify();
+}
 
 if(isset($_GET['eliminar_foto'])){
     if($controller->eliminarFotoGaleria($_GET['eliminar_foto'])) {
@@ -146,7 +151,7 @@ $fecha_actual = date("Y-m-d\TH:i");
                         <i class="fa-solid fa-pen"></i> Editar
                         <span class="tooltip">Editar noticia</span>
                     </button>
-                    <button class="btn-accion <?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>" onclick="event.stopPropagation(); location.href='/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&<?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>=<?= $n['id'] ?>'">
+                    <button class="btn-accion <?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>" onclick="event.stopPropagation(); location.href='/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&<?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>=<?= $n['id'] ?>&csrf_token=<?= urlencode($csrfToken ?? '') ?>'">
                         <i class="fa-solid fa-<?= $n['estado'] == 1 ? 'eye-slash' : 'eye' ?>"></i> <?= $n['estado'] == 1 ? 'Ocultar' : 'Mostrar' ?>
                         <span class="tooltip"><?= $n['estado'] == 1 ? 'Ocultar noticia en el portal' : 'Mostrar noticia en el portal' ?></span>
                     </button>

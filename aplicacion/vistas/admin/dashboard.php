@@ -71,10 +71,8 @@ if (!$accesoPermitido) {
 
 // 4. PROCESAMIENTO DE PETICIONES POST / ACCIONES DE BORRADO
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['eliminar_grupo']) || isset($_GET['quitar_integrante'])) {
-    
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        Middleware::csrfVerify();
-    }
+
+    Middleware::csrfVerify();
 
     if ($vistaInterna === 'DiscipuladoGrupos' || $vistaInterna === 'DiscipuladoIntegrantes') {
         $controller = new DiscipuladoController();

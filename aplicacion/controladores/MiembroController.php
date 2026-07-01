@@ -14,16 +14,16 @@ class MiembroController {
     public function manejarPeticion() {
         $urlDestino = "index.php?vista=dashboard&seccion=membresia";
 
-        // 1. Acción: Registrar
+        
         if (isset($_POST['registrar'])) {
             $cargos = $_POST['cargos'] ?? [];
-            // Limpiamos $_POST de campos que no van a la tabla 'miembros'
+        
             unset($_POST['registrar'], $_POST['cargos'], $_POST['id']); 
             $this->dao->registrar($_POST, $cargos);
             $this->redireccionar($urlDestino);
         }
 
-        // 2. Acción: Editar
+        
         if (isset($_POST['editar'])) {
             $cargos = $_POST['cargos'] ?? [];
             unset($_POST['editar'], $_POST['cargos']);
@@ -31,14 +31,16 @@ class MiembroController {
             $this->redireccionar($urlDestino);
         }
 
-        // 3. Acción: Eliminar (Desactivar)
+       
         if (isset($_GET['eliminar'])) {
+            \aplicacion\core\Middleware::csrfVerify();
             $this->dao->eliminar($_GET['eliminar']);
             $this->redireccionar($urlDestino);
         }
 
         // 4. Acción: Activar
         if (isset($_GET['activar'])) {
+            \aplicacion\core\Middleware::csrfVerify();
             $this->dao->activar($_GET['activar']);
             $this->redireccionar($urlDestino);
         }
@@ -59,20 +61,18 @@ class MiembroController {
             }
         }
 
-        // 2. Ejecutar redirección nativa si las cabeceras están limpias
+        
         if (!headers_sent()) {
             header("Location: " . $url);
             exit;
         } else {
-            // 3. Mitigación absoluta contra XSS usando json_encode()
+           
             $urlSeguraJs = json_encode($url, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
             
             echo "<script>window.location.href = " . $urlSeguraJs . ";</script>";
             exit;
         }
     }
-
-    // --- MÉTODOS DE CONSULTA PARA LA VISTA ---
 
     public function listarMiembros() {
         return $this->dao->listar();

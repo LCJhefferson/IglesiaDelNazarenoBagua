@@ -1,7 +1,12 @@
 <?php
+use aplicacion\core\Middleware;
 use aplicacion\controladores\RecursoController;
 
 $controller = new RecursoController();
+
+if (isset($_GET['eliminar']) || isset($_GET['restaurar']) || isset($_GET['eliminar_definitivo']) || isset($_GET['vaciar_papelera'])) {
+    Middleware::csrfVerify();
+}
 
 if (isset($_GET['eliminar']))            $controller->eliminar((int)$_GET['eliminar']);
 if (isset($_GET['restaurar']))           $controller->restaurar((int)$_GET['restaurar']);
@@ -483,7 +488,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
                                 </div>
                             </div>
                             <div class="acciones-papelera">
-                                <a href="<?= $ruta_base ?>&restaurar=<?= (int)$item['id'] ?>"
+                                <a href="<?= $ruta_base ?>&restaurar=<?= (int)$item['id'] ?>&csrf_token=<?= urlencode($csrfToken ?? '') ?>"
                                    class="boton boton-exito" title="Restaurar">
                                     <i class="fa-solid fa-rotate-left"></i> Restaurar
                                 </a>

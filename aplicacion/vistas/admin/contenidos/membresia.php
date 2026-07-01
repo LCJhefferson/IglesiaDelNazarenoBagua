@@ -160,7 +160,7 @@ $fechaHoy = date('Y-m-d');
             <a class="btn <?= (int)getProp($m, 'estado') === 1 ? 'eliminar' : 'editar' ?>" 
             href="javascript:void(0)" 
             style="<?= (int)getProp($m, 'estado') === 0 ? 'background: #28a745; color: white;' : '' ?>"
-            onclick="showConfirm('index.php?vista=dashboard&seccion=membresia&<?= (int)getProp($m, 'estado') === 1 ? 'eliminar' : 'activar' ?>=<?= getProp($m, 'id') ?>')">
+            onclick="showConfirm('index.php?vista=dashboard&seccion=membresia&<?= (int)getProp($m, 'estado') === 1 ? 'eliminar' : 'activar' ?>=<?= getProp($m, 'id') ?>&csrf_token=<?= urlencode($csrfToken ?? '') ?>')">
                 <i class="fa-solid <?= (int)getProp($m, 'estado') === 1 ? 'fa-user-slash' : 'fa-user-plus' ?>"></i>
             </a>
         </td>
