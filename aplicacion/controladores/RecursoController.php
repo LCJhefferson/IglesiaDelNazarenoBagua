@@ -133,9 +133,10 @@ class RecursoController {
         }
 
         $ruta_abs = realpath($_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/' . $recurso->ruta_archivo);
-        $base_dir = realpath($_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/admin/imagenes/recursos/');
+        $proyecto_dir = realpath($_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/');
 
-        if (!$ruta_abs || !str_starts_with($ruta_abs, $base_dir) || !file_exists($ruta_abs)) {
+        // Seguridad: El archivo debe existir y estar dentro de la carpeta del proyecto (LFI protection)
+        if (!$ruta_abs || !str_starts_with($ruta_abs, $proyecto_dir) || !file_exists($ruta_abs)) {
             $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin");
             return;
         }

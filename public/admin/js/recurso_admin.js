@@ -349,6 +349,9 @@ async function eliminarRecurso(id, nombre) {
         // Actualizar el badge de papelera y remover la tarjeta del DOM
         _removerTarjetaDOM(id);
         _actualizarBadgePapelera(+1);
+        
+        // RECARGAR DATOS: Al eliminar, el archivo debe aparecer de inmediato en la papelera
+        cargarRecursosInicial();
 
     } catch (err) {
         mostrarAviso(err.message, 'error');
