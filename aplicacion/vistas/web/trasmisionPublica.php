@@ -142,49 +142,88 @@ $live = TransmisionModelo::where('estado_id', 1)->first();
     
 
     <script>
-        // Configuración de Pusher
         const pusher = new Pusher('TU_KEY', { cluster: 'TU_CLUSTER' });
         const channel = pusher.subscribe('iglesia-canal');
 
         channel.bind('evento-vivo', function(data) {
             console.log("Señal de Pusher:", data);
             
-            // Regla: 1 = En Vivo
             if (data.estado_id == 1 || data.message === 'live_started' || data.message === 'live_updated') {
                 actualizarVistaVivo(data);
             } 
-            // Regla: 2 = Finalizado
             else if (data.estado_id == 2 || data.message === 'live_finished') {
                 mostrarVistaFin();
             }
         });
 
+        // Whitelist estricta: solo permitimos embebidos de YouTube.
+        // Defensa en profundidad, aunque el backend ya normaliza en formatearUrlYoutube().
+        function esUrlYoutubeEmbedValida(url) {
+            if (typeof url !== 'string') return false;
+            try {
+                const u = new URL(url, window.location.origin);
+                return (u.protocol === 'https:') &&
+                       (u.hostname === 'www.youtube.com' || u.hostname === 'youtube.com') &&
+                       u.pathname.startsWith('/embed/');
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function limpiarNodo(nodo) {
+            while (nodo.firstChild) nodo.removeChild(nodo.firstChild);
+        }
+
         function actualizarVistaVivo(data) {
             document.getElementById('live-header').style.display = 'block';
-            document.getElementById('live-title').innerText = data.titulo;
-            
-            // Actualizar Reproductor
-            const playerWrapper = document.getElementById('player-wrapper');
-            playerWrapper.innerHTML = `
-                <div class="video-container">
-                    <iframe src="${data.link_video}?autoplay=1" allow="autoplay; fullscreen" allowfullscreen></iframe>
-                </div>
-            `;
+            document.getElementById('live-title').textContent = data.titulo || '';
 
-            // Actualizar Tarjeta de Información Inferior
+            const playerWrapper = document.getElementById('player-wrapper');
+            limpiarNodo(playerWrapper);
+
+            const contenedor = document.createElement('div');
+            contenedor.className = 'video-container';
+
+            if (esUrlYoutubeEmbedValida(data.link_video)) {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'main-iframe';
+                iframe.setAttribute('src', data.link_video + '?autoplay=1');
+                iframe.setAttribute('allow', 'autoplay; fullscreen');
+                iframe.setAttribute('allowfullscreen', '');
+                contenedor.appendChild(iframe);
+            } else {
+                const aviso = document.createElement('p');
+                aviso.style.color = '#fff';
+                aviso.style.padding = '20px';
+                aviso.textContent = 'La transmisión no tiene un enlace de video válido.';
+                contenedor.appendChild(aviso);
+            }
+            playerWrapper.appendChild(contenedor);
+
             const infoWrapper = document.getElementById('info-wrapper');
-            infoWrapper.innerHTML = `
-                <div class="info-card">
-                    <h4>Descripción del servicio</h4>
-                    <p>${data.descripcion || 'Sin descripción disponible.'}</p>
-                </div>
-            `;
+            limpiarNodo(infoWrapper);
+
+            const card = document.createElement('div');
+            card.className = 'info-card';
+
+            const titulo = document.createElement('h4');
+            titulo.textContent = 'Descripción del servicio';
+
+            const parrafo = document.createElement('p');
+            parrafo.style.whiteSpace = 'pre-line'; // equivalente visual a nl2br sin usar HTML
+            parrafo.textContent = data.descripcion || 'Sin descripción disponible.';
+
+            card.appendChild(titulo);
+            card.appendChild(parrafo);
+            infoWrapper.appendChild(card);
         }
 
         function mostrarVistaFin() {
             document.getElementById('live-header').style.display = 'none';
-            
+
             const playerWrapper = document.getElementById('player-wrapper');
+            limpiarNodo(playerWrapper);
+
             playerWrapper.innerHTML = `
                 <div class="video-container finished-bg">
                     <div class="status-card">
@@ -197,8 +236,7 @@ $live = TransmisionModelo::where('estado_id', 1)->first();
                 </div>
             `;
 
-            // Limpiar descripción al finalizar
-            document.getElementById('info-wrapper').innerHTML = '';
+            limpiarNodo(document.getElementById('info-wrapper'));
         }
     </script>
 </body>
