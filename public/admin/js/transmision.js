@@ -18,13 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. SINCRONIZACIÓN EN TIEMPO REAL
     if (inputs.titulo) {
         inputs.titulo.addEventListener('input', (e) => {
-            monitores.titulo.innerText = e.target.value.trim() || 'Título del Evento';
+            monitores.titulo.textContent = e.target.value.trim() || 'Título del Evento';
         });
     }
 
     if (inputs.desc) {
         inputs.desc.addEventListener('input', (e) => {
-            monitores.desc.innerText = e.target.value.trim() || 'Descripción de la transmisión...';
+            monitores.desc.textContent = e.target.value.trim() || 'Descripción de la transmisión...';
         });
     }
 
@@ -81,11 +81,11 @@ function prepararNueva() {
     selectEstado.value = "1"; // Por defecto En Vivo
     selectEstado.disabled = false;
     
-    document.getElementById('formActionTitle').innerText = "Nueva Transmisión";
-    document.getElementById('btnAccionPrincipal').innerHTML = '<i class="fa-solid fa-play"></i> Iniciar y Notificar';
+    document.getElementById('formActionTitle').textContent = "Nueva Transmisión";
+    document.getElementById('btnAccionPrincipal').textContent = "▶ Iniciar y Notificar";
     
-    document.getElementById('monitorTitulo').innerText = "Título del Evento";
-    document.getElementById('monitorDesc').innerText = "Descripción de la transmisión...";
+    document.getElementById('monitorTitulo').textContent = "Título del Evento";
+    document.getElementById('monitorDesc').textContent = "Descripción de la transmisión...";
     document.getElementById('monitorVideo').src = "";
     document.getElementById('monitorVideo').style.display = 'none';
     document.getElementById('monitorPlaceholder').style.display = 'flex';
@@ -102,17 +102,17 @@ function cargarParaEditar(data) {
 
     if (data.estado_id == 2) {
         selectEstado.disabled = true;
-        document.getElementById('formActionTitle').innerText = "Editando Transmisión Finalizada";
+        document.getElementById('formActionTitle').textContent = "Editando Transmisión Finalizada";
     } else {
         selectEstado.disabled = false;
-        document.getElementById('formActionTitle').innerText = "Control de Vivo";
+        document.getElementById('formActionTitle').textContent = "Control de Vivo";
     }
 
-    document.getElementById('monitorTitulo').innerText = data.titulo;
-    document.getElementById('monitorDesc').innerText = data.descripcion;
+    document.getElementById('monitorTitulo').textContent = data.titulo;
+    document.getElementById('monitorDesc').textContent = data.descripcion;
     actualizarMonitor(data.link_video);
     
-    document.getElementById('btnAccionPrincipal').innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
+    document.getElementById('btnAccionPrincipal').textContent = "💾 Guardar Cambios";
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -121,7 +121,6 @@ function confirmarAccion() {
     const estado = document.getElementById('formEstado').value;
     const esNuevo = id === "";
 
-    // Siempre habilitar el select antes de validar/enviar para que viaje el dato en el POST
     document.getElementById('formEstado').disabled = false;
 
     if (esNuevo && estado == "1") {
@@ -135,7 +134,7 @@ function mostrarModal(mensaje) {
     const modal = document.getElementById('modalConfirmar');
     const texto = document.getElementById('textoModal');
     if (modal && texto) {
-        texto.innerText = mensaje;
+        texto.textContent = mensaje;
         const btnConfirmar = document.getElementById("btnConfirmarModal");
         btnConfirmar.onclick = ejecutarEnvio; 
         modal.style.display = 'flex';
@@ -160,7 +159,7 @@ function abrirModalFinalizar(id, titulo) {
     const modal = document.getElementById('modalConfirmar');
     const texto = document.getElementById('textoModal');
     
-    texto.innerText = "¿Deseas finalizar la transmisión: '" + titulo + "'? Esto cerrará la conexión para todos los espectadores.";
+    texto.textContent = "¿Deseas finalizar la transmisión: '" + titulo + "'? Esto cerrará la conexión para todos los espectadores.";
     
     const btnConfirmar = document.getElementById("btnConfirmarModal");
     btnConfirmar.onclick = () => {
