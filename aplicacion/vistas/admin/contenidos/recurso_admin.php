@@ -317,7 +317,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
             </button>
         </div>
 
-        <form class="modal-subir-body" method="POST" enctype="multipart/form-data" id="formSubir" onsubmit="enviarFormularioSubir(event)">
+        <form class="modal-subir-body" method="POST" enctype="multipart/form-data" id="formSubir">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <input type="hidden" name="id"          id="subir_campoId">
             <input type="hidden" name="ruta_actual" id="subir_campoRutaActual">
@@ -397,7 +397,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
             <i class="fa-solid fa-xmark"></i>
         </button>
         <h3>✏️ Editar archivo</h3>
-        <form method="POST" enctype="multipart/form-data" id="formEditar" onsubmit="enviarFormularioEditar(event)">
+        <form method="POST" enctype="multipart/form-data" id="formEditar">
             <!--//token de seguridad-->
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <!--//tokens para identificar el archivo-->
