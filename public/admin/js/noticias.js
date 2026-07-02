@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────
    VARIABLES GLOBALES
 ───────────────────────────────────────── */
-let archivosGaleria = []; // Almacena temporalmente los archivos de la galería
+let archivosGaleria = []; 
 
 /* ─────────────────────────────────────────
    INICIALIZACIÓN
@@ -15,7 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputMulti    = document.getElementById("imagenes");
     const txtMulti      = document.getElementById("txt-multi");
 
-    const totalReal = parseInt(document.querySelector(".badge-total-real")?.innerText || "0");
+    // antes: innerText
+    const totalReal = parseInt(document.querySelector(".badge-total-real")?.textContent || "0");
     window.animarContador("badge-total", totalReal);
 
     if (localStorage.getItem("tema-noticias") === "dark") {
@@ -30,40 +31,55 @@ document.addEventListener("DOMContentLoaded", () => {
         if (grid)     grid.style.display     = "grid";
     }, 600);
 
-    /* ── MODAL ── */
     window.abrirModal = function(editar = false) {
         modal.classList.add("active");
         modal.style.display = "flex";
 
         if (!editar) {
             form.reset();
-            archivosGaleria = []; // Limpiamos el array
-            window.sincronizarInputGaleria(); // Limpiamos el input real
+            archivosGaleria = [];
+            window.sincronizarInputGaleria(); 
             
             document.getElementById("id_noticia").value    = "";
             document.getElementById("imagen_actual").value = "";
-            txtPortada.innerText   = "Arrastra una imagen aquí o haz clic para subir";
+
+            // antes: innerText
+            txtPortada.textContent = "Arrastra una imagen aquí o haz clic para subir";
             txtPortada.style.color = "";
-            txtMulti.innerText     = "Arrastra imágenes aquí o haz clic para añadir";
+            txtMulti.textContent   = "Arrastra imágenes aquí o haz clic para añadir";
             txtMulti.style.color   = "";
-            listaAdjuntos.innerHTML = "";
-            document.getElementById("char-resumen").innerText = "0 / 150";
+
+            // antes: innerHTML
+            listaAdjuntos.textContent = "";
+
+            // antes: innerText
+            document.getElementById("char-resumen").textContent = "0 / 150";
             document.getElementById("char-resumen").className = "char-contador";
-            document.getElementById("modal-titulo").innerHTML = '<i class="fa-solid fa-plus"></i> Nueva Noticia';
+
+            // antes: innerHTML con ícono
+            const tituloModal = document.getElementById("modal-titulo");
+            tituloModal.textContent = "Nueva Noticia"; // se muestra solo texto seguro
+
             document.getElementById("label-upload").style.display = "flex";
             document.getElementById("contenedor-portada-edit").style.display = "none";
+
             const btn = document.getElementById("btn-submit-noticia");
-            if (btn) btn.innerHTML = '<i class="fa-solid fa-save"></i> <span>Guardar Publicación</span>';
+            if (btn) {
+                // antes: innerHTML con ícono
+                btn.textContent = "Guardar Publicación"; 
+            }
         }
         
         if (!window.quillInstance) {
             window.quillInstance = new Quill('#quill-editor', { theme: 'snow' });
             window.quillInstance.on('text-change', function() {
+                // aquí se mantiene innerHTML porque Quill necesita HTML para el contenido
                 document.getElementById('f-contenido').value = window.quillInstance.root.innerHTML;
             });
         }
 
         if (!editar) {
+            // aquí también se mantiene innerHTML porque es el editor rich text
             window.quillInstance.root.innerHTML = '';
         }
     };
@@ -72,7 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.classList.remove("active");
         modal.style.display = "none";
         
-        // ¡NUEVO!: Limpiamos las imágenes en cola si el usuario cancela
         archivosGaleria = []; 
         window.sincronizarInputGaleria();
     };
@@ -81,7 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === modal) window.cerrarModal();
     });
 
-    /* ── PORTADA ── */
     if(inputPortada) {
         inputPortada.addEventListener("change", function() {
             if (this.files && this.files[0]) {
@@ -90,7 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ── GALERÍA (SELECCIÓN POR CLIC) ── */
     if(inputMulti) {
         inputMulti.addEventListener("change", function() {
             const nuevosArchivos = Array.from(this.files);
@@ -100,25 +113,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* Preview en tiempo real */
     const fTitulo = document.getElementById("f-titulo");
     if(fTitulo) {
         fTitulo.addEventListener("input", (e) => {
-            document.getElementById("preview-titulo").innerText = e.target.value || "Título de la noticia";
+            // antes: innerText
+            document.getElementById("preview-titulo").textContent = e.target.value || "Título de la noticia";
         });
     }
 
     const fResumen = document.getElementById("f-resumen");
     if(fResumen) {
         fResumen.addEventListener("input", (e) => {
-            document.getElementById("preview-resumen").innerText = e.target.value || "Resumen ejecutivo...";
+            // antes: innerText
+            document.getElementById("preview-resumen").textContent = e.target.value || "Resumen ejecutivo...";
         });
     }
 
-    /* Modal confirmar: cerrar al clic fuera */
     const mc = document.getElementById("modal-confirmar");
     if (mc) mc.addEventListener("click", (e) => { if (e.target === mc) window.cerrarConfirmar(); });
 });
+
 
 
 /* ─────────────────────────────────────────
@@ -129,28 +143,39 @@ window.renderizarListaGaleria = function() {
     const listaAdjuntos = document.getElementById("lista-imagenes");
     const txtMulti      = document.getElementById("txt-multi");
     
-    // Limpiamos solo los elementos temporales (nuevos)
     document.querySelectorAll(".item-nuevo-temp").forEach(el => el.remove());
 
     archivosGaleria.forEach((file, index) => {
         const li = document.createElement("li");
         
-        // Misma estructura pero con borde punteado azul (indicador de que es nuevo)
         li.className = "item-nuevo-temp";
         li.style.cssText = "display: inline-flex; flex-direction: column; align-items: center; width: 110px; margin-right: 15px; margin-bottom: 15px; position: relative; border: 1px dashed #3b82f6; padding: 5px; border-radius: 8px; background: #eff6ff; vertical-align: top;";
 
-        // Usamos FileReader para ver la miniatura antes de subirla
         const reader = new FileReader();
         reader.onload = (e) => {
-            li.innerHTML = `
-                <img src="${e.target.result}" style="width: 100%; height: 75px; object-fit: cover; border-radius: 4px; margin-bottom: 5px; border: 1px solid #bfdbfe;">
-                <span title="${file.name}" style="font-size: 11px; color: #1e3a8a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; text-align: center;">
-                    (Nuevo) ${file.name}
-                </span>
-                <button type="button" class="btn-eliminar-adjunto" onclick="quitarImagenNueva(${index})" style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            `;
+            // antes: li.innerHTML = `<img ...><span>...</span><button>...</button>`
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.style.cssText = "width: 100%; height: 75px; object-fit: cover; border-radius: 4px; margin-bottom: 5px; border: 1px solid #bfdbfe;";
+
+            const span = document.createElement("span");
+            span.title = file.name;
+            span.style.cssText = "font-size: 11px; color: #1e3a8a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; text-align: center;";
+            span.textContent = `(Nuevo) ${file.name}`;
+
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn-eliminar-adjunto";
+            btn.style.cssText = "position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);";
+            btn.onclick = function() { quitarImagenNueva(index); };
+
+            const icon = document.createElement("i");
+            icon.className = "fa-solid fa-xmark";
+
+            btn.appendChild(icon);
+            li.appendChild(img);
+            li.appendChild(span);
+            li.appendChild(btn);
         };
         reader.readAsDataURL(file);
         
@@ -158,21 +183,22 @@ window.renderizarListaGaleria = function() {
     });
 
     if (archivosGaleria.length > 0) {
-        txtMulti.innerHTML   = `<i class="fa-solid fa-images"></i> ${archivosGaleria.length} imágenes nuevas listas`;
+        // antes: txtMulti.innerHTML = `<i ...> ${archivosGaleria.length} imágenes nuevas listas`
+        txtMulti.textContent = `${archivosGaleria.length} imágenes nuevas listas`;
         txtMulti.style.color = "var(--acento)";
     } else {
-        txtMulti.innerText   = "Arrastra imágenes aquí o haz clic para añadir";
+        // antes: txtMulti.innerText
+        txtMulti.textContent = "Arrastra imágenes aquí o haz clic para añadir";
         txtMulti.style.color = "";
     }
 };
 
 window.quitarImagenNueva = function(index) {
-    archivosGaleria.splice(index, 1); // Quitamos del array
-    window.renderizarListaGaleria();  // Refrescamos la vista
-    window.sincronizarInputGaleria(); // Sincronizamos el input para PHP
+    archivosGaleria.splice(index, 1); 
+    window.renderizarListaGaleria(); 
+    window.sincronizarInputGaleria();
 };
 
-// Función crítica para inyectar los archivos al input real del formulario
 window.sincronizarInputGaleria = function() {
     const inputMulti = document.getElementById("imagenes");
     if (!inputMulti) return;
@@ -216,14 +242,16 @@ window.dropGaleria = function(e) {
     if (files.length > 0) {
         archivosGaleria = [...archivosGaleria, ...files];
         window.renderizarListaGaleria();
-        window.sincronizarInputGaleria(); // Vital para que PHP reciba lo que arrastras
+        window.sincronizarInputGaleria();
     }
 };
 
 window.procesarImagenPortada = function(file) {
     const txtPortada = document.getElementById("txt-imagen");
-    txtPortada.innerText   = "Seleccionada: " + file.name;
+    // antes: txtPortada.innerText = "Seleccionada: " + file.name;
+    txtPortada.textContent = "Seleccionada: " + file.name;
     txtPortada.style.color = "var(--verde)";
+    
     const reader = new FileReader();
     reader.onload = (e) => {
         document.getElementById("preview-img").src = e.target.result;
@@ -232,12 +260,14 @@ window.procesarImagenPortada = function(file) {
 };
 
 
+
 /* ─────────────────────────────────────────
    MODAL CONFIRMAR ELIMINAR
 ───────────────────────────────────────── */
 window.confirmarEliminar = function(id, titulo) {
     const modalConfirmar = document.getElementById("modal-confirmar");
-    document.getElementById("confirmar-nombre").innerText = titulo;
+    
+    document.getElementById("confirmar-nombre").textContent = titulo;
     modalConfirmar.style.display = "flex";
 
     document.getElementById("btn-confirmar-ok").onclick = function() {
@@ -376,10 +406,8 @@ if (n.imagenes_adjuntas && n.imagenes_adjuntas.length > 0) {
     n.imagenes_adjuntas.forEach(img => {
         const li = document.createElement("li");
         
-        // Estilos para que cada ítem parezca una "tarjeta" cuadrada
         li.style.cssText = "display: inline-flex; flex-direction: column; align-items: center; width: 110px; margin-right: 15px; margin-bottom: 15px; position: relative; border: 1px solid #e5e7eb; padding: 5px; border-radius: 8px; background: #f9fafb; vertical-align: top;";
         
-        // Obtenemos el nombre del archivo
         let nombreArchivo = img.imagen.split('/').pop();
 
         li.innerHTML = `
@@ -445,25 +473,21 @@ window.filtrarNoticias = function() {
    MARCAR IMAGEN PARA ELIMINAR (SIN MODAL)
 ───────────────────────────────────────── */
 window.borrarImagenGaleria = function(idImagen, elementoBtn) {
-    // 1. Buscamos el formulario al que pertenece esta imagen
     const form = elementoBtn.closest('form');
 
-    // 2. Creamos un campo de texto oculto para guardar el ID de la imagen a borrar
     if (form) {
         const inputOculto = document.createElement('input');
         inputOculto.type = 'hidden';
-        inputOculto.name = 'imagenes_a_eliminar[]'; // Los corchetes [] indican que será un array (lista) en PHP
+        inputOculto.name = 'imagenes_a_eliminar[]'; 
         inputOculto.value = idImagen;
         form.appendChild(inputOculto);
     }
 
-    // 3. Ocultamos y eliminamos el cuadrito de la imagen visualmente
     const itemImagen = elementoBtn.parentElement;
     if (itemImagen) {
         itemImagen.remove();
     }
 
-    // 4. (Opcional) Un pequeño aviso de que se marcaron los cambios
     if (typeof window.mostrarToast === 'function') {
         window.mostrarToast("Marcada para eliminar (Guarda para aplicar)", "info");
     }

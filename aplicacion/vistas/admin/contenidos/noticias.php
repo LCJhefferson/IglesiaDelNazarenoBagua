@@ -1,6 +1,11 @@
 <?php
+use aplicacion\core\Middleware;
 use aplicacion\controladores\NoticiaController;
 $controller = new NoticiaController();
+
+if (isset($_GET['eliminar_foto']) || isset($_GET['ocultar']) || isset($_GET['mostrar']) || isset($_GET['eliminar'])) {
+    Middleware::csrfVerify();
+}
 
 if(isset($_GET['eliminar_foto'])){
     if($controller->eliminarFotoGaleria($_GET['eliminar_foto'])) {
@@ -66,7 +71,6 @@ $fecha_actual = date("Y-m-d\TH:i");
 </header>
 
 
-<!-- CONTENEDOR PRINCIPAL -->
 <div class="contenedor">
     <div class="tabla-container-wrapper">
         <div class="tabla-header">
@@ -76,7 +80,6 @@ $fecha_actual = date("Y-m-d\TH:i");
             </div>
         </div>
 
-        <!-- SKELETON LOADER -->
         <div class="cards-grid" id="skeleton-grid">
             <?php for($i = 0; $i < 3; $i++): ?>
             <div class="skeleton-card">
@@ -91,7 +94,6 @@ $fecha_actual = date("Y-m-d\TH:i");
             <?php endfor; ?>
         </div>
 
-        <!-- GRID DE CARDS -->
         <div class="cards-grid" id="contenedor-noticias" style="display:none;">
 
             <div class="sin-resultados-busqueda" id="msg-sin-busqueda" style="display:none;">
@@ -146,7 +148,7 @@ $fecha_actual = date("Y-m-d\TH:i");
                         <i class="fa-solid fa-pen"></i> Editar
                         <span class="tooltip">Editar noticia</span>
                     </button>
-                    <button class="btn-accion <?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>" onclick="event.stopPropagation(); location.href='/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&<?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>=<?= $n['id'] ?>'">
+                    <button class="btn-accion <?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>" onclick="event.stopPropagation(); location.href='/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&<?= $n['estado'] == 1 ? 'ocultar' : 'mostrar' ?>=<?= $n['id'] ?>&csrf_token=<?= urlencode($csrfToken ?? '') ?>'">
                         <i class="fa-solid fa-<?= $n['estado'] == 1 ? 'eye-slash' : 'eye' ?>"></i> <?= $n['estado'] == 1 ? 'Ocultar' : 'Mostrar' ?>
                         <span class="tooltip"><?= $n['estado'] == 1 ? 'Ocultar noticia en el portal' : 'Mostrar noticia en el portal' ?></span>
                     </button>
@@ -161,7 +163,6 @@ $fecha_actual = date("Y-m-d\TH:i");
         </div>
     </div>
 
-    <!-- PREVIEW LATERAL -->
     <div class="preview">
         <div class="card-preview">
             <img id="preview-img" src="https://via.placeholder.com/400x200">
@@ -174,7 +175,6 @@ $fecha_actual = date("Y-m-d\TH:i");
     </div>
 </div>
 
-<!-- MODAL CONFIRMAR ELIMINAR -->
 <div class="modal" id="modal-confirmar" style="display:none;">
     <div class="modal-box confirmar-box">
         <div class="confirmar-icono">
@@ -191,7 +191,6 @@ $fecha_actual = date("Y-m-d\TH:i");
     </div>
 </div>
 
-<!-- MODAL CREAR / EDITAR -->
 <div class="modal" id="modal">
     <div class="modal-box">
         <div class="modal-header">
@@ -279,7 +278,6 @@ $fecha_actual = date("Y-m-d\TH:i");
     </div>
 </div>
 
-<!-- TOAST NOTIFICATIONS -->
 <div id="toast-container"></div>
 
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>

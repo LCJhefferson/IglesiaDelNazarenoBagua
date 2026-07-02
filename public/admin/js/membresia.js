@@ -6,6 +6,8 @@
 // 1. INICIALIZACIÓN
 document.addEventListener("DOMContentLoaded", function() {
     inicializarSelect2();
+    inicializarBuscadorDirecciones();
+    inicializarFlashData();
 });
 
 function inicializarSelect2() {
@@ -29,21 +31,18 @@ function abrirModal() {
         modal.classList.add("active");
         modal.style.display = "flex";
 
-        // Resetear formulario y limpiar Select2
         if (form) form.reset();
         $('#cargos_select').val(null).trigger('change');
 
         // Configuración para modo "Nuevo"
         document.getElementById("btnAgregar").style.display = "inline-block";
         document.getElementById("btnActualizar").style.display = "none";
-        document.getElementById("tituloModal").innerHTML = '<i class="fa-solid fa-user-plus"></i> Nuevo Miembro';
+        document.getElementById("tituloModal").textContent = "Nuevo Miembro";
 
-        // Limpiar campos específicos/ocultos
         document.getElementsByName("id")[0].value = "";
         document.getElementById("latitud").value = "";
         document.getElementById("longitud").value = "";
-        
-        // Ejecutar lógica extra de tipo si existe
+
         if (typeof checkTipo === 'function') checkTipo();
     }
 }
@@ -70,7 +69,7 @@ function editar(m) {
     abrirModal();
 
     // Ajustar UI para modo "Edición"
-    document.getElementById("tituloModal").innerHTML = '<i class="fa-solid fa-pen"></i> Editar Miembro';
+    document.getElementById("tituloModal").textContent = "Editar Miembro";
     document.getElementById("btnAgregar").style.display = "none";
     document.getElementById("btnActualizar").style.display = "inline-block";
 
@@ -110,9 +109,9 @@ function filtrarTabla() {
     const filas = document.querySelectorAll("#tablaCuerpo tr");
 
     filas.forEach(fila => {
-        const nombre = fila.querySelector("td:nth-child(1)").innerText.toLowerCase();
-        const tipo = fila.querySelector(".col-tipo").innerText.toLowerCase();
-        const rol = fila.querySelector(".col-rol").innerText.toLowerCase();
+        const nombre = fila.querySelector("td:nth-child(1)").textContent.toLowerCase();
+        const tipo = fila.querySelector(".col-tipo").textContent.toLowerCase();
+        const rol = fila.querySelector(".col-rol").textContent.toLowerCase();
         const estado = fila.getAttribute("data-estado");
 
         const coincideNombre = nombre.includes(busqueda);

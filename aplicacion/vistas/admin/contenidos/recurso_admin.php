@@ -1,6 +1,6 @@
 <?php
-use aplicacion\controladores\RecursoController;
 use aplicacion\core\Middleware;
+use aplicacion\controladores\RecursoController;
 
 // Genera (o reutiliza) el token CSRF para esta sesión.
 // El JS lo leerá del campo oculto [name="csrf_token"] para enviarlo
@@ -17,7 +17,6 @@ if (isset($_GET['vaciar_papelera']))     $controller->vaciarPapelera();
 if (isset($_GET['descargar']))           $controller->descargar((int)$_GET['descargar']);
 if (isset($_POST['guardar']))            $controller->guardar();
 
-// Obtenemos los datos y los convertimos a un arreglo nativo de PHP usando toArray()
 $coleccion_archivos = $controller->listar();
 $archivos = is_object($coleccion_archivos) && method_exists($coleccion_archivos, 'toArray') 
     ? $coleccion_archivos->toArray() 

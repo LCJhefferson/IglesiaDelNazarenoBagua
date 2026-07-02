@@ -746,6 +746,7 @@ function verTodosResultados(titulo) {
     if (inp) inp.value = termino;
 }
 
+
 // ─── 12. NOTIFICACIONES TOAST ────────────────────────────────────────────────
 
 /**

@@ -14,30 +14,135 @@ let datosGlobalescache = {};
 let timeoutBusqueda = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicialización de selectores dinámicos desde la BD al cargar la página
     inicializarCondicionesMiembros();
-
-    // 2. CARGA AUTOMÁTICA DE DATOS
-    // Al entrar, cargamos los datos por defecto (sin filtros activos)
     window.cargarVistaPrevia('miembros');
 
-
-    // EVITAR RECARGA DE PÁGINA ACCIDENTAL: Si presionan ENTER en un buscador, que no se recargue la web
     const formDiscipulado = document.getElementById('form-discipulado');
     if (formDiscipulado) {
         formDiscipulado.addEventListener('submit', (e) => e.preventDefault());
     }
 
-    // CERRAR LISTAS AL HACER CLIC AFUERA: Oculta los resultados si el usuario hace clic en otra parte
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.autocomplete-container')) {
             document.querySelectorAll('.autocomplete-resultados').forEach(box => {
-                box.innerHTML = '';
+                // ✅ antes: box.innerHTML = '';
+                box.textContent = '';
                 box.style.display = 'none';
             });
         }
     });
 });
+
+// --- CONFIRMAR ELIMINAR ---
+window.confirmarEliminar = function(id, titulo) {
+    const modalConfirmar = document.getElementById("modal-confirmar");
+    // ✅ antes: innerText
+    document.getElementById("confirmar-nombre").textContent = titulo;
+    modalConfirmar.style.display = "flex";
+
+    document.getElementById("btn-confirmar-ok").onclick = function() {
+        window.location.href = `/IglesiaDelNazarenoBagua/public/index.php?vista=dashboard&seccion=noticias&eliminar=${id}`;
+    };
+};
+
+window.cerrarConfirmar = function() {
+    document.getElementById("modal-confirmar").style.display = "none";
+};
+
+// --- DRAG & DROP PORTADA ---
+window.procesarImagenPortada = function(file) {
+    const txtPortada = document.getElementById("txt-imagen");
+    // ✅ antes: innerText
+    txtPortada.textContent = "Seleccionada: " + file.name;
+    txtPortada.style.color = "var(--verde)";
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        document.getElementById("preview-img").src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
+// --- TOAST ---
+window.mostrarToast = function(mensaje, tipo = "exito") {
+    const iconos    = { exito: "fa-circle-check", error: "fa-circle-xmark", info: "fa-circle-info" };
+    const container = document.getElementById("toast-container");
+    if(!container) return;
+
+    const toast     = document.createElement("div");
+    toast.className = `toast ${tipo}`;
+    
+    // ✅ antes: toast.innerHTML
+    const icon = document.createElement("i");
+    icon.className = `fa-solid ${iconos[tipo]}`;
+
+    const msg = document.createElement("span");
+    msg.textContent = mensaje;
+
+    toast.appendChild(icon);
+    toast.appendChild(msg);
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = "toastSalida 0.3s ease forwards";
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+};
+
+// --- GALERÍA ---
+window.renderizarListaGaleria = function() {
+    const listaAdjuntos = document.getElementById("lista-imagenes");
+    const txtMulti      = document.getElementById("txt-multi");
+    
+    document.querySelectorAll(".item-nuevo-temp").forEach(el => el.remove());
+
+    archivosGaleria.forEach((file, index) => {
+        const li = document.createElement("li");
+        li.className = "item-nuevo-temp";
+        li.style.cssText = "..."; // estilos omitidos para brevedad
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            // antes: li.innerHTML
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.style.cssText = "...";
+
+            const span = document.createElement("span");
+            span.title = file.name;
+            span.style.cssText = "...";
+            span.textContent = `(Nuevo) ${file.name}`;
+
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn-eliminar-adjunto";
+            btn.style.cssText = "...";
+            btn.onclick = function() { quitarImagenNueva(index); };
+
+            const icon = document.createElement("i");
+            icon.className = "fa-solid fa-xmark";
+
+            btn.appendChild(icon);
+            li.appendChild(img);
+            li.appendChild(span);
+            li.appendChild(btn);
+        };
+        reader.readAsDataURL(file);
+        
+        listaAdjuntos.appendChild(li);
+    });
+
+    if (archivosGaleria.length > 0) {
+        // antes: txtMulti.innerHTML
+        txtMulti.textContent = `${archivosGaleria.length} imágenes nuevas listas`;
+        txtMulti.style.color = "var(--acento)";
+    } else {
+        // antes: txtMulti.innerText
+        txtMulti.textContent = "Arrastra imágenes aquí o haz clic para añadir";
+        txtMulti.style.color = "";
+    }
+};
+
 
 /**
  * Conmuta la visibilidad de los paneles de reportes (Sistema de Pestañas)
@@ -76,7 +181,13 @@ function inicializarCondicionesMiembros() {
     .then(data => {
         // 1. Cargar condiciones de miembros
         if (selectCondiciones && data.condiciones && Array.isArray(data.condiciones)) {
-            selectCondiciones.innerHTML = '<option value="">Todas</option>'; 
+            // ✅ antes: selectCondiciones.innerHTML = '<option value="">Todas</option>';
+            selectCondiciones.textContent = ''; 
+            const optDefault = document.createElement('option');
+            optDefault.value = '';
+            optDefault.textContent = 'Todas';
+            selectCondiciones.appendChild(optDefault);
+
             data.condiciones.forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c.id;
@@ -85,9 +196,15 @@ function inicializarCondicionesMiembros() {
             });
         }
         
-        // 2. Cargar estados de discipulado maestro (Uso exclusivo de la nueva tabla)
+        // 2. Cargar estados de discipulado maestro
         if (selectEstadosDisc && data.estados_discipulo && Array.isArray(data.estados_discipulo)) {
-            selectEstadosDisc.innerHTML = '<option value="">Todos</option>';
+            // antes: selectEstadosDisc.innerHTML = '<option value="">Todos</option>';
+            selectEstadosDisc.textContent = '';
+            const optDefault = document.createElement('option');
+            optDefault.value = '';
+            optDefault.textContent = 'Todos';
+            selectEstadosDisc.appendChild(optDefault);
+
             data.estados_discipulo.forEach(e => {
                 const opt = document.createElement('option');
                 opt.value = e.id;
@@ -117,7 +234,6 @@ window.cargarVistaPrevia = function(tipo) {
     .then(datos => {
         datosGlobalescache[tipo] = datos || [];
         
-        // Al filtrar o cargar de nuevo, regresamos siempre a la primera página
         if(paginacion[tipo]) {
             paginacion[tipo].paginaActual = 1;
         }
@@ -126,6 +242,7 @@ window.cargarVistaPrevia = function(tipo) {
     })
     .catch(err => console.error(`Error cargando vista previa de ${tipo}:`, err));
 };
+
 
 /**
  * Descarga y exportación física de archivos dinámico

@@ -1,14 +1,8 @@
 <?php
-/**
- * ARCHIVO: dashboard.php
- * Función: Actuar como "Marco" (Shell) del Panel Administrativo.
- * Garantiza: Seguridad CSRF, Autenticación y Procesamiento de datos antes de mostrar HTML.
- */
 
 use aplicacion\core\Middleware;
 use aplicacion\controladores\DiscipuladoController;
 
-// ── ENDPOINT PARA CONSULTAR BITÁCORA VÍA AJAX (ANTES DE CUALQUIER SALIDA HTML) ──
 if (isset($_GET['obtener_bitacora']) && !empty($_GET['usuario_id'])) {
     header('Content-Type: application/json');
     if (ob_get_length()) ob_clean(); 
@@ -23,58 +17,45 @@ if (isset($_GET['obtener_bitacora']) && !empty($_GET['usuario_id'])) {
     exit; 
 }
 
-// 1. INICIAR SEGURIDAD (Middleware ya configurado profesionalmente)
 Middleware::auth([1, 2, 9, 11, 12]); 
 
-// 2. GENERAR TOKEN CSRF
 $csrfToken = Middleware::csrfGenerate();
 
-// 3. CAPTURAR LA SECCIÓN ACTUAL
 $vista = $_GET['seccion'] ?? 'inicioAdmin';
-// Seguridad Avanzada: Permitir únicamente caracteres alfanuméricos y guiones bajos (Evita Path Traversal de raíz)
 $vistaInterna = preg_replace('/[^a-zA-Z0-9_]/', '', $vista); 
 
-// ── RBAC: VALIDACIÓN DE ACCESO POR ROL (antes de cualquier salida HTML) ──
 $rolId = (int)($_SESSION['rol_id'] ?? 0);
 $vistaCheck = strtolower($vistaInterna);
 
-// Definir vistas permitidas por cada rol restringido (lista blanca estricta)
 $vistasPermitidasPorRol = [
     9  => ['inicioadmin', 'discipuladogrupos', 'discipuladointegrantes'],                                   // Discipulador
     11 => ['inicioadmin', 'recurso_admin', 'membresia', 'noticias', 'discipuladogrupos', 'discipuladointegrantes', 'reportes'],  // Secretaria
     12 => ['inicioadmin', 'visitaslistar', 'visitasmap'],                                                    // Grupo de Visitas
 ];
 $vistasBloqueadasPorRol = [
-    // Secretaria ahora usa lista blanca, ya no necesita lista negra
 ];
 
 $accesoPermitido = true;
 
 if (isset($vistasPermitidasPorRol[$rolId])) {
     if ($vistasPermitidasPorRol[$rolId] !== null) {
-        // Rol con lista blanca (solo puede ver estas vistas)
         $accesoPermitido = in_array($vistaCheck, $vistasPermitidasPorRol[$rolId]);
     }
 }
 if (isset($vistasBloqueadasPorRol[$rolId])) {
-    // Rol con lista negra (puede ver todo excepto estas)
     if (in_array($vistaCheck, $vistasBloqueadasPorRol[$rolId])) {
         $accesoPermitido = false;
     }
 }
 
-// Si no tiene permiso, redirigir silenciosamente al inicio (sin mostrar error)
 if (!$accesoPermitido) {
     header('Location: /IglesiaDelNazarenoBagua/dashboard?seccion=inicioAdmin');
     exit;
 }
 
-// 4. PROCESAMIENTO DE PETICIONES POST / ACCIONES DE BORRADO
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['eliminar_grupo']) || isset($_GET['quitar_integrante'])) {
-    
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        Middleware::csrfVerify();
-    }
+
+    Middleware::csrfVerify();
 
     if ($vistaInterna === 'DiscipuladoGrupos' || $vistaInterna === 'DiscipuladoIntegrantes') {
         $controller = new DiscipuladoController();
@@ -82,9 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['eliminar_grupo']) || i
     }
 }
 
-/**
- * MAPEO DE ASSETS (CSS y JS)
- */
+
 $estilos = [
     'inicioAdmin'            => 'inicioAdmin.css',
     'NewUsuarioForm'         => 'NewUsuarioForm.css',
@@ -144,15 +123,12 @@ $scripts = [
 
 <div class="admin-container">
     <?php 
-    // MENU LATERAL
     include __DIR__ . '/includes/sidebar.php'; 
     ?>
 
     <main class="main-area">
         <section class="content" id="contenedor-vista">
             <?php
-            // RUTA HACIA EL ARCHIVO DE CONTENIDO
-            // (La validación RBAC ya se realizó arriba, antes del HTML. Si llegamos aquí, el acceso es válido.)
             $rutaContenido = __DIR__ . "/contenidos/" . $vistaInterna . ".php";
             
             if (file_exists($rutaContenido)) {
