@@ -78,9 +78,8 @@ $mensajes_exito = [
 ];
 $msg_exito = isset($_GET['exito']) ? ($mensajes_exito[(int)$_GET['exito']] ?? '') : '';
 
-$_paginas_validas = ['publico', 'archivos', 'subir', 'papelera'];
-$pagina_activa    = in_array($_GET['pagina'] ?? '', $_paginas_validas) ? $_GET['pagina'] : 'publico';
-
+$_paginas_validas = ['archivos', 'subir', 'papelera'];
+$pagina_activa    = in_array($_GET['pagina'] ?? '', $_paginas_validas) ? $_GET['pagina'] : 'archivos';
 $ruta_base = '/IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin';
 
 // LAS TARJETAS AHORA SE RENDERIZAN 100% EN JAVASCRIPT (CLIENT-SIDE)
@@ -90,11 +89,9 @@ $ruta_base = '/IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin';
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet"/>
 <script>var RUTA_RECURSOS = <?= json_encode($ruta_base) ?>;</script>
-<?php if ($pagina_activa !== 'publico'): ?>
 <script>
     window.addEventListener('DOMContentLoaded', () => mostrarPagina(<?= json_encode($pagina_activa) ?>));
 </script>
-<?php endif; ?>
 
 <?php if ($msg_exito): ?>
 <script>
@@ -158,7 +155,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
 
 <main class="area-contenido">
 
-    <div class="pagina activa" id="pagina-publico">
+    <div class="pagina" id="pagina-publico" style="display:none;">
 
 
         <div class="envoltorio-hero">
@@ -225,7 +222,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
         </div>
     </div>
 
-    <div class="pagina" id="pagina-archivos">
+    <div class="pagina activa" id="pagina-archivos">
         <div class="envoltorio-hero">
             <div class="hero-editorial">
                 <svg class="hero-paloma" viewBox="0 0 64 64" fill="none">
@@ -298,6 +295,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
             <!-- Fetch API inyectará las tarjetas de papelera aquí -->
             <div class="lista-papelera" id="contenedorPapelera">
             </div>
+
         </div>
     </div>
 
