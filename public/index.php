@@ -155,7 +155,47 @@ if ($vista === 'inicializar_filtros_reporte') {
     exit;
 }
 
-// Procesamiento de Visitas
+// ============================================================================
+// API REST — MÓDULO RECURSOS
+// ─────────────────────────────────────────────────────────────────────────────
+// Todos los endpoints devuelven JSON puro. El frontend (JS) gestiona la UI.
+// Los verbos HTTP determinan la acción — NO hay verbos en la URL.
+//
+// Rutas registradas:
+//   GET    ?vista=api/recursos            → index()   (listar/buscar)
+//   POST   ?vista=api/recursos            → store()   (crear)
+//   DELETE ?vista=api/recursos&id={n}     → destroy() (soft-delete)
+//   GET    ?vista=api/recursos/papelera   → papelera()
+//   POST   ?vista=api/recursos/restaurar  → restaurar()
+//   DELETE ?vista=api/recursos/definitivo → eliminarDefinitivo()
+//   DELETE ?vista=api/recursos/vaciar     → vaciarPapelera()
+// ============================================================================
+if (strpos($vista, 'api/recursos') === 0) {
+    $apiRecurso = new \aplicacion\controladores\api\RecursoApiController();
+
+    // Enrutado interno según sub-ruta y verbo HTTP
+    if ($vista === 'api/recursos') {
+        $verbo = $_SERVER['REQUEST_METHOD'];
+        if ($verbo === 'GET')    { $apiRecurso->index();   }
+        if ($verbo === 'POST')   { $apiRecurso->store();   }
+        if ($verbo === 'DELETE') { $apiRecurso->destroy(); }
+    }
+    elseif ($vista === 'api/recursos/update') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $apiRecurso->update();
+        }
+    }
+    elseif ($vista === 'api/recursos/papelera')   { $apiRecurso->papelera();          exit; }
+    elseif ($vista === 'api/recursos/restaurar')  { $apiRecurso->restaurar();         exit; }
+    elseif ($vista === 'api/recursos/definitivo') { $apiRecurso->eliminarDefinitivo(); exit; }
+    elseif ($vista === 'api/recursos/vaciar')     { $apiRecurso->vaciarPapelera();    exit; }
+
+    // Si llegamos aquí, la sub-ruta API no existe
+    \aplicacion\core\Response::notFound('Endpoint de recursos no encontrado');
+    exit;
+}
+
+// ─── Procesamiento de Visitas (rutas antiguas — se mantienen por compatibilidad)
 $accionesVisitas = [
     'admin/guardarVisita'        => 'guardarVisita',
     'admin/guardarAjustesVisita' => 'guardarAjustesVisita',
