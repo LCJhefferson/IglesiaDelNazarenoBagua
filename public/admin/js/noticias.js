@@ -15,7 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputMulti    = document.getElementById("imagenes");
     const txtMulti      = document.getElementById("txt-multi");
 
-    const totalReal = parseInt(document.querySelector(".badge-total-real")?.innerText || "0");
+    // antes: innerText
+    const totalReal = parseInt(document.querySelector(".badge-total-real")?.textContent || "0");
     window.animarContador("badge-total", totalReal);
 
     if (localStorage.getItem("tema-noticias") === "dark") {
@@ -41,28 +42,44 @@ document.addEventListener("DOMContentLoaded", () => {
             
             document.getElementById("id_noticia").value    = "";
             document.getElementById("imagen_actual").value = "";
-            txtPortada.innerText   = "Arrastra una imagen aquí o haz clic para subir";
+
+            // antes: innerText
+            txtPortada.textContent = "Arrastra una imagen aquí o haz clic para subir";
             txtPortada.style.color = "";
-            txtMulti.innerText     = "Arrastra imágenes aquí o haz clic para añadir";
+            txtMulti.textContent   = "Arrastra imágenes aquí o haz clic para añadir";
             txtMulti.style.color   = "";
-            listaAdjuntos.innerHTML = "";
-            document.getElementById("char-resumen").innerText = "0 / 150";
+
+            // antes: innerHTML
+            listaAdjuntos.textContent = "";
+
+            // antes: innerText
+            document.getElementById("char-resumen").textContent = "0 / 150";
             document.getElementById("char-resumen").className = "char-contador";
-            document.getElementById("modal-titulo").innerHTML = '<i class="fa-solid fa-plus"></i> Nueva Noticia';
+
+            // antes: innerHTML con ícono
+            const tituloModal = document.getElementById("modal-titulo");
+            tituloModal.textContent = "Nueva Noticia"; // se muestra solo texto seguro
+
             document.getElementById("label-upload").style.display = "flex";
             document.getElementById("contenedor-portada-edit").style.display = "none";
+
             const btn = document.getElementById("btn-submit-noticia");
-            if (btn) btn.innerHTML = '<i class="fa-solid fa-save"></i> <span>Guardar Publicación</span>';
+            if (btn) {
+                // antes: innerHTML con ícono
+                btn.textContent = "Guardar Publicación"; 
+            }
         }
         
         if (!window.quillInstance) {
             window.quillInstance = new Quill('#quill-editor', { theme: 'snow' });
             window.quillInstance.on('text-change', function() {
+                // aquí se mantiene innerHTML porque Quill necesita HTML para el contenido
                 document.getElementById('f-contenido').value = window.quillInstance.root.innerHTML;
             });
         }
 
         if (!editar) {
+            // aquí también se mantiene innerHTML porque es el editor rich text
             window.quillInstance.root.innerHTML = '';
         }
     };
@@ -99,20 +116,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const fTitulo = document.getElementById("f-titulo");
     if(fTitulo) {
         fTitulo.addEventListener("input", (e) => {
-            document.getElementById("preview-titulo").innerText = e.target.value || "Título de la noticia";
+            // antes: innerText
+            document.getElementById("preview-titulo").textContent = e.target.value || "Título de la noticia";
         });
     }
 
     const fResumen = document.getElementById("f-resumen");
     if(fResumen) {
         fResumen.addEventListener("input", (e) => {
-            document.getElementById("preview-resumen").innerText = e.target.value || "Resumen ejecutivo...";
+            // antes: innerText
+            document.getElementById("preview-resumen").textContent = e.target.value || "Resumen ejecutivo...";
         });
     }
 
     const mc = document.getElementById("modal-confirmar");
     if (mc) mc.addEventListener("click", (e) => { if (e.target === mc) window.cerrarConfirmar(); });
 });
+
 
 
 /* ─────────────────────────────────────────
@@ -133,15 +153,29 @@ window.renderizarListaGaleria = function() {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            li.innerHTML = `
-                <img src="${e.target.result}" style="width: 100%; height: 75px; object-fit: cover; border-radius: 4px; margin-bottom: 5px; border: 1px solid #bfdbfe;">
-                <span title="${file.name}" style="font-size: 11px; color: #1e3a8a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; text-align: center;">
-                    (Nuevo) ${file.name}
-                </span>
-                <button type="button" class="btn-eliminar-adjunto" onclick="quitarImagenNueva(${index})" style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            `;
+            // antes: li.innerHTML = `<img ...><span>...</span><button>...</button>`
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.style.cssText = "width: 100%; height: 75px; object-fit: cover; border-radius: 4px; margin-bottom: 5px; border: 1px solid #bfdbfe;";
+
+            const span = document.createElement("span");
+            span.title = file.name;
+            span.style.cssText = "font-size: 11px; color: #1e3a8a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; text-align: center;";
+            span.textContent = `(Nuevo) ${file.name}`;
+
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn-eliminar-adjunto";
+            btn.style.cssText = "position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);";
+            btn.onclick = function() { quitarImagenNueva(index); };
+
+            const icon = document.createElement("i");
+            icon.className = "fa-solid fa-xmark";
+
+            btn.appendChild(icon);
+            li.appendChild(img);
+            li.appendChild(span);
+            li.appendChild(btn);
         };
         reader.readAsDataURL(file);
         
@@ -149,10 +183,12 @@ window.renderizarListaGaleria = function() {
     });
 
     if (archivosGaleria.length > 0) {
-        txtMulti.innerHTML   = `<i class="fa-solid fa-images"></i> ${archivosGaleria.length} imágenes nuevas listas`;
+        // antes: txtMulti.innerHTML = `<i ...> ${archivosGaleria.length} imágenes nuevas listas`
+        txtMulti.textContent = `${archivosGaleria.length} imágenes nuevas listas`;
         txtMulti.style.color = "var(--acento)";
     } else {
-        txtMulti.innerText   = "Arrastra imágenes aquí o haz clic para añadir";
+        // antes: txtMulti.innerText
+        txtMulti.textContent = "Arrastra imágenes aquí o haz clic para añadir";
         txtMulti.style.color = "";
     }
 };
@@ -212,8 +248,10 @@ window.dropGaleria = function(e) {
 
 window.procesarImagenPortada = function(file) {
     const txtPortada = document.getElementById("txt-imagen");
-    txtPortada.innerText   = "Seleccionada: " + file.name;
+    // antes: txtPortada.innerText = "Seleccionada: " + file.name;
+    txtPortada.textContent = "Seleccionada: " + file.name;
     txtPortada.style.color = "var(--verde)";
+    
     const reader = new FileReader();
     reader.onload = (e) => {
         document.getElementById("preview-img").src = e.target.result;
@@ -222,12 +260,14 @@ window.procesarImagenPortada = function(file) {
 };
 
 
+
 /* ─────────────────────────────────────────
    MODAL CONFIRMAR ELIMINAR
 ───────────────────────────────────────── */
 window.confirmarEliminar = function(id, titulo) {
     const modalConfirmar = document.getElementById("modal-confirmar");
-    document.getElementById("confirmar-nombre").innerText = titulo;
+    
+    document.getElementById("confirmar-nombre").textContent = titulo;
     modalConfirmar.style.display = "flex";
 
     document.getElementById("btn-confirmar-ok").onclick = function() {

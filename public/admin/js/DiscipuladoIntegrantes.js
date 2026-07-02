@@ -24,7 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
             listaGrupos.style.display = 'block';
             
             items.forEach(item => {
-                const texto = item.textContent.toLowerCase();
+                // ✅ antes: item.innerText.toLowerCase()
+                const texto = item.textContent.toLowerCase(); 
                 item.style.display = (valor === "" || texto.includes(valor)) ? 'block' : 'none';
             });
         });
@@ -35,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         items.forEach(item => {
             item.addEventListener('click', function() {
+                // ✅ antes: this.innerText
                 inputGrupo.value = this.textContent.trim().split('(')[0].trim();
                 hiddenInputGrupo.value = this.getAttribute('data-id');
                 listaGrupos.style.display = 'none';
@@ -67,8 +69,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-
-
 function actualizarContador() {
     const filas = document.querySelectorAll('.fila-integrante');
     let visibles = 0;
@@ -77,7 +77,10 @@ function actualizarContador() {
     });
     
     const elemContador = document.getElementById('filasMostradas');
-    if (elemContador) elemContador.textContent = visibles;
+    if (elemContador) {
+        // ✅ antes: elemContador.innerText = visibles;
+        elemContador.textContent = visibles;
+    }
 }
 
 function filtrarTablaIntegrantes() {
@@ -115,7 +118,16 @@ function filtrarTablaIntegrantes() {
         if (!noDataRow) {
             noDataRow = document.createElement('tr');
             noDataRow.id = 'noResultsRow';
-            noDataRow.innerHTML = `<td colspan="6" style="text-align:center; padding:30px; color:#6b7a99;">No se encontraron resultados</td>`;
+
+            // ✅ antes: noDataRow.innerHTML = `<td colspan="6" ...>No se encontraron resultados</td>`;
+            const td = document.createElement('td');
+            td.colSpan = 6;
+            td.style.textAlign = "center";
+            td.style.padding = "30px";
+            td.style.color = "#6b7a99";
+            td.textContent = "No se encontraron resultados";
+            noDataRow.appendChild(td);
+
             tbody.appendChild(noDataRow);
         }
     } else if (noDataRow) {
@@ -124,8 +136,6 @@ function filtrarTablaIntegrantes() {
 
     actualizarContador();
 }
-
-
 
 function abrirModalAsignar() {
     const modal = document.getElementById('modalAsignar');
@@ -149,7 +159,6 @@ function cerrarModalAsignar() {
     }
 }
 
-
 function abrirModalEstadoAlumno(idIntegrante, idEstadoActual, nombreAlumno) {
     const modal = document.getElementById('modalEstadoAlumno');
     if (modal) {
@@ -167,13 +176,13 @@ function cerrarModalEstadoAlumno() {
     }
 }
 
-
 function confirmarQuitarIntegrante(id, nombre) {
     const modal = document.getElementById('modalConfirmarQuitar');
     const txtNombre = document.getElementById('nombreIntegranteQuitar');
     const btnQuitar = document.getElementById('enlaceQuitarSeguro');
 
     if (modal && txtNombre && btnQuitar) {
+        // ✅ ya estaba correcto con textContent
         txtNombre.textContent = nombre;
         btnQuitar.href = `dashboard?seccion=DiscipuladoIntegrantes&quitar_integrante=${id}&csrf_token=${encodeURIComponent(CSRF_TOKEN)}`;
         modal.style.display = 'flex';
@@ -203,11 +212,22 @@ function mostrarToastNotificacion(mensaje, tipo = 'success', icono = 'fa-check-c
     const toast = document.createElement('div');
     toast.className = `custom-toast ${tipo}`;
     
-    toast.innerHTML = `
-        <i class="fas ${icono} toast-icon"></i>
-        <div class="toast-message">${mensaje}</div>
-        <span class="toast-close" onclick="this.parentElement.remove()">&times;</span>
-    `;
+    //antes: toast.innerHTML = `<i ...>${mensaje}</div> ...`
+    const iconElem = document.createElement("i");
+    iconElem.className = `fas ${icono} toast-icon`;
+
+    const msgElem = document.createElement("div");
+    msgElem.className = "toast-message";
+    msgElem.textContent = mensaje;
+
+    const closeElem = document.createElement("span");
+    closeElem.className = "toast-close";
+    closeElem.textContent = "×";
+    closeElem.onclick = function() { this.parentElement.remove(); };
+
+    toast.appendChild(iconElem);
+    toast.appendChild(msgElem);
+    toast.appendChild(closeElem);
 
     contenedor.appendChild(toast);
 
