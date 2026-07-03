@@ -433,7 +433,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
         <p>Esta acción <strong>no se puede deshacer</strong>. Todos los archivos de la papelera se eliminarán permanentemente.</p>
         <div style="display:flex;gap:10px;justify-content:center;">
             <button class="boton boton-contorno" onclick="cerrarModalVaciarPapelera()">Cancelar</button>
-            <button id="btnVaciarPapeleraConfirmar" class="boton boton-peligro-solido">
+            <button id="btnVaciarPapelera" class="boton boton-peligro-solido" onclick="vaciarPapelera()">
                 <i class="fa-solid fa-trash-can"></i> Vaciar todo
             </button>
         </div>
