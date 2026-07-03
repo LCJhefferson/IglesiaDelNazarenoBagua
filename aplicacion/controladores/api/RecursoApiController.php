@@ -195,6 +195,15 @@ class RecursoApiController extends ApiController {
             'fecha_creacion' => date('Y-m-d H:i:s'),
         ]);
 
+        if ($nuevoRecurso && $nuevoRecurso->id) {
+            \aplicacion\services\RecursoThumbService::generar(
+                $nuevoRecurso->id, 
+                $rutaArchivo, 
+                $tipo, 
+                trim($data['enlace_youtube'] ?? '')
+            );
+        }
+
         Response::created(Recurso::find($nuevoRecurso->id));
     }
 
@@ -287,7 +296,14 @@ class RecursoApiController extends ApiController {
         $recurso->editado_por = $usuarioId;
         $recurso->save();
 
-        Response::success($recurso);
+        \aplicacion\services\RecursoThumbService::generar(
+            $recurso->id, 
+            $recurso->ruta_archivo, 
+            $recurso->tipo, 
+            $recurso->enlace_youtube
+        );
+
+        Response::success(Recurso::find($recurso->id), 'Recurso actualizado exitosamente');
     }
 
     // ── DELETE /api/recursos?id={n} ───────────────────────────────────────────

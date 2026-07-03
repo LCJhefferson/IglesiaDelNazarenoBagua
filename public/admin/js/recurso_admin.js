@@ -308,54 +308,81 @@ function filtrarPorCategoria(categoria, elemento) {
 
 // ─── 5. OPERACIONES DE ESCRITURA CON FETCH API ───────────────────────────────
 
-async function eliminarRecurso(id) {
+/**
+ * Mueve un recurso a la papelera mediante DELETE /api/recursos?id={n}.
+ *
+ * @param {number} id     ID del recurso a eliminar
+ * @param {string} nombre Nombre del recurso (para mensajes de UI)
+ */
+async function eliminarRecurso(id, nombre) {
+    cerrarModalConfirmar();
+    mostrarSpinner(true);
+
     try {
-        const respuesta = await fetch(`index.php?vista=api/recursos&id=${id}`, {
+        const resp = await fetch(`index.php?vista=api/recursos&id=${id}`, {
             method: 'DELETE',
             headers: {
-                'X-CSRF-Token': _CSRF() // Tu función de token CSRF
+                'X-CSRF-Token': _CSRF(),
+                'Accept': 'application/json'
             }
         });
 
-        if (respuesta.ok) {
-            const resultado = await respuesta.json();
-            
-            // 🛠️ SOLUCIÓN: Buscar la fila en la tabla y eliminarla visualmente
-            // Asumiendo que tus filas tienen un id como: id="fila-recurso-12"
-            const fila = document.getElementById(`fila-recurso-${id}`);
-            if (fila) {
-                fila.remove(); // Desaparece al instante sin recargar
-            }
-
-            // Opcional: Mostrar tu alerta flotante de éxito
-            mostrarAviso("Recurso movido a la papelera correctamente.");
-        } else {
-            console.error("Error en el servidor al intentar borrar");
+        if (!resp.ok) {
+            const errData = await resp.json().catch(() => ({}));
+            throw new Error(errData.error || `Error HTTP ${resp.status}`);
         }
-    } catch (error) {
-        console.error("Error de red:", error);
+
+        const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Error al eliminar el recurso');
+
+        mostrarAviso('Recurso movido a la papelera', 'exito');
+
+        // RECARGAR DATOS: Al eliminar, el archivo debe desaparecer y el DOM actualizarse
+        cargarRecursosInicial();
+
+    } catch (err) {
+        mostrarAviso(err.message, 'error');
+        console.error('[RecursosAPI] Error al eliminar:', err);
+    } finally {
+        mostrarSpinner(false);
     }
 }
 
-// Función para restaurar (Utiliza el verbo PUT o PATCH para actualización de estado)
-async function restaurarRecurso(id) {
+/**
+ * Restaura un recurso desde la papelera mediante POST /api/recursos/restaurar.
+ *
+ * @param {number} papeleraId  ID del registro en la tabla recursos_papelera
+ */
+async function restaurarRecurso(papeleraId) {
+    mostrarSpinner(true);
+
     try {
-        const response = await fetch(`index.php?vista=api/recursos&id=${id}&accion=restaurar`, {
-            method: 'PUT', // ◄ Verbo semántico para actualizar/modificar un recurso existente
+        const resp = await fetch('index.php?vista=api/recursos/restaurar', {
+            method: 'POST',
             headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json',
-                'X-CSRF-Token': _CSRF()
-            }
+                'X-CSRF-Token': _CSRF(),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ papelera_id: papeleraId })
         });
 
-        const resultado = await response.json();
-        if (resultado.success) {
-            document.getElementById(`fila-papelera-${id}`).remove();
-            mostrarAviso(resultado.mensaje);
+        if (!resp.ok) {
+            const errData = await resp.json().catch(() => ({}));
+            throw new Error(errData.error || `Error HTTP ${resp.status}`);
         }
-    } catch (error) {
-        console.error("Error al restaurar:", error);
+
+        const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Error al restaurar');
+
+        mostrarAviso('Recurso restaurado correctamente', 'exito');
+        cargarRecursosInicial();
+
+    } catch (err) {
+        mostrarAviso(err.message, 'error');
+        console.error('[RecursosAPI] Error al restaurar:', err);
+    } finally {
+        mostrarSpinner(false);
     }
 }
 
@@ -471,44 +498,22 @@ function _actualizarBadgePapelera(delta) {
 let _idPendienteEliminar    = null;
 let _idPendienteDefinitivo  = null;
 
-async function confirmarEliminar() {
-    if (!idRecursoSeleccionado) return;
-
-    const btn = document.getElementById('btnConfirmarEliminar');
-    const originalText = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = 'Moviendo...';
-
-    try {
-        const token = _CSRF();
-        const response = await fetch(`${API_RECURSOS}&id=${idRecursoSeleccionado}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-Token': token
-            }
-        });
-
-        if (response.ok) {
-            // 🛠️ ACTUALIZACIÓN DEL DOM IMMEDIATA:
-            const fila = document.getElementById(`fila-recurso-${idRecursoSeleccionado}`);
-            if (fila) {
-                fila.remove(); // Desaparece la fila al instante frente al usuario
-            }
-
-            cerrarModalConfirmar();
-            mostrarAviso('Recurso movido a la papelera.');
-            idRecursoSeleccionado = null;
-        } else {
-            const errData = await response.json().catch(() => ({}));
-            alert(errData.mensaje || 'Error al mover a la papelera.');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error de red al intentar eliminar.');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = originalText;
+function confirmarEliminar(id, nombre) {
+    _idPendienteEliminar = id;
+    const modal = document.getElementById('modalConfirmarEliminar');
+    const texto = document.getElementById('textoConfirmarEliminar');
+    if (texto) {
+        // SEGURIDAD: textContent para nombre del servidor — nunca innerHTML
+        texto.textContent = '';
+        const strong = document.createElement('strong');
+        strong.textContent = nombre; // textContent escapa automáticamente
+        texto.append('"', strong, '" se moverá a la papelera y podrás restaurarlo después.');
     }
+    const btnConfirmar = document.getElementById('btnConfirmarEliminar');
+    if (btnConfirmar) {
+        btnConfirmar.onclick = () => eliminarRecurso(id, nombre);
+    }
+    if (modal) modal.classList.add('activo');
 }
 
 function cerrarModalConfirmar() {
