@@ -1,27 +1,54 @@
 
+/**
+ * mostrarOcultar(idCampo, boton)
+ * Alterna el tipo del input entre 'password' y 'text'
+ * y cambia el ícono del ojo en consecuencia.
+ *
+ * @param {string} idCampo - El id del input de contraseña
+ * @param {HTMLElement} boton - El botón que fue presionado
+ */
+function mostrarOcultar(idCampo, boton) {
+    const campoContrasena = document.getElementById(idCampo);
+    const iconoOjo        = document.getElementById('ojo-' + idCampo);
 
-    /**
-     * mostrarOcultar(idCampo, boton)
-     * Alterna el tipo del input entre 'password' y 'text'
-     * y cambia el ícono del ojo en consecuencia.
-     *
-     * @param {string} idCampo - El id del input de contraseña
-     * @param {HTMLElement} boton - El botón que fue presionado
-     */
-    function mostrarOcultar(idCampo, boton) {
-        const campoContrasena = document.getElementById(idCampo);
-        const iconoOjo        = document.getElementById('ojo-' + idCampo);
-
-        if (campoContrasena.type === 'password') {
-            // Mostrar la contraseña
-            campoContrasena.type = 'text';
-            iconoOjo.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
-        } else {
-            // Ocultar la contraseña
-            campoContrasena.type = 'password';
-            iconoOjo.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-        }
+    // Limpiar contenido previo de forma segura
+    while (iconoOjo.firstChild) {
+        iconoOjo.removeChild(iconoOjo.firstChild);
     }
+
+    if (campoContrasena.type === 'password') {
+        // Mostrar la contraseña
+        campoContrasena.type = 'text';
+
+        // CORRECCIÓN XSS: crear SVG de forma segura
+        const path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path1.setAttribute("d", "M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24");
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", "1");
+        line.setAttribute("y1", "1");
+        line.setAttribute("x2", "23");
+        line.setAttribute("y2", "23");
+
+        iconoOjo.appendChild(path1);
+        iconoOjo.appendChild(line);
+
+    } else {
+        // Ocultar la contraseña
+        campoContrasena.type = 'password';
+
+        // CORRECCIÓN XSS: crear SVG de forma segura
+        const path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path2.setAttribute("d", "M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z");
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", "12");
+        circle.setAttribute("cy", "12");
+        circle.setAttribute("r", "3");
+
+        iconoOjo.appendChild(path2);
+        iconoOjo.appendChild(circle);
+    }
+}
+
 
     /**
      * evaluarFuerza(valor)

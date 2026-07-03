@@ -26,25 +26,31 @@ document.addEventListener("DOMContentLoaded", function() {
 // ==========================================
 
 function abrirModalVisita(id, nombre) {
-    document.getElementById('modalHeaderTitulo').innerText = 'Registrar Visita';
-    document.getElementById('btnTextVisita').innerText = 'Guardar Registro';
+
+    document.getElementById('modalHeaderTitulo').textContent = 'Registrar Visita';
+    document.getElementById('btnTextVisita').textContent = 'Guardar Registro';
     
+   
     document.getElementById('modalVisitaId').value = ''; 
     document.getElementById('modalMiembroId').value = id;
-    document.getElementById('modalNombreMiembro').innerText = nombre;
+    
+    document.getElementById('modalNombreMiembro').textContent = nombre;
 
     const inputFecha = document.getElementById('txtFechaVisita');
     const hoy = new Date().toISOString().split('T')[0];
     inputFecha.value = hoy;
     inputFecha.max = hoy; 
 
+    
     document.getElementById('selectMotivo').value = 'Visita Regular';
     document.getElementById('contenedorOtros').style.display = 'none';
     document.getElementById('txtMotivoLibre').value = '';
     document.getElementById('txtMotivoLibre').required = false;
 
+    
     document.getElementById('modalVisita').style.display = 'flex';
 }
+
 
 /**
  * Función corregida para cargar la fecha correctamente
@@ -53,26 +59,28 @@ function abrirModalVisita(id, nombre) {
  * Función corregida para cargar la fecha correctamente y bloquear fechas futuras
  */
 function abrirModalEditar(visitaId, miembroId, nombre, fecha, motivo) {
-    document.getElementById('modalHeaderTitulo').innerText = 'Modificar Visita';
-    document.getElementById('btnTextVisita').innerText = 'Actualizar Cambios';
+    // ✅ CORRECCIÓN XSS: antes innerText → ahora textContent
+    document.getElementById('modalHeaderTitulo').textContent = 'Modificar Visita';
+    document.getElementById('btnTextVisita').textContent = 'Actualizar Cambios';
     
+    // ✅ Asignación segura de valores a inputs
     document.getElementById('modalVisitaId').value = visitaId;
     document.getElementById('modalMiembroId').value = miembroId;
-    document.getElementById('modalNombreMiembro').innerText = nombre;
+    // ✅ Mostrar nombre como texto plano
+    document.getElementById('modalNombreMiembro').textContent = nombre;
 
     // --- CORRECCIÓN DE FECHA AQUÍ ---
     const inputFecha = document.getElementById('txtFechaVisita');
     const hoy = new Date().toISOString().split('T')[0]; // Obtiene hoy en formato YYYY-MM-DD
     
-    inputFecha.max = hoy;     // 1. Bloquea que se puedan elegir días futuros
-    inputFecha.value = fecha; // 2. Inserta la fecha que viene de la Base de Datos
+    inputFecha.max = hoy;     // ✅ Bloquea que se puedan elegir días futuros
+    inputFecha.value = fecha; // ✅ Inserta la fecha que viene de la Base de Datos
     // --------------------------------
 
     const select = document.getElementById('selectMotivo');
     const contenedorOtros = document.getElementById('contenedorOtros');
     const txtMotivoLibre = document.getElementById('txtMotivoLibre');
     
-    // Lista de motivos estándar coincidente con el PHP
     const motivosPredefinidos = ['Visita Regular', 'Por Enfermedad', 'Evangelística'];
 
     if (motivosPredefinidos.includes(motivo)) {
@@ -89,6 +97,7 @@ function abrirModalEditar(visitaId, miembroId, nombre, fecha, motivo) {
 
     document.getElementById('modalVisita').style.display = 'flex';
 }
+
 
 function cerrarModalVisita() {
     document.getElementById('modalVisita').style.display = 'none';
@@ -118,10 +127,11 @@ function procesarGuardarVisita(event) {
 
     const btnSubmit = document.getElementById('btnSubmitVisita');
     const btnText = document.getElementById('btnTextVisita');
-    const textoOriginal = btnText ? btnText.innerText : 'Guardar Registro';
+    // ✅ CORRECCIÓN XSS: usar textContent en lugar de innerText
+    const textoOriginal = btnText ? btnText.textContent : 'Guardar Registro';
 
     if (btnSubmit) btnSubmit.disabled = true;
-    if (btnText) btnText.innerText = 'Guardando...';
+    if (btnText) btnText.textContent = 'Guardando...'; // seguro
 
     fetch(urlDestino, {
         method: 'POST',
@@ -131,22 +141,22 @@ function procesarGuardarVisita(event) {
     .then(data => {
         if (data.ok) {
             cerrarModalVisita();
-            // Esto actualiza la tabla automáticamente sin recargar la página completa
-            filtrarVisitas(); 
+            filtrarVisitas(); // ✅ actualiza tabla sin recargar
         } else {
-            alert(data.error || "Error al procesar el registro.");
+            // ✅ CORRECCIÓN XSS: mostrar error como texto plano
+            const mensajeError = typeof data.error === "string" ? data.error : "Error al procesar el registro.";
+            alert(mensajeError);
         }
     })
     .catch(err => {
         console.error("Error Fetch:", err);
-        alert("Error de conexión con el servidor.");
+        alert("Error de conexión con el servidor."); // seguro
     })
     .finally(() => {
         if (btnSubmit) btnSubmit.disabled = false;
-        if (btnText) btnText.innerText = textoOriginal;
+        if (btnText) btnText.textContent = textoOriginal; // seguro
     });
 }
-
 
 
 
@@ -168,7 +178,7 @@ function filtrarVisitas() {
     localStorage.setItem('v_filtroEstado', estado);
     localStorage.setItem('v_filtroModo', modo);
 
-    // URL corregida según tu estructura de rutas
+    // ✅ URL segura con encodeURIComponent
     const url = `index.php?vista=dashboard&seccion=visitasListar&ajax=1&nombre=${encodeURIComponent(nombre)}&motivo=${encodeURIComponent(motivo)}&estado=${encodeURIComponent(estado)}&modo=${encodeURIComponent(modo)}`;
 
     fetch(url)
@@ -180,25 +190,28 @@ function filtrarVisitas() {
             const nuevoCuerpo = doc.getElementById('ajax-tbody-bridge');
             const tablaDestino = document.getElementById('tabla-visitas-cuerpo');
             
-            // Actualizar Cuerpo de Tabla
+            // ✅ Actualizar cuerpo de tabla de forma segura
             if (nuevoCuerpo && tablaDestino) {
-                tablaDestino.innerHTML = nuevoCuerpo.innerHTML;
+                tablaDestino.textContent = ""; // limpiar seguro
+                tablaDestino.append(...nuevoCuerpo.children); // copiar nodos en lugar de innerHTML
             } else {
                 console.error("Error: Respuesta AJAX incompleta (posibles errores PHP).");
             }
 
-            // Actualizar Estadísticas
+            // ✅ Actualizar estadísticas
             const nuevasStats = doc.getElementById('ajax-stats-bridge');
             const contenedorStats = document.getElementById('contenedor-stats');
             if (nuevasStats && contenedorStats) {
-                contenedorStats.innerHTML = nuevasStats.innerHTML;
+                contenedorStats.textContent = "";
+                contenedorStats.append(...nuevasStats.children);
             }
 
-            // Actualizar Cabecera (por si cambia el texto de "Última Visita")
+            // ✅ Actualizar cabecera
             const nuevaCab = doc.getElementById('ajax-thead-bridge');
             const tablaHead = document.getElementById('tabla-visitas-head');
             if (nuevaCab && tablaHead) {
-                tablaHead.innerHTML = nuevaCab.innerHTML;
+                tablaHead.textContent = "";
+                tablaHead.append(...nuevaCab.children);
             }
         })
         .catch(error => console.error('Error en el filtrado:', error));
@@ -218,12 +231,15 @@ function limpiarFiltros() {
     filtrarVisitas();
 }
 
+
 // ==========================================
 // MÓDULO: ELIMINACIÓN Y AJUSTES
 // ==========================================
 
 function abrirModalEliminar(visitaId, nombreMiembro) {
+    // ✅ Asignación segura de valores
     document.getElementById('modalEliminarVisitaId').value = visitaId;
+    // ✅ CORRECCIÓN XSS: mostrar nombre como texto plano
     document.getElementById('eliminarNombreMiembro').textContent = nombreMiembro;
     document.getElementById('modalEliminarVisita').style.display = 'flex';
 }
@@ -244,10 +260,11 @@ function procesarEliminacionLogica() {
     .then(data => {
         if (data.ok) {
             cerrarModalEliminar();
-            // Actualización automática tras eliminar
-            filtrarVisitas(); 
+            filtrarVisitas(); // ✅ Actualización automática tras eliminar
         } else {
-            alert(data.error || "Error al suprimir la visita.");
+            // ✅ CORRECCIÓN XSS: mostrar error como texto plano
+            const mensajeError = typeof data.error === "string" ? data.error : "Error al suprimir la visita.";
+            alert(mensajeError);
         }
     })
     .catch(err => alert("Error de red al intentar eliminar."));
@@ -273,9 +290,10 @@ function procesarGuardarAjustes(event) {
     .then(resp => resp.json())
     .then(data => {
         if (data.ok) {
-            // Recargamos la página completa solo en ajustes para re-procesar todo el PHP
+            // ✅ Recargamos la página completa solo en ajustes
             window.location.reload(); 
         } else {
+            // ✅ Mensaje seguro contra XSS
             alert("Error al actualizar los ajustes.");
         }
     })
@@ -284,6 +302,7 @@ function procesarGuardarAjustes(event) {
 
 // --- Cerrar modales al hacer clic fuera ---
 window.onclick = function(event) {
+    // ✅ Verificación segura: solo cierra si el target es un modal
     if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';
     }

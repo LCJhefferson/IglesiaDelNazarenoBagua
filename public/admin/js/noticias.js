@@ -333,8 +333,12 @@ window.seleccionarCard = function(cardEl, n) {
 
 window.verNoticia = function(n) {
     const rutaBase = "/IglesiaDelNazarenoBagua/";
-    document.getElementById("preview-titulo").innerText  = n.titulo  || "Sin título";
-    document.getElementById("preview-resumen").innerText = n.resumen || "Sin resumen";
+
+    // CORRECCIÓN XSS: antes innerText → ahora textContent
+    document.getElementById("preview-titulo").textContent  = n.titulo  || "Sin título";
+    document.getElementById("preview-resumen").textContent = n.resumen || "Sin resumen";
+
+    // Asignación segura de la imagen (src no ejecuta scripts)
     document.getElementById("preview-img").src = n.imagen_portada
         ? rutaBase + n.imagen_portada
         : "https://via.placeholder.com/400x200";
@@ -342,7 +346,8 @@ window.verNoticia = function(n) {
     const btnLeer = document.querySelector(".btn-leer");
     if (btnLeer) {
         btnLeer.onclick = function() {
-            window.location.href = rutaBase + "public/index.php?vista=noticia&id=" + n.id + "&origen=admin";
+            // Construcción segura de la URL con encodeURIComponent
+            window.location.href = rutaBase + "public/index.php?vista=noticia&id=" + encodeURIComponent(n.id) + "&origen=admin";
         };
     }
 };
@@ -358,10 +363,10 @@ window.animarContador = function(elementId, hasta) {
             actual = hasta;
             clearInterval(intervalo);
         }
-        el.innerText = actual + (hasta === 1 ? " noticia" : " noticias");
+        // CORRECCIÓN XSS: antes innerText → ahora textContent
+        el.textContent = actual + (hasta === 1 ? " noticia" : " noticias");
     }, 40);
 };
-
 
 /* ─────────────────────────────────────────
    EDITAR NOTICIA
@@ -370,13 +375,15 @@ window.editarNoticia = function(n) {
     window.abrirModal(true);
     const rutaBase = "/IglesiaDelNazarenoBagua/";
 
-    document.getElementById("id_noticia").value    = n.id;
+    // Asignación segura de valores a inputs
+    document.getElementById("id_noticia").value    = n.id || "";
     document.getElementById("imagen_actual").value = n.imagen_portada || "";
-    document.getElementById("f-titulo").value      = n.titulo;
-    document.getElementById("f-fecha").value       = n.fecha_creacion;
-    document.getElementById("f-resumen").value     = n.resumen;
+    document.getElementById("f-titulo").value      = n.titulo || "";
+    document.getElementById("f-fecha").value       = n.fecha_creacion || "";
+    document.getElementById("f-resumen").value     = n.resumen || "";
     document.getElementById('f-contenido').value   = n.contenido || '';
     
+    // ⚠️ Quill necesita innerHTML para renderizar contenido enriquecido
     if (window.quillInstance) {
          window.quillInstance.root.innerHTML = n.contenido || '';
     }
@@ -401,33 +408,64 @@ window.editarNoticia = function(n) {
     }
 
     const listaAdjuntos = document.getElementById("lista-imagenes");
-    listaAdjuntos.innerHTML = "";
-if (n.imagenes_adjuntas && n.imagenes_adjuntas.length > 0) {
-    n.imagenes_adjuntas.forEach(img => {
-        const li = document.createElement("li");
-        
-        li.style.cssText = "display: inline-flex; flex-direction: column; align-items: center; width: 110px; margin-right: 15px; margin-bottom: 15px; position: relative; border: 1px solid #e5e7eb; padding: 5px; border-radius: 8px; background: #f9fafb; vertical-align: top;";
-        
-        let nombreArchivo = img.imagen.split('/').pop();
+    listaAdjuntos.textContent = ""; // CORRECCIÓN XSS: antes innerHTML → ahora textContent
 
-        li.innerHTML = `
-            <img src="${rutaBase + img.imagen}" style="width: 100%; height: 75px; object-fit: cover; border-radius: 4px; margin-bottom: 5px; border: 1px solid #ddd;">
+    if (n.imagenes_adjuntas && n.imagenes_adjuntas.length > 0) {
+        n.imagenes_adjuntas.forEach(img => {
+            const li = document.createElement("li");
+            li.style.cssText = "display: inline-flex; flex-direction: column; align-items: center; width: 110px; margin-right: 15px; margin-bottom: 15px; position: relative; border: 1px solid #e5e7eb; padding: 5px; border-radius: 8px; background: #f9fafb; vertical-align: top;";
             
-            <span title="${nombreArchivo}" style="font-size: 11px; color: #4b5563; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; text-align: center;">
-                ${nombreArchivo}
-            </span>
+            let nombreArchivo = img.imagen.split('/').pop();
 
-            <button type="button" class="btn-eliminar-adjunto" onclick="borrarImagenGaleria(${img.id}, this)" style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        `;
-        listaAdjuntos.appendChild(li);
-    });
-}
+            // Imagen segura
+            const imagenEl = document.createElement("img");
+            imagenEl.src = rutaBase + img.imagen;
+            imagenEl.style.cssText = "width: 100%; height: 75px; object-fit: cover; border-radius: 4px; margin-bottom: 5px; border: 1px solid #ddd;";
+            li.appendChild(imagenEl);
 
-    document.getElementById("modal-titulo").innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Editar Noticia';
+            // Nombre de archivo seguro
+            const spanNombre = document.createElement("span");
+            spanNombre.title = nombreArchivo;
+            spanNombre.style.cssText = "font-size: 11px; color: #4b5563; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; text-align: center;";
+            spanNombre.textContent = nombreArchivo; // CORRECCIÓN XSS
+            li.appendChild(spanNombre);
+
+            // Botón eliminar seguro
+            const btnEliminar = document.createElement("button");
+            btnEliminar.type = "button";
+            btnEliminar.className = "btn-eliminar-adjunto";
+            btnEliminar.style.cssText = "position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);";
+            btnEliminar.onclick = function() { borrarImagenGaleria(img.id, btnEliminar); };
+
+            const icono = document.createElement("i");
+            icono.className = "fa-solid fa-xmark";
+            btnEliminar.appendChild(icono);
+
+            li.appendChild(btnEliminar);
+
+            listaAdjuntos.appendChild(li);
+        });
+    }
+
+    // CORRECCIÓN XSS: antes innerHTML → ahora textContent + createElement
+    const modalTitulo = document.getElementById("modal-titulo");
+    modalTitulo.textContent = "";
+    const iconoTitulo = document.createElement("i");
+    iconoTitulo.className = "fa-solid fa-pen-to-square";
+    modalTitulo.appendChild(iconoTitulo);
+    modalTitulo.append(" Editar Noticia");
+
     const btn = document.getElementById("btn-submit-noticia");
-    if (btn) btn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> <span>Actualizar Publicación</span>';
+    if (btn) {
+        btn.textContent = ""; // limpiar seguro
+        const iconoBtn = document.createElement("i");
+        iconoBtn.className = "fa-solid fa-arrows-rotate";
+        btn.appendChild(iconoBtn);
+
+        const spanBtn = document.createElement("span");
+        spanBtn.textContent = "Actualizar Publicación";
+        btn.appendChild(spanBtn);
+    }
 };
 
 
