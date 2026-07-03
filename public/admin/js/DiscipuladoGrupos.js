@@ -43,12 +43,13 @@ function abrirModalGrupo() {
 
 
 /**
- * @param {Object} datos 
+ * @param {HTMLElement} boton - El elemento botón que recibió el click
  */
-function editarGrupo(datos) {
+function editarGrupo(boton) {
     const modal = document.getElementById('modalGrupo');
     if (!modal) return;
 
+<<<<<<< HEAD
     // CORRECCIÓN XSS: antes innerHTML → ahora textContent + createElement
     const modalTitulo = document.getElementById('modalTitulo');
     modalTitulo.textContent = ""; // limpia contenido seguro
@@ -58,6 +59,15 @@ function editarGrupo(datos) {
     modalTitulo.appendChild(icono);
     modalTitulo.append(" Editar Configuración de Grupo");
 
+=======
+    // 1. EXTRAER Y PARSEAR EL JSON DESDE EL ATRIBUTO DATA
+    const datos = JSON.parse(boton.getAttribute('data-grupo'));
+    if (!datos) return;
+
+    document.getElementById('modalTitulo').innerHTML = '<i class="fas fa-edit"></i> Editar Configuración de Grupo';
+    
+    // 2. LLENAR LOS CAMPOS USANDO LOS DATOS RECONSTRUIDOS
+>>>>>>> bbcee56e91f16efd66c433131578f7ddc84eee89
     document.getElementById('grupo_id').value = datos.id;
     document.getElementById('nombre_grupo').value = datos.nombre;
     document.getElementById('nivel_grupo').value = datos.nivel;
@@ -143,18 +153,37 @@ function cerrarModalGrupo() {
  * @param {number} id - ID del grupo a eliminar
  * @param {string} nombre - Nombre del grupo para mostrar en el mensaje
  */
-function confirmarEliminarGrupo(id, nombre) {
+/**
+ * @param {HTMLElement} boton - El botón de eliminar que recibió el click
+ */
+function confirmarEliminarGrupo(boton) {
     const modal = document.getElementById('modalConfirmarEliminar');
     const txtNombre = document.getElementById('nombreGrupoEliminar');
     const btnEliminar = document.getElementById('enlaceEliminarSeguro');
 
+    // 1. Obtener los datos limpios desde los atributos data del HTML
+    const id = boton.getAttribute('data-id');
+    const nombre = boton.getAttribute('data-nombre');
+
+    // 2. Capturar el token CSRF real que está en el formulario del modal
+    const tokenInput = document.querySelector('input[name="csrf_token"]');
+    const tokenReal = tokenInput ? tokenInput.value : '';
+
     if (modal && txtNombre && btnEliminar) {
+<<<<<<< HEAD
         // CORRECCIÓN XSS: usamos textContent para mostrar el nombre de forma segura
         txtNombre.textContent = nombre;
 
         // Construcción segura del enlace con encodeURIComponent para el token
         btnEliminar.href = `?seccion=DiscipuladoGrupos&eliminar_grupo=${encodeURIComponent(id)}&csrf_token=${encodeURIComponent(CSRF_TOKEN)}`;
 
+=======
+        txtNombre.textContent = nombre; // Setea el texto de manera segura
+        
+        // Armamos la URL usando el token del formulario real de la sesión
+        btnEliminar.href = `?seccion=DiscipuladoGrupos&eliminar_grupo=${id}&csrf_token=${encodeURIComponent(tokenReal)}`;
+        
+>>>>>>> bbcee56e91f16efd66c433131578f7ddc84eee89
         modal.style.display = 'flex';
     }
 }

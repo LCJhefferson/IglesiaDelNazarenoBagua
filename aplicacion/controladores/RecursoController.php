@@ -14,8 +14,32 @@ class RecursoController {
     }
 
     /**
-     * Redirección híbrida y ULTRA-SEGURA
-     * Protegida contra XSS (Inyección de código) y Redirecciones Abiertas (Phishing)
+     * Detecta si la petición actual es una llamada AJAX o espera una respuesta JSON
+     */
+    private function isAjax(): bool {
+        return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') 
+            || (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json'));
+    }
+
+    /**
+     * Termina la ejecución enviando una respuesta estructurada en JSON puro
+     */
+    private function jsonResponse(bool $success, string $mensaje, int $code = 200): void {
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        http_response_code($code);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success'   => $success,
+            'mensaje'   => $mensaje,
+            'timestamp' => time()
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    /**
+     * Redirección híbrida y ULTRA-SEGURA (Para flujos síncronos)
      */
     private function redireccionar(string $url): void {
         if (preg_match('/^https?:\/\//i', $url)) {
@@ -44,8 +68,7 @@ class RecursoController {
     public function listarPapelera(): iterable {
         return RecursoPapelera::listar();
     }
-
-    public function guardar(): void {
+public function guardar(): void {
         $id          = !empty($_POST['id']) ? (int)$_POST['id'] : null;
         $rutaArchivo = $_POST['ruta_actual'] ?? '';
         $tipoArchivo = $_POST['tipo_actual'] ?? 'doc';
@@ -55,6 +78,9 @@ class RecursoController {
             $permitidos = ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi', 'xls', 'xlsx', 'ppt', 'pptx', 'gif', 'webp'];
             
             if (!in_array($extension, $permitidos, true)) {
+                if ($this->isAjax()) {
+                    $this->jsonResponse(false, 'Extensión de archivo no permitida por políticas de seguridad.', 400);
+                }
                 header("Location: /IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin&error=invalid_extension");
                 exit;
             }
@@ -99,22 +125,41 @@ class RecursoController {
             if ($recursoExistente) {
                 $rolIdActual = (int)($_SESSION['rol_id'] ?? 0);
                 if (!in_array($rolIdActual, [1, 2, 11]) && (int)$recursoExistente->creado_por !== (int)$usuarioId) {
+                    if ($this->isAjax()) {
+                        $this->jsonResponse(false, 'Acceso denegado: No tienes permisos para editar este recurso.', 403);
+                    }
                     $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&error=permiso");
                     return;
                 }
             }
 
             Recurso::where('id', $id)->update($datos);
-            RecursoThumbService::generar($id, $rutaArchivo, $tipoArchivo, $datos['enlace_youtube']);
+            
+            // 🔥 Se fuerza la miniatura/ícono inmediatamente en la edición
+            $this->regenerarUno($id, $rutaArchivo, $tipoArchivo, $datos['enlace_youtube']);
         } else {
             $nuevoRecurso = Recurso::create($datos);
-            RecursoThumbService::generar($nuevoRecurso->id, $rutaArchivo, $tipoArchivo, $datos['enlace_youtube']);
+            
+            if ($nuevoRecurso) {
+                // 🔥 Se fuerza la miniatura/ícono inmediatamente al CREAR un nuevo recurso
+                $this->regenerarUno(
+                    (int)$nuevoRecurso->id,
+                    $nuevoRecurso->ruta_archivo ?? '',
+                    $nuevoRecurso->tipo ?? 'doc',
+                    $nuevoRecurso->enlace_youtube ?? ''
+                );
+            }
+        }
+
+        if ($this->isAjax()) {
+            $this->jsonResponse(true, 'El recurso ha sido guardado exitosamente.');
         }
 
         $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&exito=1&pagina=archivos");
     }
+   
 
-   public function descargar(int $id): void {
+    public function descargar(int $id): void {
         $recurso = Recurso::find($id);
 
         if (!$recurso) {
@@ -133,33 +178,28 @@ class RecursoController {
         }
 
         $ruta_abs = realpath($_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/' . $recurso->ruta_archivo);
-        $base_dir = realpath($_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/admin/imagenes/recursos/');
+        $proyecto_dir = realpath($_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/');
 
-        if (!$ruta_abs || !str_starts_with($ruta_abs, $base_dir) || !file_exists($ruta_abs)) {
+        // Seguridad: El archivo debe existir y estar dentro de la carpeta del proyecto (LFI protection)
+        if (!$ruta_abs || !str_starts_with($ruta_abs, $proyecto_dir) || !file_exists($ruta_abs)) {
             $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin");
             return;
         }
 
         Recurso::incrementarDescargas($id);
 
-        // ====================================================================
-        // SOLUCIÓN DEFINITIVA: Limpiar el búfer radicalmente ANTES de los headers
-        // ====================================================================
         while (ob_get_level() > 0) {
             ob_end_clean();
         }
 
-        // Determinar el MIME type correcto
         $mime = mime_content_type($ruta_abs) ?: 'application/octet-stream';
         
-        // Enviar cabeceras HTTP limpias
         header('Content-Type: ' . $mime);
         header('Content-Disposition: attachment; filename="' . basename($recurso->ruta_archivo) . '"');
         header('Content-Length: ' . filesize($ruta_abs));
         header('Cache-Control: no-cache, must-revalidate');
         header('Pragma: public');
         
-        // Leer el archivo y cortar la ejecución inmediatamente
         readfile($ruta_abs);
         exit;
     }
@@ -172,27 +212,50 @@ class RecursoController {
         if ($recursoExistente) {
             $rolIdActual = (int)($_SESSION['rol_id'] ?? 0);
             if (!in_array($rolIdActual, [1, 2, 11]) && (int)$recursoExistente->creado_por !== (int)$usuarioId) {
+                if ($this->isAjax()) {
+                    $this->jsonResponse(false, 'Acceso denegado: No cuentas con los privilegios para eliminar este elemento.', 403);
+                }
                 $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&error=permiso");
                 return;
             }
         }
 
         Recurso::moverAPapelera($id, $usuarioId);
+
+        if ($this->isAjax()) {
+            $this->jsonResponse(true, 'El recurso ha sido movido a la papelera correctamente.');
+        }
+
         $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&exito=2&pagina=archivos");
     }
 
     public function restaurar(int $papeleraId): void {
         RecursoPapelera::restaurar($papeleraId);
+
+        if ($this->isAjax()) {
+            $this->jsonResponse(true, 'Recurso recuperado y restaurado con éxito.');
+        }
+
         $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&exito=3&pagina=papelera");
     }
 
     public function eliminarDefinitivo(int $papeleraId): void {
         RecursoPapelera::eliminarDefinitivo($papeleraId);
+
+        if ($this->isAjax()) {
+            $this->jsonResponse(true, 'El recurso ha sido borrado permanentemente del servidor.');
+        }
+
         $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&exito=4&pagina=papelera");
     }
 
     public function vaciarPapelera(): void {
         RecursoPapelera::vaciar();
+
+        if ($this->isAjax()) {
+            $this->jsonResponse(true, 'La papelera ha sido vaciada por completo de forma segura.');
+        }
+
         $this->redireccionar("/IglesiaDelNazarenoBagua/dashboard?seccion=recurso_admin&exito=5&pagina=papelera");
     }
 

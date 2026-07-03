@@ -96,11 +96,17 @@ $csrfToken = Middleware::csrfGenerate();
                     </div>
 
                     <div class="card-actions">
-                        <button class="btn-edit" onclick='editarGrupo(<?= json_encode($g) ?>)'>
+                        <button class="btn-edit" 
+                                data-grupo="<?= htmlspecialchars(json_encode($g), ENT_QUOTES, 'UTF-8') ?>" 
+                                onclick="editarGrupo(this)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
                         
-                        <button type="button" class="btn-delete" onclick="confirmarEliminarGrupo(<?= $g->id ?>, '<?= htmlspecialchars($g->nombre ?? 'este grupo') ?>')">
+                        <button type="button" 
+                                class="btn-delete" 
+                                data-id="<?= (int)$g->id ?>"
+                                data-nombre="<?= htmlspecialchars($g->nombre ?? 'este grupo', ENT_QUOTES, 'UTF-8') ?>"
+                                onclick="confirmarEliminarGrupo(this)">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>

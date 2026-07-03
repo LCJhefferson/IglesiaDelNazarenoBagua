@@ -505,6 +505,7 @@ html, body {
     flex-direction: column;
     gap: 10px;
     flex: 1;
+    min-width: 0;
 }
 .titulo-publico {
     font-family: var(--serif);
@@ -696,6 +697,10 @@ html, body {
 .info-archivo {
     display: flex; flex-direction: column; gap: 12px;
     flex: 1;
+    min-width: 0;
+}
+.info-archivo > div {
+    min-width: 0;
 }
 .nombre-archivo {
     font-size: 15px;
@@ -914,7 +919,7 @@ html, body {
     pointer-events: none;
     background-image: repeating-linear-gradient(135deg, transparent 0 14px, rgba(15,26,51,0.025) 14px 15px);
 }
-.tarjeta-papelera > * { position: relative; }
+.tarjeta-papelera > * { position: relative; min-width: 0; }
 .icono-papelera {
     width: 54px; height: 54px;
     border-radius: 12px;

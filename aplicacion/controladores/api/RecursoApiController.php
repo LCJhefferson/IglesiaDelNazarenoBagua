@@ -163,14 +163,16 @@ class RecursoApiController extends ApiController {
 
             $nombreLimpio = preg_replace('/[^A-Za-z0-9.\-_]/', '_', $_FILES['archivo_principal']['name']);
             $nombreArchivo = time() . '_' . $nombreLimpio;
-            $rutaDestino = 'public/uploads/recursos/' . $nombreArchivo;
-
-            if (!is_dir('public/uploads/recursos')) {
-                mkdir('public/uploads/recursos', 0777, true);
+            
+            $carpetaDestino = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/admin/imagenes/recursos/';
+            if (!is_dir($carpetaDestino)) {
+                mkdir($carpetaDestino, 0777, true);
             }
+            
+            $rutaFisica = $carpetaDestino . $nombreArchivo;
 
-            if (move_uploaded_file($_FILES['archivo_principal']['tmp_name'], $rutaDestino)) {
-                $rutaArchivo = $rutaDestino;
+            if (move_uploaded_file($_FILES['archivo_principal']['tmp_name'], $rutaFisica)) {
+                $rutaArchivo = 'admin/imagenes/recursos/' . $nombreArchivo;
                 if (in_array($extension, ['pdf'])) $tipo = 'pdf';
                 elseif (in_array($extension, ['png','jpg','jpeg','gif','webp'])) $tipo = 'img';
                 elseif (in_array($extension, ['mp4','mov','avi'])) $tipo = 'vid';
@@ -250,18 +252,23 @@ class RecursoApiController extends ApiController {
 
             $nombreLimpio = preg_replace('/[^A-Za-z0-9.\-_]/', '_', $_FILES['archivo_principal']['name']);
             $nombreArchivo = time() . '_' . $nombreLimpio;
-            $rutaDestino = 'public/uploads/recursos/' . $nombreArchivo;
-
-            if (!is_dir('public/uploads/recursos')) {
-                mkdir('public/uploads/recursos', 0777, true);
+            
+            $carpetaDestino = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/admin/imagenes/recursos/';
+            if (!is_dir($carpetaDestino)) {
+                mkdir($carpetaDestino, 0777, true);
             }
+            
+            $rutaFisica = $carpetaDestino . $nombreArchivo;
 
-            if (move_uploaded_file($_FILES['archivo_principal']['tmp_name'], $rutaDestino)) {
-                // Eliminar archivo anterior si existía
-                if (!empty($rutaArchivo) && file_exists($rutaArchivo)) {
-                    @unlink($rutaArchivo);
+            if (move_uploaded_file($_FILES['archivo_principal']['tmp_name'], $rutaFisica)) {
+                // Eliminar archivo anterior si existía (resolviendo path absoluto)
+                if (!empty($rutaArchivo)) {
+                    $rutaAbsAnterior = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/' . $rutaArchivo;
+                    if (file_exists($rutaAbsAnterior)) {
+                        @unlink($rutaAbsAnterior);
+                    }
                 }
-                $rutaArchivo = $rutaDestino;
+                $rutaArchivo = 'admin/imagenes/recursos/' . $nombreArchivo;
                 if (in_array($extension, ['pdf'])) $tipo = 'pdf';
                 elseif (in_array($extension, ['png','jpg','jpeg','gif','webp'])) $tipo = 'img';
                 elseif (in_array($extension, ['mp4','mov','avi'])) $tipo = 'vid';

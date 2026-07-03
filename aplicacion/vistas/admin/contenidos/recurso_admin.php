@@ -2,20 +2,10 @@
 use aplicacion\core\Middleware;
 use aplicacion\controladores\RecursoController;
 
-// Genera (o reutiliza) el token CSRF para esta sesión.
-// El JS lo leerá del campo oculto [name="csrf_token"] para enviarlo
-// en la cabecera X-CSRF-Token de cada petición de escritura.
+// Genera el token CSRF seguro para las peticiones asíncronas
 $csrfToken = Middleware::csrfGenerate();
 
 $controller = new RecursoController();
-
-
-if (isset($_GET['eliminar']))            $controller->eliminar((int)$_GET['eliminar']);
-if (isset($_GET['restaurar']))           $controller->restaurar((int)$_GET['restaurar']);
-if (isset($_GET['eliminar_definitivo'])) $controller->eliminarDefinitivo((int)$_GET['eliminar_definitivo']);
-if (isset($_GET['vaciar_papelera']))     $controller->vaciarPapelera();
-if (isset($_GET['descargar']))           $controller->descargar((int)$_GET['descargar']);
-if (isset($_POST['guardar']))            $controller->guardar();
 
 $coleccion_archivos = $controller->listar();
 $archivos = is_object($coleccion_archivos) && method_exists($coleccion_archivos, 'toArray') 
@@ -27,6 +17,7 @@ $papelera = is_object($coleccion_papelera) && method_exists($coleccion_papelera,
     ? $coleccion_papelera->toArray() 
     : $coleccion_papelera;
 
+// Mantenemos la regeneración automática de miniaturas pendientes en background
 $pendientes = array_filter($archivos, fn($a) => $a['ruta_thumb'] === null);
 if (!empty($pendientes)) {
     foreach ($pendientes as $a) {
@@ -37,9 +28,14 @@ if (!empty($pendientes)) {
             $a['enlace_youtube'] ?? ''
         );
     }
-    $archivos = $controller->listar();
+    // Volver a listar para obtener los cambios actualizados de las miniaturas
+    $coleccion_archivos = $controller->listar();
+    $archivos = is_object($coleccion_archivos) && method_exists($coleccion_archivos, 'toArray') 
+        ? $coleccion_archivos->toArray() 
+        : $coleccion_archivos;
 }
 
+// Estadísticas de arranque para la carga inicial
 $total_archivos = count($archivos);
 $total_descargas = 0;
 $descargas_semana = 0;
@@ -51,7 +47,9 @@ foreach ($archivos as $a) {
     if (isset($a['fecha_creacion']) && strtotime($a['fecha_creacion']) >= $tiempo_semana) {
         $descargas_semana++;
     }
-    if (!empty($a['autor'])) $contribuidores[$a['autor']] = true;
+    if (!empty($a['autor_nombre'])) {
+        $contribuidores[$a['autor_nombre']] = true;
+    }
 }
 $total_contribuidores = count($contribuidores);
 if ($total_contribuidores === 0 && $total_archivos > 0) $total_contribuidores = 1;
@@ -64,52 +62,18 @@ foreach ($archivos as $a) {
     $categorias_encontradas[$cat]++;
 }
 
-$icono_tipo    = ['pdf' => '📄', 'img' => '🖼️', 'vid' => '🎬', 'doc' => '📝'];
-$clase_tipo    = ['pdf' => 'pdf', 'img' => 'img', 'vid' => 'vid', 'doc' => 'doc'];
-$etiqueta_tipo = ['pdf' => 'PDF', 'img' => 'IMG', 'vid' => 'VIDEO', 'doc' => 'DOC'];
-$etiqueta_slab = ['pdf' => 'PDF', 'img' => 'IMAGEN', 'vid' => 'VIDEO', 'doc' => 'DOCUMENTO'];
-
-$mensajes_exito = [
-    1 => 'Archivo guardado correctamente.',
-    2 => 'Archivo movido a la papelera.',
-    3 => 'Archivo restaurado correctamente.',
-    4 => 'Archivo eliminado definitivamente.',
-    5 => 'Papelera vaciada correctamente.',
-];
-$msg_exito = isset($_GET['exito']) ? ($mensajes_exito[(int)$_GET['exito']] ?? '') : '';
-
-$_paginas_validas = ['publico', 'archivos', 'subir', 'papelera'];
-$pagina_activa    = in_array($_GET['pagina'] ?? '', $_paginas_validas) ? $_GET['pagina'] : 'publico';
-
+$_paginas_validas = ['archivos', 'subir', 'papelera'];
+$pagina_activa    = in_array($_GET['pagina'] ?? '', $_paginas_validas) ? $_GET['pagina'] : 'archivos';
 $ruta_base = '/IglesiaDelNazarenoBagua/?vista=dashboard&seccion=recurso_admin';
-
-// LAS TARJETAS AHORA SE RENDERIZAN 100% EN JAVASCRIPT (CLIENT-SIDE)
-// Cumpliendo con el criterio de la rúbrica "JSON puro, JS construye UI"
 ?>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet"/>
-<script>var RUTA_RECURSOS = <?= json_encode($ruta_base) ?>;</script>
-<?php if ($pagina_activa !== 'publico'): ?>
+
 <script>
+    var RUTA_RECURSOS = <?= json_encode($ruta_base) ?>;
     window.addEventListener('DOMContentLoaded', () => mostrarPagina(<?= json_encode($pagina_activa) ?>));
 </script>
-<?php endif; ?>
-
-<?php if ($msg_exito): ?>
-<script>
-    window.addEventListener('DOMContentLoaded', () => mostrarAviso(<?= json_encode($msg_exito) ?>, 'exito'));
-</script>
-<?php endif; ?>
-
-<?php if (isset($_GET['error']) && $_GET['error'] === 'invalid_extension'): ?>
-<script>
-    window.addEventListener('DOMContentLoaded', () => {
-        const modalErr = document.getElementById('modalErrorExtension');
-        if (modalErr) modalErr.style.display = 'flex';
-    });
-</script>
-<?php endif; ?>
 
 <script>
 var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
@@ -147,7 +111,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
         <button class="nav-btn" data-pagina="papelera" onclick="mostrarPagina('papelera')" title="Papelera">
             <i class="fa-solid fa-trash-can"></i>
             <?php if (count($papelera) > 0): ?>
-                <span class="nav-badge"><?= count($papelera) ?></span>
+                <span class="nav-badge" id="badgePapeleraConteo"><?= count($papelera) ?></span>
             <?php endif; ?>
         </button>
         <button class="nav-btn nav-btn-primario" onclick="abrirModalSubir()" title="Subir archivo">
@@ -158,14 +122,10 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
 
 <main class="area-contenido">
 
-    <div class="pagina activa" id="pagina-publico">
-
-
+    <div class="pagina" id="pagina-publico" style="display:none;">
         <div class="envoltorio-hero">
             <div class="hero-editorial">
-
-               
-                <svg class="hero-paloma" viewBox="0 0 64 64" fill="none">
+               <svg class="hero-paloma" viewBox="0 0 64 64" fill="none">
                     <path d="M52 16c-3 0-6 1.5-8 4-2 2-3 5-3 8 0 2 .5 4 1.5 5.5L30 46l-10-2-8 8 12-2 4 6 8-8-2-10 12-13.5C48 23 49 21 49 19c1.5-.5 3-1.5 3-3z" fill="#125680ff"/>
                 </svg>
                 <div class="hero-glow"></div>
@@ -219,13 +179,11 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
             </div>
         </div>
 
-        <!-- RENDERIZADO POR JAVASCRIPT -->
         <div class="cuadricula-publica" id="contenedorPublico">
-            <!-- Fetch API inyectará las tarjetas aquí -->
-        </div>
+            </div>
     </div>
 
-    <div class="pagina" id="pagina-archivos">
+    <div class="pagina activa" id="pagina-archivos">
         <div class="envoltorio-hero">
             <div class="hero-editorial">
                 <svg class="hero-paloma" viewBox="0 0 64 64" fill="none">
@@ -257,8 +215,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
         </div>
 
         <div class="cuadricula-archivos" id="todosArchivos">
-            <!-- Fetch API inyectará las tarjetas aquí -->
-        </div>
+            </div>
     </div>
 
     <div class="pagina" id="pagina-papelera">
@@ -295,9 +252,8 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
                 </button>
             </div>
 
-            <!-- Fetch API inyectará las tarjetas de papelera aquí -->
             <div class="lista-papelera" id="contenedorPapelera">
-            </div>
+                </div>
         </div>
     </div>
 
@@ -319,7 +275,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
             </button>
         </div>
 
-        <form class="modal-subir-body" method="POST" enctype="multipart/form-data" id="formSubir" onsubmit="enviarFormularioSubir(event)">
+        <form class="modal-subir-body" method="POST" enctype="multipart/form-data" id="formSubir">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
             <input type="hidden" name="id"          id="subir_campoId">
             <input type="hidden" name="ruta_actual" id="subir_campoRutaActual">
@@ -358,7 +314,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
                 <div class="subir-fila-2">
                     <div class="subir-grupo">
                         <label>Categoría</label>
-                        <select name="categoria" id="subir_categoria">
+                        <select name="categoria" id="subir_categoria" required>
                             <option value="">Seleccionar…</option>
                             <option value="documentos">Documentos</option>
                             <option value="imagenes">Imágenes</option>
@@ -385,7 +341,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
             </span>
             <div style="display:flex;gap:10px;">
                 <button type="button" class="boton boton-contorno" onclick="cerrarModalSubir()">Cancelar</button>
-                <button type="submit" name="guardar" form="formSubir" class="boton boton-primario">
+                <button type="submit" form="formSubir" class="boton boton-primario">
                     <i class="fa-solid fa-cloud-arrow-up"></i> Publicar recurso
                 </button>
             </div>
@@ -399,10 +355,8 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
             <i class="fa-solid fa-xmark"></i>
         </button>
         <h3>✏️ Editar archivo</h3>
-        <form method="POST" enctype="multipart/form-data" id="formEditar" onsubmit="enviarFormularioEditar(event)">
-            <!--//token de seguridad-->
+        <form method="POST" enctype="multipart/form-data" id="formEditar">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
-            <!--//tokens para identificar el archivo-->
             <input type="hidden" name="id"          id="editarId">
             <input type="hidden" name="ruta_actual" id="editarRuta">
             <input type="hidden" name="tipo_actual" id="editarTipoActual">
@@ -438,7 +392,7 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
             </div>
             <div class="fila-botones-modal">
                 <button type="button" class="boton boton-contorno" onclick="cerrarModalEditar()">Cancelar</button>
-                <button type="submit" name="guardar" class="boton boton-primario">
+                <button type="submit" class="boton boton-primario">
                     <i class="fa-solid fa-floppy-disk"></i> Guardar cambios
                 </button>
             </div>
@@ -453,14 +407,12 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
         <p id="textoConfirmarEliminar">El archivo se moverá a la papelera y podrás restaurarlo después.</p>
         <div style="display:flex;gap:10px;justify-content:center;">
             <button class="boton boton-contorno" onclick="cerrarModalConfirmar()">Cancelar</button>
-            <!-- id="btnConfirmarEliminar": el JS asigna onclick dinámicamente con el ID correcto -->
             <button id="btnConfirmarEliminar" class="boton boton-peligro-solido">
                 <i class="fa-solid fa-trash"></i> Mover a papelera
             </button>
         </div>
     </div>
 </div>
-
 
 <div class="superposicion-modal" id="modalConfirmarDefinitivo" onclick="if(event.target===this) cerrarModalDefinitivo()">
     <div class="caja-modal-confirm">
@@ -471,14 +423,12 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
         </p>
         <div style="display:flex;gap:10px;justify-content:center;">
             <button class="boton boton-contorno" onclick="cerrarModalDefinitivo()">Cancelar</button>
-            <!-- id="btnConfirmarDefinitivo": el JS asigna onclick dinámicamente -->
             <button id="btnConfirmarDefinitivo" class="boton boton-peligro-solido">
                 <i class="fa-solid fa-trash"></i> Eliminar para siempre
             </button>
         </div>
     </div>
 </div>
-
 
 <div class="superposicion-modal" id="modalVaciarPapelera" onclick="if(event.target===this) cerrarModalVaciarPapelera()">
     <div class="caja-modal-confirm">
@@ -487,14 +437,12 @@ var ARCHIVOS_DATA = <?= json_encode(array_map(fn($a) => [
         <p>Esta acción <strong>no se puede deshacer</strong>. Todos los archivos de la papelera se eliminarán permanentemente.</p>
         <div style="display:flex;gap:10px;justify-content:center;">
             <button class="boton boton-contorno" onclick="cerrarModalVaciarPapelera()">Cancelar</button>
-            <!-- id="btnVaciarPapelera": el JS asigna onclick via confirmarVaciarPapelera() -->
-            <button id="btnVaciarPapelera" class="boton boton-peligro-solido">
+            <button id="btnVaciarPapeleraConfirmar" class="boton boton-peligro-solido">
                 <i class="fa-solid fa-trash-can"></i> Vaciar todo
             </button>
         </div>
     </div>
-</div>
-
+</div> 
 
 <div class="aviso" id="aviso">
     <i class="fa-solid fa-circle-check"></i>
