@@ -176,21 +176,22 @@ if (strpos($vista, 'api/recursos') === 0) {
     // Enrutado interno según sub-ruta y verbo HTTP
     if ($vista === 'api/recursos') {
         $verbo = $_SERVER['REQUEST_METHOD'];
-        if ($verbo === 'GET')    { $apiRecurso->index();   }
-        if ($verbo === 'POST')   { $apiRecurso->store();   }
-        if ($verbo === 'DELETE') { $apiRecurso->destroy(); }
+        if ($verbo === 'GET')    { $apiRecurso->index();   exit; }
+        if ($verbo === 'POST')   { $apiRecurso->store();   exit; }
+        if ($verbo === 'DELETE') { $apiRecurso->destroy(); exit; }
     }
     elseif ($vista === 'api/recursos/update') {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $apiRecurso->update();
+            exit;
         }
     }
-    elseif ($vista === 'api/recursos/papelera')   { $apiRecurso->papelera();          exit; }
-    elseif ($vista === 'api/recursos/restaurar')  { $apiRecurso->restaurar();         exit; }
+    elseif ($vista === 'api/recursos/papelera')   { $apiRecurso->papelera();           exit; }
+    elseif ($vista === 'api/recursos/restaurar')  { $apiRecurso->restaurar();          exit; }
     elseif ($vista === 'api/recursos/definitivo') { $apiRecurso->eliminarDefinitivo(); exit; }
-    elseif ($vista === 'api/recursos/vaciar')     { $apiRecurso->vaciarPapelera();    exit; }
+    elseif ($vista === 'api/recursos/vaciar')     { $apiRecurso->vaciarPapelera();     exit; }
 
-    // Si llegamos aquí, la sub-ruta API no existe
+    // Si llegamos aquí, la sub-ruta API no existe o el verbo no coincide
     \aplicacion\core\Response::notFound('Endpoint de recursos no encontrado');
     exit;
 }

@@ -308,98 +308,54 @@ function filtrarPorCategoria(categoria, elemento) {
 
 // ─── 5. OPERACIONES DE ESCRITURA CON FETCH API ───────────────────────────────
 
-/**
- * Mueve un recurso a la papelera mediante DELETE /api/recursos?id={n}.
- *
- * Criterio 2 (Avanzado): async/await + response.ok + try/catch.
- * Criterio 4 (Avanzado): CSRF en cabecera X-CSRF-Token, BOLA/IDOR en servidor.
- *
- * @param {number} id     ID del recurso a eliminar
- * @param {string} nombre Nombre del recurso (para mensajes de UI)
- */
-async function eliminarRecurso(id, nombre) {
-    cerrarModalConfirmar();
-    mostrarSpinner(true);
-
+async function eliminarRecurso(id) {
     try {
-        const resp = await fetch(`${API_RECURSOS}&id=${id}`, {
+        const respuesta = await fetch(`index.php?vista=api/recursos&id=${id}`, {
             method: 'DELETE',
             headers: {
-                // CSRF: enviado en cabecera para inmunidad ante formularios cruzados
-                'X-CSRF-Token': _CSRF(),
-                'Accept': 'application/json'
+                'X-CSRF-Token': _CSRF() // Tu función de token CSRF
             }
         });
 
-        // Verificación response.ok — Criterio 2 Avanzado
-        if (!resp.ok) {
-            const errData = await resp.json().catch(() => ({}));
-            throw new Error(errData.error || `Error HTTP ${resp.status}`);
+        if (respuesta.ok) {
+            const resultado = await respuesta.json();
+            
+            // 🛠️ SOLUCIÓN: Buscar la fila en la tabla y eliminarla visualmente
+            // Asumiendo que tus filas tienen un id como: id="fila-recurso-12"
+            const fila = document.getElementById(`fila-recurso-${id}`);
+            if (fila) {
+                fila.remove(); // Desaparece al instante sin recargar
+            }
+
+            // Opcional: Mostrar tu alerta flotante de éxito
+            mostrarAviso("Recurso movido a la papelera correctamente.");
+        } else {
+            console.error("Error en el servidor al intentar borrar");
         }
-
-        const data = await resp.json();
-
-        if (!data.ok) {
-            throw new Error(data.error || 'Error al eliminar el recurso');
-        }
-
-        // Retroalimentación visual inmediata sin recargar la página
-        mostrarAviso('Recurso movido a la papelera', 'exito');
-
-        // Actualizar el badge de papelera y remover la tarjeta del DOM
-        _removerTarjetaDOM(id);
-        _actualizarBadgePapelera(+1);
-        
-        // RECARGAR DATOS: Al eliminar, el archivo debe aparecer de inmediato en la papelera
-        cargarRecursosInicial();
-
-    } catch (err) {
-        mostrarAviso(err.message, 'error');
-        console.error('[RecursosAPI] Error al eliminar:', err);
-    } finally {
-        // finally garantiza que el spinner siempre se oculte,
-        // incluso si ocurrió un error inesperado
-        mostrarSpinner(false);
+    } catch (error) {
+        console.error("Error de red:", error);
     }
 }
 
-/**
- * Restaura un recurso desde la papelera mediante POST /api/recursos/restaurar.
- *
- * @param {number} papeleraId  ID del registro en la tabla recursos_papelera
- */
-async function restaurarRecurso(papeleraId) {
-    mostrarSpinner(true);
-
+// Función para restaurar (Utiliza el verbo PUT o PATCH para actualización de estado)
+async function restaurarRecurso(id) {
     try {
-        const resp = await fetch('index.php?vista=api/recursos/restaurar', {
-            method: 'POST',
+        const response = await fetch(`index.php?vista=api/recursos&id=${id}&accion=restaurar`, {
+            method: 'PUT', // ◄ Verbo semántico para actualizar/modificar un recurso existente
             headers: {
-                'X-CSRF-Token': _CSRF(),
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ papelera_id: papeleraId })
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-Token': _CSRF()
+            }
         });
 
-        if (!resp.ok) {
-            const errData = await resp.json().catch(() => ({}));
-            throw new Error(errData.error || `Error HTTP ${resp.status}`);
+        const resultado = await response.json();
+        if (resultado.success) {
+            document.getElementById(`fila-papelera-${id}`).remove();
+            mostrarAviso(resultado.mensaje);
         }
-
-        const data = await resp.json();
-        if (!data.ok) throw new Error(data.error || 'Error al restaurar');
-
-        mostrarAviso('Recurso restaurado correctamente', 'exito');
-
-        // Recargar la sección papelera para reflejar el cambio
-        cargarRecursosInicial();
-
-    } catch (err) {
-        mostrarAviso(err.message, 'error');
-        console.error('[RecursosAPI] Error al restaurar:', err);
-    } finally {
-        mostrarSpinner(false);
+    } catch (error) {
+        console.error("Error al restaurar:", error);
     }
 }
 
@@ -515,22 +471,44 @@ function _actualizarBadgePapelera(delta) {
 let _idPendienteEliminar    = null;
 let _idPendienteDefinitivo  = null;
 
-function confirmarEliminar(id, nombre) {
-    _idPendienteEliminar = id;
-    const modal = document.getElementById('modalConfirmarEliminar');
-    const texto = document.getElementById('textoConfirmarEliminar');
-    if (texto) {
-        // SEGURIDAD: textContent para nombre del servidor — nunca innerHTML
-        texto.textContent = '';
-        const strong = document.createElement('strong');
-        strong.textContent = nombre; // textContent escapa automáticamente
-        texto.append('"', strong, '" se moverá a la papelera y podrás restaurarlo después.');
+async function confirmarEliminar() {
+    if (!idRecursoSeleccionado) return;
+
+    const btn = document.getElementById('btnConfirmarEliminar');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Moviendo...';
+
+    try {
+        const token = _CSRF();
+        const response = await fetch(`${API_RECURSOS}&id=${idRecursoSeleccionado}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-Token': token
+            }
+        });
+
+        if (response.ok) {
+            // 🛠️ ACTUALIZACIÓN DEL DOM IMMEDIATA:
+            const fila = document.getElementById(`fila-recurso-${idRecursoSeleccionado}`);
+            if (fila) {
+                fila.remove(); // Desaparece la fila al instante frente al usuario
+            }
+
+            cerrarModalConfirmar();
+            mostrarAviso('Recurso movido a la papelera.');
+            idRecursoSeleccionado = null;
+        } else {
+            const errData = await response.json().catch(() => ({}));
+            alert(errData.mensaje || 'Error al mover a la papelera.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error de red al intentar eliminar.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
     }
-    const btnConfirmar = document.getElementById('btnConfirmarEliminar');
-    if (btnConfirmar) {
-        btnConfirmar.onclick = () => eliminarRecurso(id, nombre);
-    }
-    if (modal) modal.classList.add('activo');
 }
 
 function cerrarModalConfirmar() {
