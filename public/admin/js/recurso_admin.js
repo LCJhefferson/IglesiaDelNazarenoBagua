@@ -1015,7 +1015,10 @@ async function enviarFormularioSubir(e) {
         const resp = await fetch('index.php?vista=api/recursos', {
             method: 'POST',
             body: formData,
-            headers: { 'Accept': 'application/json' }
+            headers: { 
+                'Accept': 'application/json',
+                'X-CSRF-Token': _CSRF()
+            }
         });
         
         if (!resp.ok) {
@@ -1042,13 +1045,19 @@ async function enviarFormularioEditar(e) {
     const formData = new FormData(form);
     
     formData.set('csrf_token', _CSRF());
+    // Truco REST: Enviamos como POST para que PHP lea los archivos, pero le 
+    // decimos al servidor que la intención real (semántica) es PUT.
+    formData.append('_method', 'PUT');
 
     mostrarSpinner(true);
     try {
-        const resp = await fetch('index.php?vista=api/recursos/update', {
+        const resp = await fetch('index.php?vista=api/recursos', {
             method: 'POST',
             body: formData,
-            headers: { 'Accept': 'application/json' }
+            headers: { 
+                'Accept': 'application/json',
+                'X-CSRF-Token': _CSRF()
+            }
         });
         
         if (!resp.ok) {

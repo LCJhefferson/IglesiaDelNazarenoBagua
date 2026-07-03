@@ -206,7 +206,7 @@ class RecursoApiController extends ApiController {
      */
     public function update(): void {
         Middleware::apiAuth();
-        $this->requireMethod('POST');
+        $this->requireMethod('PUT');
         Middleware::csrfVerify();
 
         $data = $this->parseBody();

@@ -21,7 +21,8 @@ abstract class ApiController {
             return json_decode($raw, true) ?? [];
         }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Si es POST real o un PUT simulado que viene con form-data (ej. _method=PUT)
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($_POST)) {
             return $_POST;
         }
 

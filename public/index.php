@@ -26,7 +26,6 @@ use aplicacion\core\Middleware;
 use aplicacion\controladores\AuthController;
 use aplicacion\controladores\VisitaController;
 use aplicacion\controladores\ReporteController;
-use aplicacion\controladores\RecursoController;
 use aplicacion\modelos\Recurso;
 
 // 4. Determinar la vista (Ruta)
@@ -41,19 +40,11 @@ if (empty($vista) || $vista === 'index.php') {
 }
 
 // ============================================================================
-// INTERCEPCIÓN CRÍTICA 1: Descarga pública de recursos antes de cualquier renderizado
+// FUNCIÓN AUXILIAR PARA SERVIR DESCARGAS DE RECURSOS
+// Evita código duplicado entre descargas públicas y administrativas.
 // ============================================================================
-if ($vista === 'recursos' && !empty($_GET['descargar'])) {
-    while (ob_get_level() > 0) {
-        ob_end_clean();
-    }
-    
-    $recursoId = (int)$_GET['descargar'];
-    $recurso = Recurso::find($recursoId);
-    
-    if ($recurso) {
-        Recurso::incrementarDescargas($recursoId);
-        
+if (!function_exists('servirArchivoRecurso')) {
+    function servirArchivoRecurso($recurso) {
         if (!empty($recurso->enlace_youtube)) {
             if (!headers_sent()) {
                 header('Location: ' . $recurso->enlace_youtube);
@@ -67,6 +58,7 @@ if ($vista === 'recursos' && !empty($_GET['descargar'])) {
             $ruta_abs = $_SERVER['DOCUMENT_ROOT'] . '/IglesiaDelNazarenoBagua/' . $recurso->ruta_archivo;
             if (file_exists($ruta_abs)) {
                 $mime = mime_content_type($ruta_abs) ?: 'application/octet-stream';
+                while (ob_get_level() > 0) { ob_end_clean(); }
                 header('Content-Type: ' . $mime);
                 header('Content-Disposition: attachment; filename="' . basename($ruta_abs) . '"');
                 header('Content-Length: ' . filesize($ruta_abs));
@@ -77,6 +69,23 @@ if ($vista === 'recursos' && !empty($_GET['descargar'])) {
             }
         }
     }
+}
+
+// ============================================================================
+// INTERCEPCIÓN CRÍTICA 1: Descarga pública de recursos antes de cualquier renderizado
+// ============================================================================
+if ($vista === 'recursos' && !empty($_GET['descargar'])) {
+    while (ob_get_level() > 0) { ob_end_clean(); }
+    
+    $recursoId = (int)$_GET['descargar'];
+    // Diseño (IDOR): En esta app, los recursos publicados son visibles para todo público
+    // que acceda a la vista web pública, por lo que find() sin filtro de usuario es correcto.
+    $recurso = Recurso::find($recursoId);
+    
+    if ($recurso) {
+        Recurso::incrementarDescargas($recursoId);
+        servirArchivoRecurso($recurso);
+    }
     
     $urlFallback = URL . 'recursos';
     if (!headers_sent()) {
@@ -86,9 +95,8 @@ if ($vista === 'recursos' && !empty($_GET['descargar'])) {
     }
     exit;
 }
-
 // ============================================================================
-// INTERCEPCIÓN CRÍTICA 2: Descarga desde el Panel Administrativo (Solución al Error)
+// INTERCEPCIÓN CRÍTICA 2: Descarga desde el Panel Administrativo
 // ============================================================================
 if (($vista === 'dashboard' || strpos($vista, 'admin/') === 0) 
     && ($_GET['seccion'] ?? '') === 'recurso_admin' 
@@ -98,9 +106,22 @@ if (($vista === 'dashboard' || strpos($vista, 'admin/') === 0)
     Middleware::auth([1, 2, 11]);  // Admin, Pastor, Secretaria
     
     $recursoId = (int)$_GET['descargar'];
-    $controller = new RecursoController();
-    $controller->descargar($recursoId);
-    exit; // Asegura que jamás se pinte el HTML si entra aquí
+    // Diseño (IDOR): Los administradores tienen acceso a todos los recursos del panel,
+    // independientemente de quién los subió (rol colaborativo).
+    $recurso = Recurso::find($recursoId);
+    
+    if ($recurso) {
+        Recurso::incrementarDescargas($recursoId);
+        servirArchivoRecurso($recurso);
+    }
+    
+    $urlFallback = URL . 'dashboard?seccion=recurso_admin';
+    if (!headers_sent()) {
+        header('Location: ' . $urlFallback);
+    } else {
+        echo "<script>window.location.href='" . $urlFallback . "';</script>";
+    }
+    exit;
 }
 // ============================================================================
 
@@ -160,16 +181,17 @@ if ($vista === 'inicializar_filtros_reporte') {
 // ─────────────────────────────────────────────────────────────────────────────
 // Todos los endpoints devuelven JSON puro. El frontend (JS) gestiona la UI.
 // Los verbos HTTP determinan la acción — NO hay verbos en la URL.
-//
-// Rutas registradas:
-//   GET    ?vista=api/recursos            → index()   (listar/buscar)
-//   POST   ?vista=api/recursos            → store()   (crear)
-//   DELETE ?vista=api/recursos&id={n}     → destroy() (soft-delete)
-//   GET    ?vista=api/recursos/papelera   → papelera()
-//   POST   ?vista=api/recursos/restaurar  → restaurar()
-//   DELETE ?vista=api/recursos/definitivo → eliminarDefinitivo()
-//   DELETE ?vista=api/recursos/vaciar     → vaciarPapelera()
 // ============================================================================
+
+// --- METHOD SPOOFING (Técnica Laravel) ---
+// PHP no soporta multipart/form-data en PUT. Permitimos enviar POST con _method=PUT.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['_method'])) {
+    $override = strtoupper($_POST['_method']);
+    if (in_array($override, ['PUT', 'PATCH', 'DELETE'])) {
+        $_SERVER['REQUEST_METHOD'] = $override;
+    }
+}
+
 if (strpos($vista, 'api/recursos') === 0) {
     $apiRecurso = new \aplicacion\controladores\api\RecursoApiController();
 
@@ -178,12 +200,8 @@ if (strpos($vista, 'api/recursos') === 0) {
         $verbo = $_SERVER['REQUEST_METHOD'];
         if ($verbo === 'GET')    { $apiRecurso->index();   }
         if ($verbo === 'POST')   { $apiRecurso->store();   }
+        if ($verbo === 'PUT')    { $apiRecurso->update();  }
         if ($verbo === 'DELETE') { $apiRecurso->destroy(); }
-    }
-    elseif ($vista === 'api/recursos/update') {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $apiRecurso->update();
-        }
     }
     elseif ($vista === 'api/recursos/papelera')   { $apiRecurso->papelera();          exit; }
     elseif ($vista === 'api/recursos/restaurar')  { $apiRecurso->restaurar();         exit; }

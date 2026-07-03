@@ -1,28 +1,19 @@
 <?php
 use aplicacion\core\Middleware;
-use aplicacion\controladores\RecursoController;
 
 // Genera (o reutiliza) el token CSRF para esta sesión.
 // El JS lo leerá del campo oculto [name="csrf_token"] para enviarlo
 // en la cabecera X-CSRF-Token de cada petición de escritura.
 $csrfToken = Middleware::csrfGenerate();
 
-$controller = new RecursoController();
+// Las operaciones de borrado, guardado, etc. ahora se manejan vía Fetch API (recurso_admin.js) y RecursoApiController
 
-
-if (isset($_GET['eliminar']))            $controller->eliminar((int)$_GET['eliminar']);
-if (isset($_GET['restaurar']))           $controller->restaurar((int)$_GET['restaurar']);
-if (isset($_GET['eliminar_definitivo'])) $controller->eliminarDefinitivo((int)$_GET['eliminar_definitivo']);
-if (isset($_GET['vaciar_papelera']))     $controller->vaciarPapelera();
-if (isset($_GET['descargar']))           $controller->descargar((int)$_GET['descargar']);
-if (isset($_POST['guardar']))            $controller->guardar();
-
-$coleccion_archivos = $controller->listar();
+$coleccion_archivos = \aplicacion\modelos\Recurso::listar();
 $archivos = is_object($coleccion_archivos) && method_exists($coleccion_archivos, 'toArray') 
     ? $coleccion_archivos->toArray() 
     : $coleccion_archivos;
 
-$coleccion_papelera = $controller->listarPapelera();
+$coleccion_papelera = \aplicacion\modelos\RecursoPapelera::listar();
 $papelera = is_object($coleccion_papelera) && method_exists($coleccion_papelera, 'toArray') 
     ? $coleccion_papelera->toArray() 
     : $coleccion_papelera;
@@ -30,14 +21,14 @@ $papelera = is_object($coleccion_papelera) && method_exists($coleccion_papelera,
 $pendientes = array_filter($archivos, fn($a) => $a['ruta_thumb'] === null);
 if (!empty($pendientes)) {
     foreach ($pendientes as $a) {
-        $controller->regenerarUno(
+        \aplicacion\services\RecursoThumbService::generar(
             (int)$a['id'],
             $a['ruta_archivo']   ?? '',
             $a['tipo']           ?? 'doc',
             $a['enlace_youtube'] ?? ''
         );
     }
-    $archivos = $controller->listar();
+    $archivos = \aplicacion\modelos\Recurso::listar();
 }
 
 $total_archivos = count($archivos);
