@@ -96,7 +96,7 @@ if ($vista === 'recursos' && !empty($_GET['descargar'])) {
     exit;
 }
 // ============================================================================
-// INTERCEPCIÓN CRÍTICA 2: Descarga desde el Panel Administrativo
+// INTERCEPCIÓN CRÍTICA 2: Descarga desde el Panel Administrativo (Solución al Error)
 // ============================================================================
 if (($vista === 'dashboard' || strpos($vista, 'admin/') === 0) 
     && ($_GET['seccion'] ?? '') === 'recurso_admin' 
@@ -206,9 +206,9 @@ if (strpos($vista, 'api/recursos') === 0) {
     elseif ($vista === 'api/recursos/papelera')   { $apiRecurso->papelera();          exit; }
     elseif ($vista === 'api/recursos/restaurar')  { $apiRecurso->restaurar();         exit; }
     elseif ($vista === 'api/recursos/definitivo') { $apiRecurso->eliminarDefinitivo(); exit; }
-    elseif ($vista === 'api/recursos/vaciar')     { $apiRecurso->vaciarPapelera();    exit; }
+    elseif ($vista === 'api/recursos/vaciar')     { $apiRecurso->vaciarPapelera();     exit; }
 
-    // Si llegamos aquí, la sub-ruta API no existe
+    // Si llegamos aquí, la sub-ruta API no existe o el verbo no coincide
     \aplicacion\core\Response::notFound('Endpoint de recursos no encontrado');
     exit;
 }
