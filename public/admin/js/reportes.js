@@ -410,50 +410,99 @@ window.limpiarFiltros = function(tipo) {
 window.renderizarBloqueTabla = function(tipo) {
     const tbody = document.querySelector(`#tabla-${tipo} tbody`);
     const datos = datosGlobalescache[tipo] || [];
-    tbody.innerHTML = ''; 
+    tbody.textContent = ""; // ✅ CORRECCIÓN XSS: antes innerHTML → ahora textContent
 
     const numColumnas = tipo === 'miembros' ? 7 : (tipo === 'visitas' ? 5 : (tipo === 'cumpleanos' ? 4 : 3));
 
     if (datos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${numColumnas}" style="text-align:center; padding:15px; color:#888;">No se encontraron registros para los filtros seleccionados</td></tr>`;
+        // ✅ Construcción segura con createElement
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = numColumnas;
+        td.style.textAlign = "center";
+        td.style.padding = "15px";
+        td.style.color = "#888";
+        td.textContent = "No se encontraron registros para los filtros seleccionados"; // seguro contra XSS
+        tr.appendChild(td);
+        tbody.appendChild(tr);
         window.removerControlesPaginacion(tipo);
         return;
     }
 
-    // CÁLCULO DE PAGINACIÓN COMPACTA
     const config = paginacion[tipo];
     const totalRegistros = datos.length;
     const totalPaginas = Math.ceil(totalRegistros / config.porPagina);
     
-    // Si por alguna razón la página actual excede el total, la nivelamos
     if (config.paginaActual > totalPaginas) config.paginaActual = totalPaginas;
     if (config.paginaActual < 1) config.paginaActual = 1;
 
-    // Corte de datos en memoria (Ej: página 1 saca del 0 al 2)
     const inicio = (config.paginaActual - 1) * config.porPagina;
     const fin = inicio + config.porPagina;
     const datosVisibles = datos.slice(inicio, fin);
 
-    // Inyección de filas en la tabla (Tu lógica exacta intacta)
     datosVisibles.forEach(fila => {
         const tr = document.createElement('tr');
         let columnas = [];
 
         if (tipo === 'miembros') {
             let origenTexto = fila.origen == 1 ? 'Local' : (fila.origen == 2 ? 'Externo' : 'Otros');
-            columnas = [fila.nombre_completo || 'Sin Nombre', fila.telefono || '-', fila.edad !== undefined ? fila.edad : '-', fila.direccion || '-', origenTexto, fila.condicion || 'Sin asignar', fila.estado || 'Activo'];
+            columnas = [
+                fila.nombre_completo || 'Sin Nombre',
+                fila.telefono || '-',
+                fila.edad !== undefined ? fila.edad : '-',
+                fila.direccion || '-',
+                origenTexto,
+                fila.condicion || 'Sin asignar',
+                fila.estado || 'Activo'
+            ];
         } else if (tipo === 'visitas') {
-            let celdaFechaHtml = fila.ultima_visita !== 'Sin visitas' 
-                ? `${fila.ultima_visita}<br><small style="color: #64748b; font-weight: normal; display: block; margin-top: 2px;">${fila.dias_transcurridos || ''}</small>`
-                : `<span style="color: #ef4444; font-weight: bold;">Sin visitas</span><br><small style="color: #94a3b8;">${fila.dias_transcurridos || 'Requiere atención'}</small>`;
-            columnas = [fila.nombre_completo || 'Sin Nombre', fila.direccion || 'Sin dirección', celdaFechaHtml, fila.motivo || 'Sin motivo', fila.estado || 'Pendiente'];
+            // ✅ Construcción segura con createElement en lugar de innerHTML
+            const celdaFecha = document.createElement("div");
+            if (fila.ultima_visita !== 'Sin visitas') {
+                const spanFecha = document.createElement("span");
+                spanFecha.textContent = fila.ultima_visita;
+                celdaFecha.appendChild(spanFecha);
+
+                const small = document.createElement("small");
+                small.style.color = "#64748b";
+                small.style.display = "block";
+                small.textContent = fila.dias_transcurridos || "";
+                celdaFecha.appendChild(document.createElement("br"));
+                celdaFecha.appendChild(small);
+            } else {
+                const spanSin = document.createElement("span");
+                spanSin.style.color = "#ef4444";
+                spanSin.style.fontWeight = "bold";
+                spanSin.textContent = "Sin visitas";
+                celdaFecha.appendChild(spanSin);
+
+                const small = document.createElement("small");
+                small.style.color = "#94a3b8";
+                small.textContent = fila.dias_transcurridos || "Requiere atención";
+                celdaFecha.appendChild(document.createElement("br"));
+                celdaFecha.appendChild(small);
+            }
+            columnas = [
+                fila.nombre_completo || 'Sin Nombre',
+                fila.direccion || 'Sin dirección',
+                celdaFecha,
+                fila.motivo || 'Sin motivo',
+                fila.estado || 'Pendiente'
+            ];
         } else if (tipo === 'discipulado') {
-            let nombreMiembro = fila.integrante_nombre || 'Sin Nombre';
-            let nombreGrupo = fila.grupo_nombre || 'Sin Grupo';
-            let nombreLider = fila.discipulador_nombre || 'Sin asignar';
-            let estadoTexto = fila.estado_alumno_texto || 'Sin estado';
-            let bloqueGrupoHtml = `<strong>${nombreGrupo}</strong><br><small style="color: #64748b;">Líder: ${nombreLider}</small>`;
-            columnas = [bloqueGrupoHtml, nombreMiembro, estadoTexto];
+            // ✅ Bloque seguro con createElement
+            const bloqueGrupo = document.createElement("div");
+            const strong = document.createElement("strong");
+            strong.textContent = fila.grupo_nombre || 'Sin Grupo';
+            bloqueGrupo.appendChild(strong);
+
+            const small = document.createElement("small");
+            small.style.color = "#64748b";
+            small.textContent = "Líder: " + (fila.discipulador_nombre || 'Sin asignar');
+            bloqueGrupo.appendChild(document.createElement("br"));
+            bloqueGrupo.appendChild(small);
+
+            columnas = [bloqueGrupo, fila.integrante_nombre || 'Sin Nombre', fila.estado_alumno_texto || 'Sin estado'];
         } else if (tipo === 'cumpleanos') { 
             let fechaFormateada = '-';
             if (fila.fecha_nacimiento) {
@@ -463,15 +512,20 @@ window.renderizarBloqueTabla = function(tipo) {
                     fechaFormateada = fechaLocal.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
                 }
             }
-            columnas = [fila.nombre_completo || 'Sin Nombre', fila.telefono || '-', fechaFormateada, fila.edad !== undefined ? `${fila.edad} años` : '-'];
+            columnas = [
+                fila.nombre_completo || 'Sin Nombre',
+                fila.telefono || '-',
+                fechaFormateada,
+                fila.edad !== undefined ? `${fila.edad} años` : '-'
+            ];
         }
 
-        columnas.forEach((texto, index) => {
+        columnas.forEach((col, index) => {
             const td = document.createElement('td');
-            if ((tipo === 'discipulado' && index === 0) || (tipo === 'visitas' && index === 2)) {
-                td.innerHTML = texto;
+            if (col instanceof HTMLElement) {
+                td.appendChild(col); // ✅ bloque seguro
             } else {
-                td.textContent = texto;
+                td.textContent = col; // ✅ texto plano seguro
             }
             if (tipo === 'visitas' && index === 2) td.style.textAlign = 'center'; 
             tr.appendChild(td);
@@ -506,14 +560,17 @@ window.renderizarControlesPaginacion = function(tipo, paginaActual, totalPaginas
     const tabla = document.getElementById(`tabla-${tipo}`);
     if (!tabla) return;
 
-    // Contenedor principal de la botonera
+    // ✅ Contenedor principal de la botonera
     const container = document.createElement('div');
     container.id = `paginacion-control-${tipo}`;
     container.style = 'display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px auto; font-family: inherit;';
 
-    // Botón Anterior
+    // ✅ Botón Anterior (antes innerHTML → ahora createElement + textContent)
     const btnAnt = document.createElement('button');
-    btnAnt.innerHTML = '<i class="fas fa-chevron-left"></i> Anterior';
+    const iconAnt = document.createElement('i');
+    iconAnt.className = "fas fa-chevron-left";
+    btnAnt.appendChild(iconAnt);
+    btnAnt.append(" Anterior"); // texto plano seguro
     btnAnt.style = 'padding: 8px 14px; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px; transition: 0.2s;';
     if (paginaActual === 1) {
         btnAnt.style.opacity = '0.5';
@@ -525,14 +582,17 @@ window.renderizarControlesPaginacion = function(tipo, paginaActual, totalPaginas
         };
     }
 
-    // Texto de ubicación de páginas e indicadores numéricos
+    // ✅ Texto de ubicación de páginas e indicadores numéricos
     const textoInfo = document.createElement('span');
     textoInfo.style = 'font-size: 14px; color: #475569; font-weight: 500;';
-    textoInfo.textContent = `Página ${paginaActual} de ${totalPaginas} (${totalRegistros} registros totales)`;
+    textoInfo.textContent = `Página ${paginaActual} de ${totalPaginas} (${totalRegistros} registros totales)`; // seguro contra XSS
 
-    // Botón Siguiente
+    // ✅ Botón Siguiente (antes innerHTML → ahora createElement + textContent)
     const btnSig = document.createElement('button');
-    btnSig.innerHTML = 'Siguiente <i class="fas fa-chevron-right"></i>';
+    btnSig.textContent = "Siguiente "; // texto plano seguro
+    const iconSig = document.createElement('i');
+    iconSig.className = "fas fa-chevron-right";
+    btnSig.appendChild(iconSig);
     btnSig.style = 'padding: 8px 14px; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px; transition: 0.2s;';
     if (paginaActual === totalPaginas) {
         btnSig.style.opacity = '0.5';
@@ -544,12 +604,12 @@ window.renderizarControlesPaginacion = function(tipo, paginaActual, totalPaginas
         };
     }
 
-    // Construcción del nodo
+    // ✅ Construcción del nodo seguro
     container.appendChild(btnAnt);
     container.appendChild(textoInfo);
     container.appendChild(btnSig);
 
-    // Lo inyectamos exactamente debajo de la tabla correspondiente
+    // ✅ Lo inyectamos debajo de la tabla correspondiente
     tabla.parentNode.insertBefore(container, tabla.nextSibling);
 };
 

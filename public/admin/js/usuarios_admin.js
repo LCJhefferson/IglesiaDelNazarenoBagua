@@ -152,39 +152,71 @@ function cerrarModalPassword() {
 //  MODAL: VER BITÁCORA VIA AJAX
 // ══════════════════════════════
 function abrirModalBitacora(id, nombre) {
+    // CORRECCIÓN XSS: antes innerText → ahora textContent
     document.getElementById('nombreUsuarioBitacora').textContent = nombre;
     const lista = document.getElementById('listaBitacora');
-    lista.innerHTML = '<p style="text-align:center; color:#888; padding: 10px;">Buscando actividades...</p>';
-    
+
+    // Limpiar contenido previo
+    lista.textContent = 'Buscando actividades...';
+
     document.getElementById('modalBitacora').classList.add('abierto');
-    
-    // Hacemos una petición silenciosa en segundo plano al servidor
+
     fetch('?seccion=usuarios_admin&obtener_bitacora=1&usuario_id=' + id)
         .then(response => response.json())
         .then(data => {
-            if(data.length === 0) {
-                lista.innerHTML = '<p style="text-align:center; color:#999; padding:15px;">No se registran actividades para este usuario de momento.</p>';
+            // Limpiar contenido previo
+            lista.textContent = '';
+
+            if (data.length === 0) {
+                // CORRECCIÓN XSS: antes innerHTML → ahora textContent
+                lista.textContent = 'No se registran actividades para este usuario de momento.';
                 return;
             }
-            
-            let html = '<ul style="list-style:none; padding:0; margin:0; font-size:0.9rem;">';
+
+            // Crear lista segura con createElement
+            const ul = document.createElement('ul');
+            ul.style.listStyle = 'none';
+            ul.style.padding = '0';
+            ul.style.margin = '0';
+            ul.style.fontSize = '0.9rem';
+
             data.forEach(log => {
-                html += '<li style="padding: 10px; border-bottom:1px solid #eee; display:flex; flex-direction:column; gap:2px;">' +
-                            '<span style="color:#333; font-weight:500;">' + log.accion + '</span>' +
-                            '<span style="color:#999; font-size:0.75rem;"><i class="fa-regular fa-clock"></i> ' + log.fecha + '</span>' +
-                        '</li>';
+                const li = document.createElement('li');
+                li.style.padding = '10px';
+                li.style.borderBottom = '1px solid #eee';
+                li.style.display = 'flex';
+                li.style.flexDirection = 'column';
+                li.style.gap = '2px';
+
+                const accion = document.createElement('span');
+                accion.style.color = '#333';
+                accion.style.fontWeight = '500';
+                // CORRECCIÓN XSS: antes innerHTML → ahora textContent
+                accion.textContent = log.accion;
+
+                const fecha = document.createElement('span');
+                fecha.style.color = '#999';
+                fecha.style.fontSize = '0.75rem';
+                // CORRECCIÓN XSS: antes innerHTML → ahora textContent
+                fecha.textContent = '🕒 ' + log.fecha;
+
+                li.appendChild(accion);
+                li.appendChild(fecha);
+                ul.appendChild(li);
             });
-            html += '</ul>';
-            lista.innerHTML = html;
+
+            lista.appendChild(ul);
         })
         .catch(err => {
-            lista.innerHTML = '<p style="text-align:center; color:red; padding:10px;">Error al cargar la bitácora.</p>';
+            // CORRECCIÓN XSS: antes innerHTML → ahora textContent
+            lista.textContent = 'Error al cargar la bitácora.';
         });
 }
 
 function cerrarModalBitacora() {
     document.getElementById('modalBitacora').classList.remove('abierto');
 }
+
 
 // ── Actualizar cierre de modales al hacer clic fuera ──
 ['modalCrear', 'modalEditar', 'modalPassword', 'modalBitacora'].forEach(idModal => {
