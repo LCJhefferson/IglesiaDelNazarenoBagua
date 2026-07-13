@@ -10,7 +10,32 @@ class UsuarioController {
         // Inicializar si es necesario
     }
 
+public function registrar($username, $password, $id_rol, $estado = 'activo'): bool {
+        try {
+            // Validación básica de campos requeridos
+            if (empty($username) || empty($password) || empty($id_rol)) {
+                return false;
+            }
 
+            // LE DECIMOS A MYSQL QUIÉN SOY ANTES DE GUARDAR
+            $this->configurarUsuarioAuditoria();
+
+            // Creamos el nuevo registro utilizando tu Modelo Eloquent
+            $nuevoUsuario = Usuario::create([
+                'username' => trim($username),
+                'password' => password_hash($password, PASSWORD_BCRYPT),
+                'id_rol'   => intval($id_rol),
+                'estado'   => $estado
+            ]);
+
+            return (bool)$nuevoUsuario;
+
+        } catch (\Exception $e) {
+            // Puedes depurar temporalmente con un log si algo falla internamente:
+            // error_log($e->getMessage());
+            return false;
+        }
+    }
 /**
  * Define en la conexión de MySQL quién está haciendo la acción
  */
