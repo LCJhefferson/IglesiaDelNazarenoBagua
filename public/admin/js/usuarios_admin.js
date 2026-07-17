@@ -43,29 +43,25 @@ function abrirModalCrear() {
     document.getElementById('crearPassword').value = '';
     document.getElementById('crearRol').value      = '';
     document.getElementById('crearEstado').value   = 'activo';
-    // CORRECCIÓN: Cambiado de 'activo' a 'abierto'
     document.getElementById('modalCrear').classList.add('abierto'); 
 }
 
 function cerrarModalCrear() {
-    // CORRECCIÓN: Cambiado de 'activo' a 'abierto'
     document.getElementById('modalCrear').classList.remove('abierto');
 }
 
 // ══════════════════════════════
-//  MODAL: EDITAR USUARIO (Sirve también para reactivar usuarios)
+//  MODAL: EDITAR USUARIO
 // ══════════════════════════════
 function abrirModalEditar(id, username, rol, estado) {
     document.getElementById('editarId').value       = id;
     document.getElementById('editarUsername').value = username;
     document.getElementById('editarRol').value      = rol;
     document.getElementById('editarEstado').value   = estado;
-    // CORRECCIÓN: Cambiado de 'activo' a 'abierto'
     document.getElementById('modalEditar').classList.add('abierto');
 }
 
 function cerrarModalEditar() {
-    // CORRECCIÓN: Cambiado de 'activo' a 'abierto'
     document.getElementById('modalEditar').classList.remove('abierto');
 }
 
@@ -80,17 +76,15 @@ function abrirModalEliminar(id, nombre) {
     
     const texto = document.getElementById('textoEliminar');
     if (texto) {
-        texto.textContent = 'El usuario "' + nombre + '" pasará a estado inactivo.';
+        texto.textContent = 'El usuario "' + nombre + '" pasará a estado inactivo de forma lógica.';
     }
     
     document.getElementById('modalEliminar').classList.add('abierto');
 }
 
 function cerrarModalEliminar() {
-    // CORRECCIÓN: Cambiado de 'activo' a 'abierto' para que el botón Cancelar funcione
     document.getElementById('modalEliminar').classList.remove('abierto');
 }
-
 
 // ══════════════════════════════
 //  AVISO FLOTANTE (TOAST)
@@ -107,12 +101,14 @@ function mostrarAviso(mensaje, tipo = 'exito') {
     setTimeout(() => cajaAviso.classList.remove('visible'), 2800);
 }
 
-// ── Cerrar modales al hacer clic fuera ──
-['modalCrear', 'modalEditar', 'modalEliminar'].forEach(idModal => {
-    document.getElementById(idModal).addEventListener('click', function(e) {
-        // CORRECCIÓN: Al hacer clic fuera se remueve 'abierto'
-        if (e.target === this) this.classList.remove('abierto');
-    });
+// ── Cerrar modales dinámicos al hacer clic fuera (CÓDIGO UNIFICADO Y SEGURO) ──
+['modalCrear', 'modalEditar', 'modalEliminar', 'modalPassword', 'modalBitacora'].forEach(idModal => {
+    const modalEl = document.getElementById(idModal);
+    if (modalEl) {
+        modalEl.addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('abierto');
+        });
+    }
 });
 
 // ── Mostrar aviso si viene por GET ──
@@ -152,28 +148,22 @@ function cerrarModalPassword() {
 //  MODAL: VER BITÁCORA VIA AJAX
 // ══════════════════════════════
 function abrirModalBitacora(id, nombre) {
-    // CORRECCIÓN XSS: antes innerText → ahora textContent
     document.getElementById('nombreUsuarioBitacora').textContent = nombre;
     const lista = document.getElementById('listaBitacora');
 
-    // Limpiar contenido previo
     lista.textContent = 'Buscando actividades...';
-
     document.getElementById('modalBitacora').classList.add('abierto');
 
     fetch('?seccion=usuarios_admin&obtener_bitacora=1&usuario_id=' + id)
         .then(response => response.json())
         .then(data => {
-            // Limpiar contenido previo
             lista.textContent = '';
 
             if (data.length === 0) {
-                // CORRECCIÓN XSS: antes innerHTML → ahora textContent
                 lista.textContent = 'No se registran actividades para este usuario de momento.';
                 return;
             }
 
-            // Crear lista segura con createElement
             const ul = document.createElement('ul');
             ul.style.listStyle = 'none';
             ul.style.padding = '0';
@@ -191,13 +181,11 @@ function abrirModalBitacora(id, nombre) {
                 const accion = document.createElement('span');
                 accion.style.color = '#333';
                 accion.style.fontWeight = '500';
-                // CORRECCIÓN XSS: antes innerHTML → ahora textContent
                 accion.textContent = log.accion;
 
                 const fecha = document.createElement('span');
                 fecha.style.color = '#999';
                 fecha.style.fontSize = '0.75rem';
-                // CORRECCIÓN XSS: antes innerHTML → ahora textContent
                 fecha.textContent = '🕒 ' + log.fecha;
 
                 li.appendChild(accion);
@@ -208,7 +196,6 @@ function abrirModalBitacora(id, nombre) {
             lista.appendChild(ul);
         })
         .catch(err => {
-            // CORRECCIÓN XSS: antes innerHTML → ahora textContent
             lista.textContent = 'Error al cargar la bitácora.';
         });
 }
@@ -216,14 +203,3 @@ function abrirModalBitacora(id, nombre) {
 function cerrarModalBitacora() {
     document.getElementById('modalBitacora').classList.remove('abierto');
 }
-
-
-// ── Actualizar cierre de modales al hacer clic fuera ──
-['modalCrear', 'modalEditar', 'modalPassword', 'modalBitacora'].forEach(idModal => {
-    const modalEl = document.getElementById(idModal);
-    if(modalEl) {
-        modalEl.addEventListener('click', function(e) {
-            if (e.target === this) this.classList.remove('abierto');
-        });
-    }
-});

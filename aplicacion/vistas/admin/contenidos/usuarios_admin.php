@@ -19,12 +19,11 @@ if (isset($_GET['obtener_bitacora']) && !empty($_GET['usuario_id'])) {
 // ── PROCESAMIENTO DE FORMULARIOS POST ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // 1. Caso: Cambio de Contraseña (NUEVO)
+    // 1. Caso: Cambio de Contraseña
     if (isset($_POST['action']) && $_POST['action'] === 'cambiar_password' && isset($_POST['id'])) {
         $resultado = $controller->cambiarPassword($_POST['id'], $_POST['nueva_password']);
         
         if ($resultado) {
-            // Registramos el cambio en la bitácora
             DB::table('bitacora')->insert([
                 'usuario_id' => $_POST['id'],
                 'accion' => 'El administrador restableció la contraseña de este usuario.',
@@ -58,8 +57,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "<script>window.location.href = '/IglesiaDelNazarenoBagua/dashboard?seccion=usuarios_admin&$status';</script>";
         exit;
     }
+
+    // 3. Caso: Desactivar / Eliminar Lógico (NUEVO)
+    if (isset($_POST['action']) && $_POST['action'] === 'desactivar' && isset($_POST['id'])) {
+        $resultado = $controller->desactivar($_POST['id']);
+        
+        if ($resultado) {
+            DB::table('bitacora')->insert([
+                'usuario_id' => $_POST['id'],
+                'accion' => 'El usuario fue marcado como inactivo por el administrador.',
+                'fecha' => date('Y-m-d H:i:s')
+            ]);
+        }
+        
+        $status = $resultado ? 'exito=1' : 'error=1';
+        echo "<script>window.location.href = '/IglesiaDelNazarenoBagua/dashboard?seccion=usuarios_admin&$status';</script>";
+        exit;
+    }
     
-    // 3. Caso: Registro de Nuevo Usuario
+    // 4. Caso: Registro de Nuevo Usuario
     if (isset($_POST['username']) && !isset($_POST['action'])) {
         $resultado  = $controller->registrar(
             $_POST['username'],
@@ -73,8 +89,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// ... El resto de tus consultas a $usuarios y mapas de diseño siguen exactamente igual ...
-$usuarios = DB::table('usuarios')->get();
+// ... El resto de consultas a $usuarios y mapas de diseño siguen igual ...
+// Ordena primero por estado ('activo' antes que 'inactivo' alfabéticamente) 
+// y de forma secundaria por nombre de usuario de la A a la Z
+$usuarios = DB::table('usuarios')
+              ->orderBy('estado', 'asc')
+              ->orderBy('username', 'asc')
+              ->get();
 $total_usuarios       = $usuarios->count();
 $total_activos         = $usuarios->where('estado', 'activo')->count();
 $total_inactivos       = $usuarios->where('estado', 'inactivo')->count();
@@ -86,9 +107,7 @@ $etiqueta_estado = ['activo' => 'Activo', 'inactivo' => 'Inactivo'];
 $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'];
 ?>
 
-
 <!-- ── BARRA SUPERIOR ── -->
-
 <header class="barra-superior">
 <div class="barra-info">
     <h1>
@@ -96,7 +115,7 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
         Gestión de Usuarios
     </h1>
     <p>
-        Creacion y administracionde miembros de la Iglesia Del Nazareno
+        Creación y administración de miembros de la Iglesia Del Nazareno
     </p>
 </div>
 <div class="barra-acciones">
@@ -116,36 +135,9 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
 </div>
 </header>
 
-
-
 <!-- ── CONTENIDO PRINCIPAL ── -->
 <main class="area-contenido">
 
-    <!-- ESTADÍSTICAS 
-    <div class="cuadricula-estadisticas">
-        <div class="tarjeta-estadistica">
-            <div class="icono-estadistica azul"><i class="fa-solid fa-users"></i></div>
-            <div class="datos-estadistica">
-                <div class="valor"><?= $total_usuarios ?></div>
-                <div class="etiqueta">Total usuarios</div>
-            </div>
-        </div>
-        <div class="tarjeta-estadistica">
-            <div class="icono-estadistica verde"><i class="fa-solid fa-circle-check"></i></div>
-            <div class="datos-estadistica">
-                <div class="valor"><?= $total_activos ?></div>
-                <div class="etiqueta">Activos</div>
-            </div>
-        </div>
-        <div class="tarjeta-estadistica">
-            <div class="icono-estadistica naranja"><i class="fa-solid fa-clock"></i></div>
-            <div class="datos-estadistica">
-                <div class="valor"><?= $total_inactivos ?></div>
-                <div class="etiqueta">Inactivos</div>
-            </div>
-        </div>
-    </div>
-    -->
     <!-- TABLA -->
     <div class="contenedor-tabla">
         <div class="cabecera-tabla">
@@ -190,85 +182,84 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
                     </tr>
                 </thead>
 
+                <tbody id="cuerpoTabla">
+                <?php foreach ($usuarios as $usuario): ?>
+                    <?php
+                        $idUsuario = $usuario->id;
+                        $rolId    = $usuario->id_rol;
+                        $estado   = $usuario->estado;
+                        $username = $usuario->username;
 
+                        $avatar   = strtoupper(substr($username, 0, 2));
+                        $colorAv  = $color_avatar[$rolId] ?? '#868e96';
+                        $claseRol = $clase_rol[$rolId]    ?? 'rol-lector';
+                        $etqRol   = $etiqueta_rol[$rolId] ?? 'Sin rol';
+                        $claseEst = $clase_estado[$estado] ?? '';
+                        $etqEst   = $etiqueta_estado[$estado] ?? $estado;
+                    ?>
+                    <tr data-nombre="<?= strtolower($username) ?>"
+                        data-estado="<?= $estado ?>"
+                        data-rol="<?= $rolId ?>">
 
-<tbody id="cuerpoTabla">
-<?php foreach ($usuarios as $usuario): ?>
-    <?php
-        // Acceso como objeto (Eloquent/stdClass)
-        $idUsuario = $usuario->id;
-        $rolId    = $usuario->id_rol;
-        $estado   = $usuario->estado;
-        $username = $usuario->username;
+                        <td>
+                            <div class="celda-usuario">
+                                <div class="avatar-usuario" style="background: <?= $colorAv ?>">
+                                    <?= $avatar ?>
+                                </div>
+                                <div>
+                                    <div class="nombre-usuario"><?= htmlspecialchars($username) ?></div>
+                                </div>
+                            </div>
+                        </td>
 
-        $avatar   = strtoupper(substr($username, 0, 2));
-        $colorAv  = $color_avatar[$rolId] ?? '#868e96';
-        $claseRol = $clase_rol[$rolId]    ?? 'rol-lector';
-        $etqRol   = $etiqueta_rol[$rolId] ?? 'Sin rol';
-        $claseEst = $clase_estado[$estado] ?? '';
-        $etqEst   = $etiqueta_estado[$estado] ?? $estado;
-    ?>
-    <tr data-nombre="<?= strtolower($username) ?>"
-        data-estado="<?= $estado ?>"
-        data-rol="<?= $rolId ?>">
+                        <td>
+                            <span class="badge-rol <?= $claseRol ?>">
+                                <?= $etqRol ?>
+                            </span>
+                        </td>
 
-        <td>
-            <div class="celda-usuario">
-                <div class="avatar-usuario" style="background: <?= $colorAv ?>">
-                    <?= $avatar ?>
-                </div>
-                <div>
-                    <div class="nombre-usuario"><?= htmlspecialchars($username) ?></div>
-                </div>
-            </div>
-        </td>
+                        <td>
+                            <span class="badge-estado <?= $claseEst ?>">
+                                <?= $etqEst ?>
+                            </span>
+                        </td>
 
-        <td>
-            <span class="badge-rol <?= $claseRol ?>">
-                <?= $etqRol ?>
-            </span>
-        </td>
+                        <td>
+                            <div class="celda-acciones" style="justify-content: center; gap: 6px;">
+                                <button class="boton-icono" title="Editar"
+                                        onclick="abrirModalEditar(<?= $idUsuario ?>, '<?= addslashes($username) ?>', '<?= $rolId ?>', '<?= $estado ?>')">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                
+                                <button class="boton-icono" style="color: #4f6ef7;" title="Cambiar Contraseña"
+                                        onclick="abrirModalPassword(<?= $idUsuario ?>, '<?= addslashes($username) ?>')">
+                                    <i class="fa-solid fa-key"></i>
+                                </button>
 
-        <td>
-            <span class="badge-estado <?= $claseEst ?>">
-                <?= $etqEst ?>
-            </span>
-        </td>
+                                <button class="boton-icono" style="color: #1098ad;" title="Ver Actividad"
+                                        onclick="abrirModalBitacora(<?= $idUsuario ?>, '<?= addslashes($username) ?>')">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
 
-        <td>
-            <div class="celda-acciones" style="justify-content: center; gap: 6px;">
-                <button class="boton-icono" title="Editar"
-                        onclick="abrirModalEditar(<?= $idUsuario ?>, '<?= addslashes($username) ?>', '<?= $rolId ?>', '<?= $estado ?>')">
-                    <i class="fa-solid fa-pen"></i>
-                </button>
-                
-                <button class="boton-icono" style="color: #4f6ef7;" title="Cambiar Contraseña"
-                        onclick="abrirModalPassword(<?= $idUsuario ?>, '<?= addslashes($username) ?>')">
-                    <i class="fa-solid fa-key"></i>
-                </button>
-
-                <button class="boton-icono" style="color: #1098ad;" title="Ver Actividad"
-                        onclick="abrirModalBitacora(<?= $idUsuario ?>, '<?= addslashes($username) ?>')">
-                    <i class="fa-solid fa-eye"></i>
-                </button>
-            </div>
-        </td>
-    </tr>
-<?php endforeach; ?>
-</tbody>
-
-
+                                <!-- BOTÓN NUEVO: Llamado directo a abrirModalEliminar -->
+                                <button class="boton-icono" style="color: #e64980;" title="Desactivar Usuario"
+                                        onclick="abrirModalEliminar(<?= $idUsuario ?>, '<?= addslashes($username) ?>')">
+                                    <i class="fa-solid fa-user-xmark"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
             </table>
         </div>
 
-        <div style="padding: 14px 22px; border-top: 1px solid var(--borde);
-                    display:flex; justify-content: space-between; align-items:center;">
+        <div style="padding: 14px 22px; border-top: 1px solid var(--borde); display:flex; justify-content: space-between; align-items:center;">
             <span style="font-size:0.8rem; color:var(--texto-suave);">
                 Mostrando <span id="filasMostradas"><?= $total_usuarios ?></span> de <?= $total_usuarios ?> usuarios
             </span>
         </div>
     </div>
-
 </main>
 
 <!-- MODAL CREAR -->
@@ -277,7 +268,7 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
         <button class="cerrar-modal" onclick="cerrarModalCrear()">✕</button>
         <h3>👤 Nuevo Usuario</h3>
         <form method="POST" action="">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES) ?>">
             <div class="grupo-formulario">
                 <label>Username</label>
                 <input type="text" id="crearUsername" name="username" placeholder="Ej: carlos123" required/>
@@ -320,10 +311,9 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
         <button class="cerrar-modal" onclick="cerrarModalEditar()">✕</button>
         <h3>✏️ Editar Usuario</h3>
         <form method="POST" action="">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES) ?>">
             <input type="hidden" id="editarId" name="id"/>
             <input type="hidden" name="action" value="editar" />
-            
             <div class="grupo-formulario">
                 <label>Username</label>
                 <input type="text" id="editarUsername" name="username" placeholder="Username" required/>
@@ -355,6 +345,29 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
     </div>
 </div>
 
+<!-- MODAL ELIMINAR/DESACTIVAR (NUEVO HTML COMPLETO) -->
+<div class="superposicion-modal" id="modalEliminar">
+    <div class="caja-modal">
+        <button class="cerrar-modal" onclick="cerrarModalEliminar()">✕</button>
+        <h3>⚠️ Desactivar Usuario</h3>
+        <p class="subtexto-confirmacion" id="textoEliminar" style="margin-bottom:20px; color: var(--texto-suave);"></p>
+        
+        <form method="POST" action="">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES) ?>">
+            <input type="hidden" id="desactivarId" name="id" value="" />
+            <input type="hidden" name="action" value="desactivar" /> 
+            
+            <div class="fila-botones-modal">
+                <button type="button" class="boton boton-contorno" onclick="cerrarModalEliminar()">Cancelar</button>
+                <button type="submit" class="boton" style="background-color: #e64980; color: white;">
+                    <i class="fa-solid fa-user-xmark"></i> Confirmar Desactivación
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL PASSWORD -->
 <div class="superposicion-modal" id="modalPassword">
     <div class="caja-modal">
         <button class="cerrar-modal" onclick="cerrarModalPassword()">✕</button>
@@ -362,15 +375,13 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
         <p class="subtexto-confirmacion" id="textoPassword" style="margin-bottom:15px; color: var(--texto-suave);"></p>
         
         <form method="POST" action="">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES) ?>">
             <input type="hidden" id="passId" name="id" value="" />
             <input type="hidden" name="action" value="cambiar_password" /> 
-            
             <div class="grupo-formulario">
                 <label>Nueva Contraseña</label>
                 <input type="password" name="nueva_password" placeholder="Mínimo 8 caracteres" required minlength="8" />
             </div>
-            
             <div class="fila-botones-modal">
                 <button type="button" class="boton boton-contorno" onclick="cerrarModalPassword()">Cancelar</button>
                 <button type="submit" class="boton" style="background-color: #4f6ef7; color: white;">
@@ -381,6 +392,7 @@ $clase_estado    = ['activo' => 'estado-activo', 'inactivo' => 'estado-inactivo'
     </div>
 </div>
 
+<!-- MODAL BITACORA -->
 <div class="superposicion-modal" id="modalBitacora">
     <div class="caja-modal" style="max-width: 550px;">
         <button class="cerrar-modal" onclick="cerrarModalBitacora()">✕</button>

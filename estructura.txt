@@ -1,0 +1,215 @@
+IglesiaDelNazarenoBagua
+ ┣ admin
+ ┃ ┗ imagenes
+ ┃ ┃ ┣ noticias
+ ┃ ┃ ┗ recursos
+ ┣ aplicacion
+ ┃ ┣ config
+ ┃ ┃ ┣ Conexion.php.old
+ ┃ ┃ ┣ config.php
+ ┃ ┃ ┗ database.php
+ ┃ ┣ controladores
+ ┃ ┃ ┣ api
+ ┃ ┃ ┃ ┣ AuthApiController.php
+ ┃ ┃ ┃ ┗ RecursoApiController.php
+ ┃ ┃ ┣ legacy
+ ┃ ┃ ┃ ┗ RecursoController.php
+ ┃ ┃ ┣ AuthController.php
+ ┃ ┃ ┣ DiscipuladoController.php
+ ┃ ┃ ┣ MiembroController.php
+ ┃ ┃ ┣ NoticiaController.php
+ ┃ ┃ ┣ ReporteController.PHP
+ ┃ ┃ ┣ TransmisionController.php
+ ┃ ┃ ┣ UsuarioController.php
+ ┃ ┃ ┗ VisitaController.php
+ ┃ ┣ core
+ ┃ ┃ ┣ ApiController.php
+ ┃ ┃ ┣ Autoload.php
+ ┃ ┃ ┣ Middleware.php
+ ┃ ┃ ┗ Response.php
+ ┃ ┣ modelos
+ ┃ ┃ ┣ Cargo.php
+ ┃ ┃ ┣ CondicionMiembro.php
+ ┃ ┃ ┣ EstadoDiscipulo.php
+ ┃ ┃ ┣ EstadoGrupoDiscipulado.php
+ ┃ ┃ ┣ GrupoDiscipulado.php
+ ┃ ┃ ┣ IntegranteDiscipulado.php
+ ┃ ┃ ┣ Miembro.php
+ ┃ ┃ ┣ NoticiaImagenModelo.php
+ ┃ ┃ ┣ NoticiaModelo.php
+ ┃ ┃ ┣ Recurso.php
+ ┃ ┃ ┣ RecursoPapelera.php
+ ┃ ┃ ┣ ReporteModel.php
+ ┃ ┃ ┣ Rol.php
+ ┃ ┃ ┣ TipoMiembro.php
+ ┃ ┃ ┣ TransmisionModelo.php
+ ┃ ┃ ┣ Usuario.php
+ ┃ ┃ ┗ VisitaModelo.php
+ ┃ ┣ Repository
+ ┃ ┃ ┗ MiembroRepository.php
+ ┃ ┣ services
+ ┃ ┃ ┣ reports
+ ┃ ┃ ┃ ┣ ExportarCumpleanos.php
+ ┃ ┃ ┃ ┣ ExportarDiscipulado.php
+ ┃ ┃ ┃ ┣ ExportarMiembros.php
+ ┃ ┃ ┃ ┣ ExportarVisitas.php
+ ┃ ┃ ┃ ┣ ReporteCumpleanos.php
+ ┃ ┃ ┃ ┣ ReporteDiscipulado.php
+ ┃ ┃ ┃ ┣ ReporteGrupos.php
+ ┃ ┃ ┃ ┣ ReporteMiembros.php
+ ┃ ┃ ┃ ┗ ReporteVisitas.php
+ ┃ ┃ ┗ RecursoThumbService.php
+ ┃ ┣ vistas
+ ┃ ┃ ┣ admin
+ ┃ ┃ ┃ ┣ contenidos
+ ┃ ┃ ┃ ┃ ┣ DiscipuladoGrupos.php
+ ┃ ┃ ┃ ┃ ┣ DiscipuladoIntegrantes.php
+ ┃ ┃ ┃ ┃ ┣ error_permisos.php
+ ┃ ┃ ┃ ┃ ┣ inicioAdmin.php
+ ┃ ┃ ┃ ┃ ┣ membresia.php
+ ┃ ┃ ┃ ┃ ┣ noticias.php
+ ┃ ┃ ┃ ┃ ┣ procesar_eliminar.php
+ ┃ ┃ ┃ ┃ ┣ recurso_admin.php
+ ┃ ┃ ┃ ┃ ┣ reportes.php
+ ┃ ┃ ┃ ┃ ┣ transmision.php
+ ┃ ┃ ┃ ┃ ┣ usuarios_admin.php
+ ┃ ┃ ┃ ┃ ┣ visitasListar.php
+ ┃ ┃ ┃ ┃ ┗ visitasMap.php
+ ┃ ┃ ┃ ┣ includes
+ ┃ ┃ ┃ ┃ ┗ sidebar.php
+ ┃ ┃ ┃ ┗ dashboard.php
+ ┃ ┃ ┗ web
+ ┃ ┃ ┃ ┣ componentes
+ ┃ ┃ ┃ ┃ ┣ footer.php
+ ┃ ┃ ┃ ┃ ┗ nav.php
+ ┃ ┃ ┃ ┣ procesos
+ ┃ ┃ ┃ ┃ ┗ get_live_status.php
+ ┃ ┃ ┃ ┣ 404.php
+ ┃ ┃ ┃ ┣ articulos-fe.php
+ ┃ ┃ ┃ ┣ cards_conocenos.php
+ ┃ ┃ ┃ ┣ car_salvacion.php
+ ┃ ┃ ┃ ┣ creemos.php
+ ┃ ┃ ┃ ┣ historia.php
+ ┃ ┃ ┃ ┣ inicio.php
+ ┃ ┃ ┃ ┣ login.php
+ ┃ ┃ ┃ ┣ mision.php
+ ┃ ┃ ┃ ┣ noticia.php
+ ┃ ┃ ┃ ┣ recursos.php
+ ┃ ┃ ┃ ┣ trasmisionPublica.php
+ ┃ ┃ ┃ ┗ valores.php
+ ┃ ┗ .htaccess
+ ┣ IglesiaDelNazarenoBagua
+ ┣ procesos
+ ┃ ┣ auth
+ ┃ ┃ ┣ logout.php
+ ┃ ┃ ┗ procesar_login.php
+ ┃ ┗ registros
+ ┃ ┃ ┗ procesar_reguistro.php
+ ┣ pruebas_seguridad
+ ┃ ┣ aceptar
+ ┃ ┃ ┣ documento.pdf
+ ┃ ┃ ┣ foto.jpeg
+ ┃ ┃ ┣ foto.jpg
+ ┃ ┃ ┣ foto.png
+ ┃ ┃ ┣ imagen.png
+ ┃ ┃ ┣ recurso.doc
+ ┃ ┃ ┣ recurso.docx
+ ┃ ┃ ┗ video.mp4
+ ┃ ┣ rechazar
+ ┃ ┃ ┣ bypass.PHP
+ ┃ ┃ ┣ exploit.phar
+ ┃ ┃ ┣ info.phtml
+ ┃ ┃ ┣ malware.exe
+ ┃ ┃ ┗ script.sh
+ ┃ ┣ datos_prueba_xss.sql
+ ┃ ┗ extract_schema.php
+ ┣ public
+ ┃ ┣ admin
+ ┃ ┃ ┣ css
+ ┃ ┃ ┃ ┣ componentes.css
+ ┃ ┃ ┃ ┣ dashboard.css
+ ┃ ┃ ┃ ┣ DiscipuladoGrupos.css
+ ┃ ┃ ┃ ┣ DiscipuladoIntegrantes.css
+ ┃ ┃ ┃ ┣ inicioAdmin.css
+ ┃ ┃ ┃ ┣ membresia.css
+ ┃ ┃ ┃ ┣ NewUsuarioFomr.css
+ ┃ ┃ ┃ ┣ noticias.css
+ ┃ ┃ ┃ ┣ recurso_admin.css
+ ┃ ┃ ┃ ┣ reguistro_usuario.css
+ ┃ ┃ ┃ ┣ reportes.css
+ ┃ ┃ ┃ ┣ sidebar.css
+ ┃ ┃ ┃ ┣ transmision.css
+ ┃ ┃ ┃ ┣ usuarios_admin.css
+ ┃ ┃ ┃ ┣ visitasListar.css
+ ┃ ┃ ┃ ┗ visitasMap.css
+ ┃ ┃ ┣ imagenes
+ ┃ ┃ ┃ ┣ noticias
+ ┃ ┃ ┃ ┗ recursos
+ ┃ ┃ ┃ ┃ ┗ 1777263218_INTEGRANTES.docx
+ ┃ ┃ ┗ js
+ ┃ ┃ ┃ ┣ DiscipuladoGrupos.js
+ ┃ ┃ ┃ ┣ DiscipuladoIntegrantes.js
+ ┃ ┃ ┃ ┣ inicioAdmin.js
+ ┃ ┃ ┃ ┣ membresia.js
+ ┃ ┃ ┃ ┣ NewUsuario.js
+ ┃ ┃ ┃ ┣ noticias.js
+ ┃ ┃ ┃ ┣ recurso_admin.js
+ ┃ ┃ ┃ ┣ reguistro_usuario.js
+ ┃ ┃ ┃ ┣ reportes.js
+ ┃ ┃ ┃ ┣ sidebar.js
+ ┃ ┃ ┃ ┣ transmision.js
+ ┃ ┃ ┃ ┣ usuarios_admin.js
+ ┃ ┃ ┃ ┣ visitasListar.js
+ ┃ ┃ ┃ ┗ visitasMap.js
+ ┃ ┣ public
+ ┃ ┃ ┗ uploads
+ ┃ ┃ ┃ ┗ recursos
+ ┃ ┣ web
+ ┃ ┃ ┣ css
+ ┃ ┃ ┃ ┣ articulos-fe.css
+ ┃ ┃ ┃ ┣ cards_conocenos.css
+ ┃ ┃ ┃ ┣ car_salvacion.css
+ ┃ ┃ ┃ ┣ creemos.css
+ ┃ ┃ ┃ ┣ footer.css
+ ┃ ┃ ┃ ┣ historia.css
+ ┃ ┃ ┃ ┣ inicio.css
+ ┃ ┃ ┃ ┣ login.css
+ ┃ ┃ ┃ ┣ mision.css
+ ┃ ┃ ┃ ┣ nav.css
+ ┃ ┃ ┃ ┣ noticia.css
+ ┃ ┃ ┃ ┣ recursos.css
+ ┃ ┃ ┃ ┣ trasmisionPublic.css
+ ┃ ┃ ┃ ┗ valores.css
+ ┃ ┃ ┣ imagenes
+ ┃ ┃ ┃ ┣ thumbs
+ ┃ ┃ ┃ ┣ 1.png
+ ┃ ┃ ┃ ┣ 2.png
+ ┃ ┃ ┃ ┣ 3.png
+ ┃ ┃ ┃ ┣ 4.jpg
+ ┃ ┃ ┃ ┣ fe.jpg
+ ┃ ┃ ┃ ┣ LogoBagua.png
+ ┃ ┃ ┃ ┣ mision.png
+ ┃ ┃ ┃ ┣ noticia1.jpeg
+ ┃ ┃ ┃ ┣ noticia2.webp
+ ┃ ┃ ┃ ┣ noticia3.jpeg
+ ┃ ┃ ┃ ┣ selloOficial.png
+ ┃ ┃ ┃ ┗ valores.jpg
+ ┃ ┃ ┗ js
+ ┃ ┃ ┃ ┣ articulos-fe.js
+ ┃ ┃ ┃ ┣ index.js
+ ┃ ┃ ┃ ┣ login.js
+ ┃ ┃ ┃ ┗ notificaciones_vivo.js
+ ┃ ┗ index.php
+ ┣ vendor
+ ┣ .env.example
+ ┣ .gitignore
+ ┣ .htaccess
+ ┣ composer.json
+ ┣ composer.lock
+ ┣ composer.phar
+ ┣ estructura.txt
+ ┣ fix_tablas_discipulado.sql
+ ┣ iglesiadelnazareno.sql
+ ┣ implementation_plan.md
+ ┣ test_db.php
+ ┗ TODO.md

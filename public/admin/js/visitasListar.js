@@ -17,6 +17,19 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('filtroModo').value = localStorage.getItem('v_filtroModo');
     }
 
+// =========================================================================
+    // NUEVO: Escuchar los cambios en los inputs para filtrar sin recargar
+    // =========================================================================
+    
+    // // Escucha cuando el usuario escribe en el buscador de nombres
+    // document.getElementById('filtroNombre').addEventListener('input', filtrarVisitas);
+    
+    // // Escuha cuando el usuario cambia una opción en los selectores desplegables
+    // document.getElementById('filtroMotivo').addEventListener('change', filtrarVisitas);
+    // document.getElementById('filtroEstado').addEventListener('change', filtrarVisitas);
+    // document.getElementById('filtroModo').addEventListener('change', filtrarVisitas);
+    
+
     // 2. Ejecutar el filtrado inicial
     filtrarVisitas();
 });
