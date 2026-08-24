@@ -1,139 +1,210 @@
 /* ==========================================================================
-   VARIABLES DE DISEÑO (ROOT)
+   FOOTER INSTITUCIONAL ARMONIZADO
    ========================================================================== */
+
 :root {
-    --primary-color: #071e2e;    /* Azul institucional profundo */
-    --accent-color: #b8860b;     /* Dorado/Ocre elegante */
-    --text-dark: #1a202c;        /* Gris casi negro para lectura */
-    --text-light: #4a5568;       /* Gris medio para párrafos */
-    --bg-light: #f7fafc;         /* Fondo gris muy suave */
-    --white: #ffffff;
-    --transition: all 0.3s ease;
+    /* Tipografías Módulo Footer */
+    --footer-font-serif: 'Newsreader', Georgia, serif;
+    --footer-font-sans: 'DM Sans', 'Segoe UI', sans-serif;
+
+    /* Colores Módulo Footer */
+    --footer-bg: #0b2238;             /* Azul marino profundo */
+    --footer-dark-bg: #061421;        /* Azul ultra oscuro para copyright */
+    --footer-title-color: #ffffff;    /* Blanco puro para los encabezados */
+    --footer-text-color: #cbd5e1;     /* Gris claro para máxima legibilidad */
+    --footer-subtext-color: #94a3b8;  /* Gris secundario */
+    --footer-accent-icon: #93c5fd;    /* Azul suave para iconos de listas */
     
-    /* Variables específicas del Footer */
-    --footer-bg: #0b2233;        /* Azul medianoche profundo */
-    --footer-dark: #06141f;      /* El tono más oscuro para el copyright */
-    --footer-text: #cbd5e1;      /* Gris claro para lectura en fondo oscuro */
-    --footer-titles: #ffffff;    /* Títulos en blanco para máxima claridad */
+    /* Variables de estructura */
+    --footer-padding-top: 80px;
+    --footer-radius: 14px;            /* Redondeo para los iconos */
 }
 
-/* ==========================================================================
-   FOOTER PREMIUM ARMONIZADO (TEXTOS CLAROS, SIN LETRAS DORADAS)
-   ========================================================================== */
+/* ESTRUCTURA GENERAL */
 .footer {
-    background: var(--footer-bg);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    color: var(--footer-text); 
-    padding: 80px 0 0 0; 
+    background-color: var(--footer-bg);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--footer-text-color);
+    padding-top: var(--footer-padding-top);
+    font-family: var(--footer-font-sans);
 }
 
-/* GRID CENTRADO */
 .footer-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    max-width: 1100px;
-    margin: auto; 
-    gap: 40px;
-    padding: 0 20px;
-    text-align: center;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    max-width: 1150px;
+    margin: 0 auto;
+    gap: 45px;
+    padding: 0 20px 60px;
 }
 
-/* CAJAS */
+/* CAJAS Y TITULOS */
 .footer-box {
-    padding: 10px;
+    display: flex;
+    flex-direction: column;
 }
 
-/* TITULOS (Cambiado de Dorado a Blanco para mayor elegancia) */
-.footer-box h3 {
-    font-family: 'Georgia', serif;
+.footer-title {
+    font-family: var(--footer-font-serif);
+    font-size: 1.45rem;
+    font-weight: 600;
+    color: var(--footer-title-color);
     margin-bottom: 20px;
-    color: var(--footer-titles); /* Ahora es blanco */
-    font-size: 20px;
-    letter-spacing: 1px;
-    font-weight: 400;
+    letter-spacing: 0.5px;
 }
 
-/* TEXTO */
-.footer-box p {
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 14.5px;
-    margin-bottom: 12px;
-    color: var(--footer-text); 
+.footer-desc {
+    font-size: 0.92rem;
     line-height: 1.6;
+    color: var(--footer-text-color);
+    margin-bottom: 22px;
 }
 
-/* ICONOS TEXTO (El dorado se queda solo aquí como un pequeño detalle) */
-.footer-box i {
-    color: var(--accent-color); 
-    margin-right: 8px;
+/* LISTAS DE INFORMACIÓN */
+.footer-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.footer-list li i {
+    color: var(--footer-accent-icon);
     font-size: 1.1rem;
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+.footer-list li span small {
+    color: var(--footer-subtext-color);
+    font-size: 0.82rem;
+}
+
+.footer-list a {
+    color: var(--footer-text-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-list a:hover {
+    color: #ffffff;
+    text-decoration: underline;
 }
 
 /* REDES SOCIALES */
 .social-icons {
-    margin-top: 25px;
+    display: flex;
+    gap: 12px;
 }
 
 .social-icons a {
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    width: 42px;
-    height: 42px;
-    margin: 0 8px;
-    border-radius: 50%; 
-    background: rgba(255, 255, 255, 0.08); 
-    color: var(--white); 
-    font-size: 18px;
-    transition: var(--transition);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--footer-radius);
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    font-size: 1.05rem;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* HOVER REDES (Efectos de color de marca) */
+.social-icons a:hover {
+    transform: translateY(-4px);
+}
+
 .social-icons a.facebook:hover {
     background: #1877f2;
     border-color: #1877f2;
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(24, 119, 242, 0.3);
+    box-shadow: 0 6px 15px rgba(24, 119, 242, 0.35);
 }
 
 .social-icons a.instagram:hover {
     background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
     border-color: transparent;
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(220, 39, 67, 0.3);
+    box-shadow: 0 6px 15px rgba(220, 39, 67, 0.35);
 }
 
 .social-icons a.youtube:hover {
     background: #ff0000;
     border-color: #ff0000;
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+    box-shadow: 0 6px 15px rgba(255, 0, 0, 0.35);
 }
 
 .social-icons a.whatsapp:hover {
     background: #25d366;
     border-color: #25d366;
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+    box-shadow: 0 6px 15px rgba(37, 211, 102, 0.35);
 }
 
-/* BARRA DE COPYRIGHT (El tono más profundo) */
+/* BARRA DE COPYRIGHT */
 .footer-copy {
+    background-color: var(--footer-dark-bg);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 22px 20px;
     text-align: center;
-    margin-top: 60px;
-    padding: 25px;
-    background-color: var(--footer-dark); 
-    border-top: 1px solid rgba(255, 255, 255, 0.03);
-    font-size: 13px;
-    color: #64748b;
-    font-family: 'Segoe UI', sans-serif;
-    letter-spacing: 0.5px;
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-    .footer { padding: 60px 0 0 0; }
-    .footer-grid { grid-template-columns: 1fr; gap: 40px; }
-    .footer-copy { margin-top: 40px; }
+.footer-copy-container {
+    max-width: 1150px;
+    margin: 0 auto;
+}
+
+.footer-copy p {
+    font-size: 0.82rem;
+    color: var(--footer-subtext-color);
+    margin: 0;
+    letter-spacing: 0.3px;
+}
+
+/* ==========================================================================
+   RESPONSIVO FOOTER (MÓVILES)
+   ========================================================================== */
+
+@media (max-width: 850px) {
+    .footer {
+        padding-top: 50px;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 35px;
+        padding-bottom: 40px;
+    }
+
+    .footer-title {
+        font-size: 1.3rem;
+        margin-bottom: 12px;
+    }
+
+    .social-icons {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-grid {
+        gap: 30px;
+    }
+
+    .footer-desc, 
+    .footer-list li {
+        font-size: 0.86rem;
+    }
+
+    .social-icons a {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95rem;
+    }
 }

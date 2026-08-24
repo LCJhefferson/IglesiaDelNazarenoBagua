@@ -67,6 +67,7 @@ body {
     width: 100%; 
     border-collapse: collapse; 
     text-align: left;
+    table-layout: fixed; /* Mantiene la alineación vertical de th y td */
 }
 .tabla-moderna th { 
     background-color: #f8fafc;
@@ -289,3 +290,4 @@ body {
     from { transform: translateY(20px); opacity: 0; } 
     to { transform: translateY(0); opacity: 1; } 
 }
+

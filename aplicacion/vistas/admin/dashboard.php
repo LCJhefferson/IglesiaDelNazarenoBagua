@@ -30,7 +30,7 @@ $vistaCheck = strtolower($vistaInterna);
 $vistasPermitidasPorRol = [
     9  => ['inicioadmin', 'discipuladogrupos', 'discipuladointegrantes'],                                   // Discipulador
     11 => ['inicioadmin', 'recurso_admin', 'membresia', 'noticias', 'discipuladogrupos', 'discipuladointegrantes', 'reportes'],  // Secretaria
-    12 => ['inicioadmin', 'visitaslistar', 'visitasmap'],                                                    // Grupo de Visitas
+    12 => ['inicioadmin', 'visitaslistar', 'visitasmap'],                                                   // Grupo de Visitas
 ];
 $vistasBloqueadasPorRol = [
 ];
@@ -120,6 +120,11 @@ $scripts = [
     <meta name="csrf-token" content="<?= $csrfToken ?>">
 </head>
 <body>
+
+<button type="button" class="mobile-toggle-btn" id="btnToggleSidebar" aria-label="Abrir Menú">
+    <i class="fas fa-bars"></i>
+</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <div class="admin-container">
     <?php 

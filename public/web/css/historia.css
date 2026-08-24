@@ -1,173 +1,334 @@
-/* ==========================================================================
-   VARIABLES GLOBALES (ROOT) - Requerido para que los colores funcionen
-   ========================================================================== */
+/* ═══════════════════════════════════════════════
+   MÓDULO NUESTRA HISTORIA
+   ═══════════════════════════════════════════════ */
+
 :root {
-    --primary-color: #123d5a;    /* Azul institucional profundo */
-    --accent-color: #b8860b;     /* Dorado/Ocre elegante (Solo para detalles) */
-    --text-dark: #1a202c;        /* Gris casi negro para lectura */
-    --text-light: #4a5568;       /* Gris medio para párrafos */
-    --bg-light: #f7fafc;         /* Fondo gris muy suave */
-    --white: #ffffff;
-    --transition: all 0.3s ease;
+  --hist-bg:        #F5F8FF;
+  --hist-bg2:       #ECEFF4;
+  --hist-ink:       #111827;
+  --hist-ink2:      #546E7A;
+  --hist-accent:    #0B3D91;
+  --hist-border:    #DDE8F8;
+  --hist-card-bg:   #FFFFFF;
+  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ==========================================================================
-   HEADER DE HISTORIA (Hero)
-   ========================================================================== */
-.historia-header {
-    background: linear-gradient(rgba(18, 61, 90, 0.7), rgba(0, 0, 0, 0.6)), url('../imagenes/historia-hero.webp'); /* Tinte azulado sutil en la imagen */
-    background-size: cover;
-    background-position: center;
-    height: 400px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: var(--white);
-    text-align: center;
-    padding: 20px;
+body.pagina-historia {
+  background: var(--hist-bg);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--hist-ink);
 }
 
-/* Letras blancas para máxima legibilidad, nada de dorado en textos largos */
-.historia-header h1 { 
-    font-family: 'Georgia', serif;
-    font-size: 3.5rem; 
-    margin-bottom: 10px; 
-    color: var(--white); 
-    letter-spacing: 1px;
+/* ANIMACIONES REVEAL */
+.rev {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .65s var(--ease-out), transform .65s var(--ease-out);
+}
+.rev.in { opacity: 1; transform: translateY(0); }
+
+.rev-s {
+  opacity: 0;
+  transform: scale(.94);
+  transition: opacity .65s var(--ease-out), transform .65s var(--ease-out);
+}
+.rev-s.in { opacity: 1; transform: scale(1); }
+
+.d1 { transition-delay: .05s; }
+.d2 { transition-delay: .15s; }
+.d3 { transition-delay: .25s; }
+.d4 { transition-delay: .35s; }
+
+/* HERO (ALINEADO A LA IZQUIERDA) */
+.hist-hero {
+  background: var(--hist-bg2);
+  position: relative;
+  overflow: hidden;
+  padding: clamp(5rem, 9vw, 7rem) clamp(1.5rem, 6vw, 5rem) clamp(3rem, 6vw, 4.5rem);
+  border-bottom: 1px solid var(--hist-border);
 }
 
-/* ==========================================================================
-   CONTENEDOR LÍNEA DE TIEMPO
-   ========================================================================== */
+.hist-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 980px;
+  margin: 0; /* Asegura la alineación a la izquierda */
+  text-align: left;
+}
+
+.hist-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(10px, 1.1vw, 12px);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--hist-accent);
+  margin-bottom: 1.25rem;
+}
+
+.hist-punto {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--hist-accent);
+  animation: pulse-dot 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(11, 61, 145, .45); }
+  50%      { box-shadow: 0 0 0 7px rgba(11, 61, 145, 0); }
+}
+
+.hist-titulo {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  font-weight: 600;
+  line-height: .95;
+  color: var(--hist-ink);
+  margin-bottom: 1.25rem;
+}
+
+.hist-titulo em {
+  font-style: italic;
+  color: var(--hist-accent);
+}
+
+.hist-subtitulo {
+  font-size: clamp(14px, 1.6vw, 17px);
+  color: var(--hist-ink2);
+  line-height: 1.75;
+  max-width: 520px;
+  font-weight: 400;
+  margin-bottom: 2rem;
+}
+
+.hist-features {
+  display: flex;
+  gap: clamp(12px, 2.5vw, 24px);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.hist-feature {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 100px;
+  border: 1.5px solid var(--hist-border);
+  background: transparent;
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(10px, 1.1vw, 12px);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--hist-accent);
+  white-space: nowrap;
+}
+
+.hist-feature i {
+  font-size: 12px;
+  color: var(--hist-accent);
+}
+
+/* MARQUESINA */
+.hist-marquee-wrap {
+  background: linear-gradient(90deg, #0B2A6B 0%, #0D3B8F 40%, #0E4BAF 70%, #0B2A6B 100%);
+  overflow: hidden;
+  padding: 0;
+  border-top: 2px solid rgba(96, 180, 255, 0.30);
+  border-bottom: 2px solid rgba(96, 180, 255, 0.30);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+  margin-bottom: 5rem;
+}
+
+.hist-marquee-track {
+  display: flex;
+  white-space: nowrap;
+  animation: marquee-fwd 28s linear infinite;
+  padding: 16px 0;
+}
+
+.hist-marquee-wrap:hover .hist-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-fwd {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.hist-marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 28px;
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(11px, 1.2vw, 14px);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(190, 225, 255, 0.85);
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.hist-marquee-item b {
+  color: #60C4FF;
+  font-size: .80em;
+  opacity: 0.9;
+}
+
+/* LÍNEA DE TIEMPO CENTRADA */
+.timeline-section {
+  max-width: 1100px;
+  margin: 0 auto 90px auto;
+  padding: 0 20px;
+}
+
 .timeline-container {
-    position: relative;
-    max-width: 1100px;
-    margin: 80px auto;
-    padding: 0 20px;
+  position: relative;
 }
 
-/* La línea central (Gris muy sutil) */
 .timeline-line {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 2px;
-    height: 100%;
-    background: rgba(18, 61, 90, 0.1); /* Línea con un levísimo tono azul institucional */
-    z-index: 1;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 2px;
+  background-color: var(--hist-border);
 }
 
-/* ==========================================================================
-   ITEMS (Tarjetas de Eventos)
-   ========================================================================== */
 .timeline-item {
-    position: relative;
-    margin-bottom: 100px;
-    width: 100%;
-    display: flex;
-    justify-content: flex-end; 
+  position: relative;
+  margin-bottom: 80px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .timeline-item:nth-child(even) {
-    justify-content: flex-start;
+  justify-content: flex-start;
 }
 
-/* El punto en la línea (Único lugar donde brilla el dorado) */
+/* PUNTO Y FECHA */
 .timeline-dot {
-    position: absolute;
-    left: 50%;
-    top: 0;
-    transform: translateX(-50%);
-    width: 20px;
-    height: 20px;
-    background: var(--accent-color); /* Dorado institucional */
-    border-radius: 50%;
-    z-index: 2;
-    border: 4px solid var(--white);
-    box-shadow: 0 0 0 4px rgba(184, 134, 11, 0.1); /* Halo sutil dorado */
+  position: absolute;
+  left: 50%;
+  top: 25px;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  background-color: var(--hist-accent);
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  z-index: 2;
+  box-shadow: 0 0 0 4px rgba(11, 61, 145, 0.15);
 }
 
-/* Las Fechas (Azul primario para que resalte con fuerza y sobriedad) */
 .timeline-date {
-    position: absolute;
-    left: 50%;
-    top: -35px;
-    transform: translateX(-50%);
-    font-weight: 700;
-    color: var(--primary-color); /* Cambiado de dorado a azul */
-    font-size: 1.2rem;
-    font-family: 'Segoe UI', sans-serif;
-    background: var(--bg-light);
-    padding: 4px 15px;
-    border-radius: 20px;
+  position: absolute;
+  left: 50%;
+  top: -15px;
+  transform: translateX(-50%);
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  font-size: 0.82rem;
+  letter-spacing: .1em;
+  color: var(--hist-accent);
+  background-color: #E3F2FD;
+  border: 1px solid rgba(11, 61, 145, 0.2);
+  padding: 4px 16px;
+  border-radius: 100px;
+  z-index: 3;
 }
 
-/* Contenido de la Tarjeta */
+/* TARJETAS DE CONTENIDO */
 .timeline-content {
-    width: 45%;
-    background: var(--white);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(18, 61, 90, 0.06); /* Sombra armonizada con azul */
-    transition: var(--transition);
-    border: 1px solid rgba(0,0,0,0.03);
+  width: 45%;
+  background-color: var(--hist-card-bg);
+  border: 1.5px solid var(--hist-border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out), border-color 0.25s;
 }
 
 .timeline-content:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(18, 61, 90, 0.1);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 45px -8px rgba(11, 61, 145, .14);
+  border-color: transparent;
+}
+
+.timeline-img {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background-color: var(--hist-border);
 }
 
 .timeline-img img {
-    width: 100%;
-    height: 250px;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.timeline-content:hover .timeline-img img {
+  transform: scale(1.05);
 }
 
 .timeline-text {
-    padding: 25px;
+  padding: 24px;
 }
 
-/* Títulos de las tarjetas */
 .timeline-text h3 {
-    margin-bottom: 15px;
-    color: var(--text-dark); /* Gris oscuro, excelente contraste */
-    font-family: 'Georgia', serif;
-    font-size: 1.4rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--hist-ink);
+  margin-bottom: 10px;
 }
 
-/* Párrafos */
 .timeline-text p {
-    color: var(--text-light); /* Gris medio de lectura */
-    line-height: 1.6;
-    font-size: 0.95rem;
+  font-size: 0.92rem;
+  color: var(--hist-ink2);
+  line-height: 1.65;
+  margin: 0;
 }
 
-/* ==========================================================================
-   RESPONSIVE (MÓVIL)
-   ========================================================================== */
-@media (max-width: 768px) {
-    .historia-header h1 { font-size: 2.5rem; }
-    
-    .timeline-line { left: 20px; }
-    .timeline-dot { left: 20px; }
-    
-    .timeline-date { 
-        left: 50px; 
-        transform: none; 
-        top: -10px; 
-        background: transparent;
-        padding: 0;
-    }
-    
-    .timeline-item, .timeline-item:nth-child(even) {
-        justify-content: flex-end;
-        margin-bottom: 60px;
-    }
-    
-    .timeline-content {
-        width: calc(100% - 50px);
-        margin-top: 25px; /* Da espacio a la fecha en móvil */
-    }
+/* RESPONSIVO MÓVIL */
+@media (max-width: 850px) {
+  .timeline-line {
+    left: 20px;
+  }
+
+  .timeline-dot {
+    left: 20px;
+  }
+
+  .timeline-date {
+    left: 20px;
+    transform: none;
+    top: -15px;
+  }
+
+  .timeline-item, 
+  .timeline-item:nth-child(even) {
+    justify-content: flex-end;
+  }
+
+  .timeline-content {
+    width: calc(100% - 45px);
+  }
+}
+
+@media (max-width: 640px) {
+  .hist-features { gap: 8px; }
+  .hist-feature { font-size: 10px; padding: 6px 12px; }
+  .timeline-text { padding: 18px; }
+  .timeline-img { height: 160px; }
 }

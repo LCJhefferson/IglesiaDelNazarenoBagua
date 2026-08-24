@@ -1,0 +1,212 @@
+/* ==========================================================================
+   COMPONENTE: HERO CARRUSEL (Estilos independientes)
+   ========================================================================== */
+.hero-slider {
+    position: relative;
+    height: 85vh;
+    min-height: 550px;
+    overflow: hidden;
+    background-color: #0b0f19;
+}
+
+.slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.03);
+    transition: opacity 0.8s ease-in-out, transform 1s ease-in-out;
+}
+
+.slide.active {
+    opacity: 1;
+    transform: scale(1);
+    z-index: 1;
+}
+
+.slide-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Oscurecimiento radial para centrar la vista */
+.overlay-slider {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.75) 100%);
+    z-index: 1;
+}
+
+.overlay-slider-logo {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    z-index: 1;
+}
+
+/* Contenido perfectamente centrado */
+.slide-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #ffffff;
+    z-index: 2;
+    width: 90%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Etiqueta / Pill superior */
+.hero-pill {
+    background: #c6933a;
+    color: #121824;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    padding: 6px 18px;
+    border-radius: 30px;
+    text-transform: uppercase;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 15px rgba(198, 147, 58, 0.3);
+}
+
+/* Cita principal */
+.hero-quote {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: clamp(28px, 4.2vw, 54px);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 12px;
+    color: #ffffff;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* Versículo en dorado */
+.hero-verse {
+    font-family: 'Segoe UI', sans-serif;
+    color: #d8a649;
+    font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 22px);
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+}
+
+/* Subtítulo */
+.hero-subtext {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: clamp(14px, 1.3vw, 17px);
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 30px;
+    max-width: 650px;
+}
+
+/* Botones */
+.hero-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-hero-primary {
+    background: #c6933a;
+    color: #121824;
+    padding: 12px 30px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-hero-primary:hover {
+    background: #e0a745;
+    transform: translateY(-2px);
+}
+
+.btn-hero-secondary {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    padding: 12px 30px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+.btn-hero-secondary:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* Controles laterales */
+.hero-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    font-size: 1rem;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.hero-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.hero-nav-btn.prev { left: 20px; }
+.hero-nav-btn.next { right: 20px; }
+
+/* Indicadores inferiores */
+.hero-dots {
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.hero-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.hero-dot.active {
+    background: #c6933a;
+    width: 28px;
+    border-radius: 10px;
+}
+
+/* Responsivo para móviles */
+@media (max-width: 768px) {
+    .hero-slider { height: 65vh; min-height: 480px; }
+    .hero-nav-btn { width: 36px; height: 36px; font-size: 0.85rem; }
+    .hero-nav-btn.prev { left: 10px; }
+    .hero-nav-btn.next { right: 10px; }
+}

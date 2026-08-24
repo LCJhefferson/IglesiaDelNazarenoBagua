@@ -1,25 +1,17 @@
 /* ==========================================================================
-   VARIABLES GLOBALES (ROOT) - Requerido para la navegación
+   VARIABLES GLOBALES (ROOT) - Aplica a todas las páginas
    ========================================================================== */
 :root {
-    /* Identidad Visual */
     --primary-color: #123d5a;    /* Azul institucional */
-    --accent-color: #b8860b;     /* Dorado (solo para acentos) */
-    
-    /* Colores de Interfaz Clara */
-    --bg-light: #f7fafc;         /* Gris sutil para hovers y botones */
-    --white: #ffffff;            /* Blanco puro */
-    
-    /* Tipografía y Texto */
-    --text-dark: #1a202c;        /* Títulos y enlaces */
-    --text-light: #4a5568;       /* Párrafos y submenús */
-    
-    /* Animaciones */
+    --accent-color: #d4a359;     /* Dorado/Ocre elegante para hovers/detalles */
+    --text-dark: #1a202c;        /* Para menú desplegado en móvil */
+    --text-light: #4a5568;       
+    --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Tipografía unificada */
     --transition: all 0.3s ease;
 }
 
 /* ==========================================================================
-   HEADER & NAV PERFECCIONADO (SIN LETRAS DORADAS)
+   HEADER BASE
    ========================================================================== */
 .header {
     position: fixed;
@@ -27,30 +19,55 @@
     left: 0;
     width: 100%;
     height: 70px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px); /* Soporte para Safari */
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 4%;
-    box-shadow: 0 2px 15px rgba(18, 61, 90, 0.04); /* Sombra muy sutil */
     z-index: 10000;
     box-sizing: border-box;
+    transition: var(--transition);
+    font-family: var(--font-main); /* Tipografía obligatoria para todo el header */
 }
 
-.logo { display: flex; align-items: center; flex-shrink: 0; }
-.logo img { height: 45px; filter: brightness(0); display: block; }
-
-.nav-container {
-    display: flex; align-items: center; flex-grow: 1; justify-content: flex-end;
+/* Estado sólido por defecto en otras páginas (Historia, Recursos, etc.) */
+.header.header-solido {
+    background-color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.nav { display: flex; align-items: center; margin: 0; padding: 0; }
+/* Forzamos que la tipografía aplique a enlaces y botones dentro del nav */
+.header a, 
+.header button {
+    font-family: var(--font-main);
+}
 
-/* Enlaces principales y Dropdown Link */
-.nav > a, .dropdown-link {
-    color: var(--text-dark); /* Gris oscuro del root */
+/* Logo Blanco inicial */
+.header .logo { display: flex; align-items: center; flex-shrink: 0; }
+.header .logo img { 
+    height: 45px; 
+    display: block; 
+    filter: brightness(0) invert(1); /* Fuerza logo blanco */
+    transition: var(--transition);
+}
+
+.header .nav-container {
+    display: flex; 
+    align-items: center; 
+    flex-grow: 1; 
+    justify-content: flex-end;
+}
+
+.header .nav { display: flex; align-items: center; margin: 0; padding: 0; }
+
+/* Textos blancos legibles */
+.header .nav > a, 
+.header .dropdown-link {
+    color: #ffffff; 
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
     text-decoration: none;
     margin-left: 25px;
     font-weight: 500;
@@ -60,35 +77,38 @@
     position: relative;
     cursor: pointer;
     white-space: nowrap;
+    
 }
 
-/* El dorado se queda exclusivamente en esta delgada línea de acento */
-.nav > a::after, .dropdown-link::after {
+/* Subrayado blanco animado al pasar el mouse */
+.header .nav > a::after, 
+.header .dropdown-link::after {
     content: "";
     position: absolute;
     width: 0;
     height: 2px;
-    background: var(--accent-color); 
-    left: 0;
+    background: #ffffff; 
+    left: 0; 
     bottom: 0;
     transition: var(--transition);
 }
 
-.nav > a:hover::after, .dropdown-link:hover::after {
-    width: 100%;
+.header .nav > a:hover::after, 
+.header .dropdown-link:hover::after { width: 100%; }
+
+.header .nav > a:hover, 
+.header .dropdown-link:hover { 
+    color: #ffffff; 
 }
 
-/* MODIFICADO: El texto cambia al Azul Principal, NO a dorado */
-.nav > a:hover, .dropdown-link:hover { 
-    color: var(--primary-color); 
-}
-
-/* Botón de Ingresar (Login - Versión Escritorio) */
+/* Botón Ingresar inicial */
 .header .login {
-    padding: 8px 20px;
+    padding: 8px 22px;
     border-radius: 20px;
-    background: var(--bg-light); /* Fondo gris claro suave */
-    color: var(--primary-color); 
+    background: rgba(255, 255, 255, 0.2); 
+    color: #ffffff; 
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
     text-decoration: none;
     font-weight: 600;
     font-size: 0.9rem;
@@ -99,24 +119,62 @@
 }
 
 .header .login:hover { 
-    background: var(--primary-color); 
-    color: var(--white); 
-    transform: translateY(-1px); 
+    background: #ffffff; 
+    color: var(--primary-color); 
+    text-shadow: none;
 }
 
-/* Menú Hamburguesa (Oculto en PC) */
-.menu-toggle { 
+.header .menu-toggle { 
     display: none; 
     background: none; 
     border: none; 
     font-size: 1.5rem; 
     cursor: pointer; 
-    color: var(--text-dark); 
-    padding: 5px; 
+    color: #ffffff; 
 }
 
 /* ==========================================================================
-   DROPDOWN MINISTERIOS (PC - TONOS CLAROS Y LIMPIOS)
+   ESTADO AL HACER SCROLL (.scrolled) - FONDO OSCURO EN INICIO
+   ========================================================================== */
+.header.scrolled {
+    background-color: var(--primary-color);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.header.scrolled .logo img {
+    filter: brightness(0) invert(1); 
+}
+
+.header.scrolled .nav > a, 
+.header.scrolled .dropdown-link {
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.header.scrolled .nav > a:hover, 
+.header.scrolled .dropdown-link:hover {
+    color: #ffffff;
+}
+
+.header.scrolled .login {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.header.scrolled .login:hover {
+    background: #ffffff;
+    color: var(--primary-color);
+}
+
+.header.scrolled .menu-toggle {
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   DROPDOWN MINISTERIOS
    ========================================================================== */
 .dropdown { position: relative; }
 .dropdown-link i { font-size: 0.75rem; margin-left: 5px; transition: var(--transition); }
@@ -124,97 +182,92 @@
 .dropdown-menu {
     position: absolute;
     top: 100%;
-    left: 25px;
-    background: var(--white);
+    left: 0;
+    background: rgba(0, 0, 0, 0.575); 
+    backdrop-filter: blur(10px);      
+    -webkit-backdrop-filter: blur(10px);
     min-width: 220px;
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(12, 61, 90, 0.08);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15); 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     padding: 10px 0;
     display: none;
     opacity: 0;
     transform: translateY(10px);
     transition: var(--transition);
     z-index: 11000;
+    overflow: hidden; 
 }
 
 @media (min-width: 1025px) {
-    .dropdown:hover .dropdown-menu { display: block; opacity: 1; transform: translateY(0); }
+    .dropdown:hover .dropdown-menu { 
+        display: block; 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
 }
 
 .dropdown-menu a {
-    display: block !important;
-    margin: 0 !important;
-    padding: 10px 20px !important;
-    font-size: 0.9rem !important;
-    color: var(--text-light) !important; /* Gris medio */
+    display: block;
+    margin: 0;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    color: #ffffff; 
     font-weight: 500;
     transition: var(--transition);
     text-decoration: none;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
-/* MODIFICADO: Cambio a fondo gris limpio y letras azules en el submenú */
 .dropdown-menu a:hover {
-    background: var(--bg-light); /* Fondo gris claro e institucional */
-    color: var(--primary-color) !important; /* Texto Azul */
-    padding-left: 25px !important; 
+    background: rgba(255, 255, 255, 0.15); 
+    color: #ffffff;
+    padding-left: 25px; 
 }
 
 /* ==========================================================================
-   MÓVIL (Max 1024px)
+   RESPONSIVO MÓVIL
    ========================================================================== */
 @media (max-width: 1024px) {
-    .menu-toggle { display: block; }
+    .header .menu-toggle { display: block; }
     
-    .nav-container {
+    .header .nav-container {
         position: fixed;
         top: 0; right: -100%;
         width: 280px; height: 100vh;
-        background: var(--white);
+        background: #ffffff;
         flex-direction: column;
         padding: 90px 30px;
-        transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: right 0.4s ease;
         align-items: flex-start;
         justify-content: flex-start;
-        box-shadow: -5px 0 25px rgba(12, 61, 90, 0.1);
+        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
     }
-    .nav-container.active { right: 0; }
-
-    .nav { flex-direction: column; width: 100%; align-items: flex-start; gap: 15px; }
     
-    .nav > a, .dropdown { width: 100%; margin-left: 0; font-size: 1.1rem; display: block; }
-    .nav > a::after, .dropdown-link::after { display: none; } 
+    .header .nav-container.active { right: 0; }
+    .header .nav { flex-direction: column; width: 100%; align-items: flex-start; gap: 15px; }
+    
+    .header .nav > a, 
+    .header .dropdown-link { 
+        width: 100%; 
+        margin-left: 0; 
+        font-size: 1.1rem; 
+        display: block; 
+        color: var(--text-dark); 
+        text-shadow: none;
+    }
+    
+    .header .nav > a::after, 
+    .header .dropdown-link::after { display: none; } 
 
-    /* Login Móvil */
     .header .login {
         margin-left: 0; 
         width: 100%; 
         text-align: center;
         background: var(--primary-color); 
-        color: var(--white); 
-        margin-top: 15px;
+        color: #ffffff; 
+        margin-top: 15px; 
+        border: none; 
+        text-shadow: none;
     }
-    
-    /* MODIFICADO: El hover en móvil ya no va a dorado, se queda en un tono azul sutilmente más claro */
-    .header .login:hover { 
-        background: #1e537a; 
-    }
-
-    /* Dropdown Acordeón Móvil */
-    .dropdown-link { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0; }
-    
-    .dropdown-menu {
-        position: static; display: none; box-shadow: none;
-        padding-left: 20px; background: transparent; transform: none; opacity: 1; margin-top: 10px;
-    }
-    
-    .dropdown.active .dropdown-menu { display: block; }
-    .dropdown-menu a { padding: 8px 0 !important; font-size: 1rem !important; }
-    
-    /* MODIFICADO: Enlace de móvil activo pasa a azul institucional */
-    .dropdown-menu a:hover {
-        background: transparent;
-        color: var(--primary-color) !important;
-    }
-    
-    .dropdown.active .dropdown-link i { transform: rotate(180deg); }
 }

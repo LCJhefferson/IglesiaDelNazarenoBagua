@@ -50,16 +50,16 @@ class MiembroController {
      * Redirección híbrida y ULTRA-SEGURA
      * Protegida contra XSS (Inyección de código) y Redirecciones Abiertas (Phishing)
      */
-    private function redireccionar(string $url): void {
-        // 1. Mitigación contra Redirecciones Abiertas
-        if (preg_match('/^https?:\/\//i', $url)) {
-            $hostPermitido = $_SERVER['HTTP_HOST'];
-            $hostDestino = parse_url($url, PHP_URL_HOST);
-            
-            if ($hostDestino !== $hostPermitido) {
-                $url = "index.php?vista=dashboard&seccion=membresia";
-            }
-        }
+private function redireccionar(string $url): void {
+// 1. Mitigación contra Redirecciones Abiertas
+if (preg_match('/^https?:\/\//i', $url)) {
+$hostPermitido = $_SERVER['HTTP_HOST'];
+    $hostDestino = parse_url($url, PHP_URL_HOST);
+    
+    if ($hostDestino !== $hostPermitido) {
+        $url = "index.php?vista=dashboard&seccion=membresia";
+    }
+}
 
         
         if (!headers_sent()) {

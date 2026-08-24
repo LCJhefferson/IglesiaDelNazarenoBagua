@@ -135,5 +135,5 @@ $rolActual = (int)($_SESSION['rol_id'] ?? 0);
 
 </div>
 
-<script src="admin/js/sidebar.js"></script>
+<!-- <script src="admin/js/sidebar.js"></script> -->
 </aside>

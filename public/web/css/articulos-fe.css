@@ -1,74 +1,268 @@
-/* RESET GENERAL */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-    background-color: #f6f8f9; 
-    color: #333333;
-    padding: 40px 20px;
-}
+/* ==========================================================================
+   ARTÍCULOS DE FE (Opción 2: Tarjetas Uniformes con Texto Limitado)
+   ========================================================================== */
 
 /* CONTENEDOR PRINCIPAL */
-.fe-container { max-width: 1200px; margin: 0 auto; }
+.fe-main-wrapper {
+    max-width: 1200px;
+    margin: 120px auto 80px auto;
+    padding: 0 20px;
+}
 
-/* ENCABEZADO */
-.fe-header { text-align: center; margin-bottom: 50px; padding: 0 10%; }
-.fe-header h1 { font-size: 34px; color: #2e7d32; font-weight: 600; margin-bottom: 20px; }
-.fe-header p { font-size: 14px; color: #666666; line-height: 1.7; text-align: justify; }
+/* HERO Y BANNER INTEGRADO */
+.fe-hero {
+    text-align: center;
+    margin-bottom: 40px;
+}
 
-/* ESTRUCTURA DE CONTENIDO */
-.fe-content-layout { display: grid; grid-template-columns: 320px 1fr; gap: 40px; align-items: start; }
+.fe-hero h1 {
+    font-family: var(--font-serif);
+    font-size: 3.2rem;
+    color: var(--primary-color);
+    margin-top: 10px;
+    margin-bottom: 16px;
+}
 
-/* BARRA LATERAL */
-.fe-sidebar { position: sticky; top: 20px; }
-.sidebar-card { background-color: #ffffff; border-radius: 12px; padding: 30px 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); border: 1px solid #eef1f4; }
-.brand-icon-wrapper { width: 100px; height: 100px; margin: 0 auto 30px; }
-.brand-icon-wrapper img { width: 100%; height: 100%; object-fit: contain; }
-.download-block h3 { font-size: 15px; color: #444444; font-weight: 500; margin-bottom: 5px; }
-.download-block h2 { font-size: 26px; color: #222222; font-weight: 700; margin-bottom: 15px; }
-.download-block p { font-size: 13px; color: #777777; line-height: 1.5; margin-bottom: 20px; }
-.btn-download { display: inline-flex; align-items: center; gap: 8px; background-color: #4a4a4a; color: #ffffff; text-decoration: none; padding: 10px 18px; font-size: 12px; font-weight: 600; border-radius: 6px; letter-spacing: 0.5px; transition: background-color 0.2s; }
-.btn-download:hover { background-color: #2e7d32; }
-.divider { margin-top: 35px; padding-top: 30px; border-top: 1px solid #edf1f4; }
+.fe-hero-lead {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    max-width: 800px;
+    margin: 0 auto 35px auto;
+    line-height: 1.7;
+}
 
-/* ACORDEONES */
-.fe-accordion-section { display: flex; flex-direction: column; gap: 12px; }
-.accordion-item { background-color: #ffffff; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.01); border: 1px solid #eef1f4; transition: border-color 0.2s; }
-.accordion-item:hover { border-color: #cbd5e1; }
-.accordion-header { width: 100%; background: #ffffff; border: none; outline: none; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-align: left; }
-.accordion-header span { font-size: 16px; font-weight: 600; color: #3a4556; transition: color 0.2s; }
-.arrow-icon { font-size: 13px; color: #2e7d32; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+/* BANNER DE DESCARGA PDF */
+.fe-download-banner {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 24px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    box-shadow: var(--shadow-sm);
+    text-align: left;
+}
 
-/* CONTENIDO DEL ACORDEÓN (ALTURA AUTOMÁTICA) */
-.accordion-content {
-    height: 0; 
+.banner-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* BADGE PERSONALIZADO DE PDF */
+.custom-pdf-badge {
+    width: 48px;
+    height: 52px;
+    background-color: #ffebee;
+    border: 1px solid #ffcdd2;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.custom-pdf-badge i {
+    color: #e53935;
+    font-size: 1.2rem;
+}
+
+.custom-pdf-badge span {
+    color: #c62828;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    line-height: 1;
+}
+
+.banner-info strong {
+    display: block;
+    font-family: var(--font-sans);
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.banner-info > div > span {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-secondary-link {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+}
+
+/* FILTROS POR CATEGORÍA */
+.fe-filter-nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+.filter-btn {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.filter-btn:hover, 
+.filter-btn.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border-color: var(--primary-color);
+}
+
+/* GRID DE TARJETAS (FILAS RECTAS Y ALINEADAS) */
+.fe-grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.fe-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 28px;
+    display: flex;
+    gap: 20px;
+    transition: var(--transition);
+    align-items: flex-start;
+}
+
+.fe-card:hover {
+    border-color: var(--accent-blue);
+    box-shadow: var(--shadow-md);
+}
+
+.fe-card-number {
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    opacity: 0.85;
+    line-height: 1;
+}
+
+/* ESTRUCTURA INTERNA DE LA TARJETA */
+.fe-card-body {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.fe-card-body h2 {
+    font-family: var(--font-sans);
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+/* --- RECORTAR TEXTO --- */
+.fe-card-body p {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 10px;
+    
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1); 
-    background-color: #fafbfc; 
+    transition: max-height 0.3s ease;
 }
 
-/* NUEVA CAJA INTERNA OBLIGATORIA */
-.accordion-content-inner {
-    padding: 20px 24px; 
+/* EXPANDIR TEXTO */
+.fe-card-body.expanded p {
+    display: block;
+    overflow: visible;
 }
 
-.accordion-content p {
-    font-size: 14px; color: #556275; line-height: 1.6; text-align: justify; margin-bottom: 12px; 
+/* BOTÓN "LEER MÁS" */
+.btn-toggle-read {
+    background: none;
+    border: none;
+    color: var(--accent-blue);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 12px;
+    text-align: left;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
 }
-.accordion-content p:last-child { margin-bottom: 0; }
 
-/* ESTADOS ACTIVOS */
-.accordion-item.active { border-color: #2e7d32; }
-.accordion-item.active .accordion-header span { color: #2e7d32; }
-.accordion-item.active .arrow-icon { transform: rotate(180deg); }
+.btn-toggle-read:hover {
+    text-decoration: underline;
+}
 
-/* RESPONSIVE */
-@media (max-width: 992px) {
-    .fe-content-layout { grid-template-columns: 1fr; gap: 30px; }
-    .fe-sidebar { position: relative; top: 0; }
-    .fe-header { padding: 0; }
+/* CITAS BÍBLICAS */
+.citas-biblicas {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--accent-blue);
+    display: block;
+    margin-top: auto;
+}
+
+/* TARJETA DESTACADA */
+.fe-card.highlight-card {
+    border: 2px solid var(--accent-blue);
+    background-color: #f8fafc;
+}
+
+.card-badge {
+    background-color: var(--accent-blue-light);
+    color: var(--accent-blue);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: inline-block;
+}
+
+/* RESPONSIVO */
+@media (max-width: 900px) {
+    .fe-grid-container {
+        grid-template-columns: 1fr;
+    }
+
+    .fe-download-banner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .banner-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .fe-hero h1 {
+        font-size: 2.3rem;
+    }
 }

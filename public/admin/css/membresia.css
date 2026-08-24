@@ -467,3 +467,76 @@ input:focus,select:focus{
     from { opacity: 0; transform: scale(0.9); }
     to { opacity: 1; transform: scale(1); }
 }
+/* ==========================================
+   ESTILOS PARA TRIPLE SELECTOR DE FECHA
+   ========================================== */
+.fecha-nacimiento-container {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    align-items: center;
+}
+
+.fecha-nacimiento-container input,
+.fecha-nacimiento-container select {
+    height: 44px;
+    font-size: 0.88rem;
+    color: var(--texto);
+    background: #f8fafc;
+    border: 1.5px solid var(--borde);
+    border-radius: 10px;
+    transition: all 0.25s ease;
+}
+
+/* Distribución proporcional equilibrada */
+#fn_dia {
+    flex: 1;
+    text-align: center;
+}
+
+#fn_mes {
+    flex: 2;
+    cursor: pointer;
+}
+
+#fn_anio {
+    flex: 1.2;
+    text-align: center;
+}
+
+/* Efectos al pasar el cursor y enfocar */
+.fecha-nacimiento-container input:hover,
+.fecha-nacimiento-container select:hover {
+    border-color: #cbd5e1;
+}
+
+.fecha-nacimiento-container input:focus,
+.fecha-nacimiento-container select:focus {
+    border-color: var(--acento);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.12);
+    outline: none;
+}
+
+/* Quitar flechas por defecto de los campos numéricos de fecha */
+.fecha-nacimiento-container input[type="number"]::-webkit-outer-spin-button,
+.fecha-nacimiento-container input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.fecha-nacimiento-container input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Adaptación responsive en pantallas pequeñas */
+@media (max-width: 500px) {
+    .fecha-nacimiento-container {
+        gap: 6px;
+    }
+    .fecha-nacimiento-container input,
+    .fecha-nacimiento-container select {
+        padding: 8px 6px;
+        font-size: 0.8rem;
+    }
+}

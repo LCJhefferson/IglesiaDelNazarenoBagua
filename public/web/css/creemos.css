@@ -1,143 +1,144 @@
-/* ========================= */
-/* DISEÑO DECLARACIÓN DE CREENCIAS */
-/* ========================= */
-.titulo {
-    font-size: 42px;
-    color: #3daae9; /* Color azul grisáceo del logo */
-    font-weight: 600;
-    margin-bottom: 20px;
+/* ==========================================================================
+   DECLARACIÓN DE CREENCIAS (Estilos sin sidebar - solo contenido)
+   Consume variables globales de globalPublico.css
+   ========================================================================== */
+
+/* CONTENEDOR PRINCIPAL Y ESPACIADO NAV */
+.creencias-container {
+    max-width: 1050px;
+    margin: 120px auto 80px auto;
+    padding: 0 20px;
 }
+
+/* ENCABEZADO Y LEMA PRINCIPAL */
 .creencias-header {
     text-align: center;
-    padding: 60px 20px 20px;
-    background-color: #ffffff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-bottom: 50px;
 }
 
-.titulo-creencias {
-    font-size: 32px;
-    color: #4b7086; /* Color azul grisáceo del logo */
-    font-weight: 600;
-    margin-bottom: 20px;
+.creencias-header h1.titulo {
+    font-family: var(--font-serif);
+    font-size: 3.2rem;
+    color: var(--primary-color);
+    margin-top: 10px;
+    margin-bottom: 24px;
 }
 
-.subtitulo-creencias {
-    font-size: 15px;
-    color: #334155;
-    max-width: 800px;
-    margin: 0 auto;
-    line-height: 1.6;
-}
-
-/* Sección Lema (Un Señor, Una Fe...) */
 .creencias-lema {
-    text-align: center;
-    padding: 20px 20px 50px;
-    background-color: #ffffff;
-    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 35px 40px;
     max-width: 900px;
     margin: 0 auto;
+    box-shadow: var(--shadow-sm);
 }
 
 .creencias-lema h2 {
-    font-size: 22px;
-    color: #4b7086;
-    font-weight: 600;
-    margin-bottom: 25px;
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--accent-blue);
+    margin-bottom: 16px;
     letter-spacing: 0.5px;
-}
-
-.creencias-lema h2 em {
-    font-style: italic;
-    font-weight: 600;
 }
 
 .creencias-lema p {
-    font-size: 15px;
-    color: #475569;
-    line-height: 1.7;
-}
-
-/* Contenedor Principal Gris */
-.creencias-container {
-    padding: 0 5% 80px;
-    display: flex;
-    justify-content: center;
-    background-color: #ffffff; /* Fondo exterior blanco */
-}
-
-.creencias-card-main {
-    max-width: 1200px;
-    width: 100%;
-    background: #f3f4f6; /* Fondo gris claro interior */
-    border-radius: 12px;
-    padding: 50px;
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    gap: 40px;
-    align-items: start;
-}
-
-/* Logo Sticky (se queda fijo al bajar) */
-.creencias-sidebar img {
-    width: 100%;
-    max-width: 220px;
-    display: block;
-    margin: 0 auto;
-    position: sticky;
-    top: 20px;
-}
-
-/* Grid de las tarjetas blancas */
-.creencias-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-    gap: 20px;
-}
-
-.creencia-item {
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 25px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02); /* Sombra súper suave */
-    transition: transform 0.2s ease;
-}
-
-.creencia-item:hover {
-    transform: translateY(-2px); /* Pequeño efecto al pasar el mouse */
-}
-
-.creencia-item h4 {
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 14px;
-    color: #1e293b;
-    font-weight: 700;
-    margin-bottom: 12px;
-    letter-spacing: 0.5px;
-}
-
-.creencia-item p {
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 14px;
-    color: #475569;
-    line-height: 1.6;
+    font-family: var(--font-sans);
+    font-size: 0.98rem;
+    color: var(--text-muted);
+    line-height: 1.75;
     margin: 0;
 }
 
-/* Responsivo para celulares y tablets */
-@media (max-width: 900px) {
-    .creencias-card-main {
+/* DECLARACIÓN SUBTITULAR */
+.creencias-declaracion-header {
+    text-align: center;
+    margin: 50px auto 35px auto;
+    max-width: 850px;
+}
+
+.titulo-creencias {
+    font-family: var(--font-sans);
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.subtitulo-creencias {
+    font-family: var(--font-sans);
+    font-size: 0.98rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+.subtitulo-creencias strong {
+    color: var(--primary-color);
+}
+
+/* GRID DE TARJETAS */
+.creencias-grid-full {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+}
+
+/* TARJETAS CON BORDE RESALTANTE EN LA IZQUIERDA */
+.creencia-item {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-left: 5px solid var(--accent-blue); /* <-- BORDE DESTACADO IZQUIERDO */
+    border-radius: var(--radius-md);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.creencia-item:hover {
+    border-top-color: var(--accent-blue);
+    border-right-color: var(--accent-blue);
+    border-bottom-color: var(--accent-blue);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.badge-creemos {
+    align-self: flex-start;
+    background-color: var(--accent-blue-light);
+    color: var(--accent-blue);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.creencia-item p {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    line-height: 1.65;
+    margin: 0;
+}
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+    .creencias-grid-full {
         grid-template-columns: 1fr;
-        padding: 30px 20px;
     }
-    .creencias-sidebar {
-        margin-bottom: 30px;
+
+    .creencias-header h1.titulo {
+        font-size: 2.3rem;
     }
-    .creencias-sidebar img {
-        position: static; /* Quita el sticky en celular */
-        max-width: 180px;
-    }
-    .creencias-grid {
-        grid-template-columns: 1fr; /* Pasa a 1 columna */
+
+    .creencias-lema {
+        padding: 24px 20px;
     }
 }

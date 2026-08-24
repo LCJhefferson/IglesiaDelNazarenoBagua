@@ -3,7 +3,6 @@
 use Illuminate\Database\Capsule\Manager as DB;
 
 // Buscamos si hay un vivo activo usando Eloquent
-// Equivalente a: SELECT titulo FROM transmisiones WHERE estado_id = 1 LIMIT 1
 $live = DB::table('transmisiones')->where('estado_id', 1)->first();
 ?>
 <!DOCTYPE html>
@@ -15,8 +14,15 @@ $live = DB::table('transmisiones')->where('estado_id', 1)->first();
     <link rel="stylesheet" href="<?= URL ?>public/web/css/nav.css">
     <link rel="stylesheet" href="<?= URL ?>public/web/css/cards_conocenos.css">
     <link rel="stylesheet" href="<?= URL ?>public/web/css/footer.css">
+    <link rel="stylesheet" href="<?= URL ?>public/web/css/carrusel_noticias.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <style>
+        /* Desplazamiento suave para la navegación por anclas */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 </head>
 <body>
 
@@ -38,77 +44,91 @@ $live = DB::table('transmisiones')->where('estado_id', 1)->first();
 
 <?php 
 include __DIR__ . '/componentes/nav.php'; 
+include __DIR__ . '/componentes/hero_carrusel.php'; 
 ?>
 
-<section class="hero-slider">
-    <div class="slide active">
-        <img src="<?= URL ?>public/web/imagenes/1.png" class="slide-img">
-        <div class="overlay-slider"></div> <div class="slide-content">
-            <h1>Iglesia del Nazareno</h1>
-            <h2>Bagua</h2>
-            <p>Llamados a Santidad</p>
-        </div>
-    </div>
-
-    <div class="slide">
-        <img src="<?= URL ?>public/web/imagenes/2.png" class="slide-img">
-        <div class="overlay-slider"></div> <div class="slide-content">
-            <h1>Una Familia en Cristo</h1>
-            <p>Unidos en amor y fe</p>
-        </div>
-    </div>
-
-    <div class="slide">
-        <img src="<?= URL ?>public/web/imagenes/3.png" class="slide-img">
-        <div class="overlay-slider"></div> <div class="slide-content">
-            <h1>Bienvenido</h1>
-            <p>Este es tu hogar</p>
-        </div>
-    </div>
-</section>
-
 <section class="card-section">
-    <div class="card-salvacion">
-        <h2>¿ERES SALVO?</h2>
-        <p>Descubre lo que la Biblia enseña sobre la salvación y cómo tener una relación con Dios.</p>
-        <a href="<?= URL ?>Car_salvacion" class="btn-descubre">Descúbrelo</a>
+    <div class="card-salvacion" style="background-image: url('<?= URL ?>public/web/imagenes/TU_IMAGEN.jpg');">
+        
+        <div class="salvacion-overlay"></div>
+
+        <div class="salvacion-content">
+            <!-- Lado Izquierdo: Información principal -->
+            <div class="salvacion-left">
+                <span class="badge-subtitulo">
+                    <i class="fa-solid fa-heart"></i> LA PREGUNTA MÁS IMPORTANTE
+                </span>
+                <h2>¿Eres salvo?</h2>
+                <p>
+                    Esta es la pregunta más importante de tu vida. No se trata de religión, 
+                    se trata de una relación personal con Jesucristo. Descubre la buena noticia 
+                    que puede transformar tu eternidad.
+                </p>
+                <div class="salvacion-acciones">
+                    <a href="<?= URL ?>Car_salvacion" class="btn-evangelio">
+                        <i class="fa-solid fa-heart"></i> Conocer el Evangelio
+                    </a>
+                    <!-- BOTÓN AGREGADO -->
+                    <a href="#conocenos" class="btn-iglesia">
+                        <i class="fa-solid fa-church"></i> Conocer la iglesia
+                    </a>
+                </div>
+            </div>
+
+            <!-- Lado Derecho: Tarjeta del versículo -->
+            <div class="salvacion-right">
+                <div class="versiculo-card">
+                    <div class="icono-corazon">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                    <blockquote>
+                        "Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en Él cree no se pierda, mas tenga vida eterna."
+                    </blockquote>
+                    <cite>— Juan 3:16</cite>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
-<?php include __DIR__ . '/cards_conocenos.php'; ?>
 
+<!-- SECCIÓN CONÓCENOS (ENVOLTORIO CON ID) -->
+<div id="conocenos">
+    <?php include __DIR__ . '/cards_conocenos.php'; ?>
+</div>
+
+<!-- SECCIÓN NOTICIAS NAZARENAS -->
 <section class="noticias-section" id="noticias">
-    <h2 class="titulo-noticias">NOTICIAS NAZARENAS</h2>
+    <div class="noticias-container">
+        
+        <header class="noticias-header">
+            <span class="badge-tag">• ACTUALIDAD</span>
+            <h2 class="titulo-seccion-noticias">Noticias Nazarenas</h2>
+        </header>
 
-    <?php
-    // Obtenemos una colección de objetos de noticias
-    $noticiasPublicas = DB::table('noticias')
-                        ->where('estado', 1)
-                        ->orderBy('fecha_creacion', 'DESC')
-                        ->get(); 
-    $totalNoticias = count($noticiasPublicas);
-    ?>
+        <?php
+        $noticiasPublicas = DB::table('noticias')
+                            ->where('estado', 1)
+                            ->orderBy('fecha_creacion', 'DESC')
+                            ->get(); 
+        $totalNoticias = count($noticiasPublicas);
+        ?>
 
-    <?php if($totalNoticias === 0): ?>
-        <p style="text-align:center; color:#64748b; padding:40px 0;">
-            No hay noticias disponibles por el momento.
-        </p>
-    <?php else: ?>
+        <?php if($totalNoticias === 0): ?>
+            <p class="noticias-vacio">No hay noticias disponibles por el momento.</p>
+        <?php else: ?>
 
-    <div class="carrusel-wrapper">
-    <button class="carrusel-btn prev" onclick="moverCarrusel(-1)">
-        <i class="fa-solid fa-chevron-left"></i>
-    </button>
-
-    <div class="carrusel-track-container">
-        <div class="carrusel-track" id="carrusel-track">
-            <?php foreach($noticiasPublicas as $np): ?>
-            <div class="carrusel-item">
-                <div class="noticia-card">
-                    <?php if(!empty($np->imagen_portada)): ?>
-                        <img src="<?= URL ?><?= htmlspecialchars($np->imagen_portada) ?>" alt="<?= htmlspecialchars($np->titulo) ?>">
-                    <?php else: ?>
-                        <img src="<?= URL ?>public/web/imagenes/noticia2.webp" alt="Noticia">
-                    <?php endif; ?>
+        <div class="ticker-wrapper" id="tickerWrapper">
+            <div class="ticker-track">
+                
+                <?php foreach($noticiasPublicas as $np): ?>
+                <article class="noticia-card">
+                    <div class="noticia-img-wrap">
+                        <?php if(!empty($np->imagen_portada)): ?>
+                            <img src="<?= URL ?><?= htmlspecialchars($np->imagen_portada) ?>" alt="<?= htmlspecialchars($np->titulo) ?>" loading="lazy">
+                        <?php else: ?>
+                            <img src="<?= URL ?>public/web/imagenes/noticia2.webp" alt="Noticia" loading="lazy">
+                        <?php endif; ?>
+                    </div>
                     
                     <div class="noticia-content">
                         <span class="noticia-fecha">
@@ -116,34 +136,53 @@ include __DIR__ . '/componentes/nav.php';
                             <?= date("d/m/Y", strtotime($np->fecha_creacion)) ?>
                         </span>
                         <h3><?= htmlspecialchars($np->titulo) ?></h3>
-                        <p><?= htmlspecialchars(mb_substr($np->resumen, 0, 80, 'UTF-8')) ?>...</p>
-                        <a href="<?= URL ?>public/index.php?vista=noticia&id=<?= $np->id ?>&origen=web" class="btn-leer">Leer más →</a>
-                    </div> 
-                </div> 
-            </div> 
-            <?php endforeach; ?>
+                        <p><?= htmlspecialchars(mb_substr($np->resumen, 0, 75, 'UTF-8')) ?>...</p>
+                        
+                        <a href="<?= URL ?>public/index.php?vista=noticia&id=<?= $np->id ?>&origen=web" class="btn-leer-mas">
+                            Leer más <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </article>
+                <?php endforeach; ?>
+
+                <?php foreach($noticiasPublicas as $np): ?>
+                <article class="noticia-card" aria-hidden="true">
+                    <div class="noticia-img-wrap">
+                        <?php if(!empty($np->imagen_portada)): ?>
+                            <img src="<?= URL ?><?= htmlspecialchars($np->imagen_portada) ?>" alt="<?= htmlspecialchars($np->titulo) ?>" loading="lazy">
+                        <?php else: ?>
+                            <img src="<?= URL ?>public/web/imagenes/noticia2.webp" alt="Noticia" loading="lazy">
+                        <?php endif; ?>
+                    </div>
+                    
+                    <div class="noticia-content">
+                        <span class="noticia-fecha">
+                            <i class="fa-regular fa-calendar"></i>
+                            <?= date("d/m/Y", strtotime($np->fecha_creacion)) ?>
+                        </span>
+                        <h3><?= htmlspecialchars($np->titulo) ?></h3>
+                        <p><?= htmlspecialchars(mb_substr($np->resumen, 0, 75, 'UTF-8')) ?>...</p>
+                        
+                        <a href="<?= URL ?>public/index.php?vista=noticia&id=<?= $np->id ?>&origen=web" class="btn-leer-mas">
+                            Leer más <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </article>
+                <?php endforeach; ?>
+
+            </div>
         </div>
+
+        <?php endif; ?>
+
     </div>
-
-    <button class="carrusel-btn next" onclick="moverCarrusel(1)">
-        <i class="fa-solid fa-chevron-right"></i>
-    </button>
-</div>
-
-    <div class="carrusel-dots" id="carrusel-dots">
-        <?php foreach($noticiasPublicas as $idx => $np): ?>
-        <span class="dot <?= $idx === 0 ? 'activo' : '' ?>" onclick="irASlide(<?= $idx ?>)"></span>
-        <?php endforeach; ?>
-    </div>
-
-    <?php endif; ?>
 </section>
 
 <?php 
 include __DIR__ . '/componentes/footer.php'; 
 ?>
 
-<script src="<?= URL ?>public/web/js/index.js"></script>
+<script src="<?= URL ?>public/web/js/noticias_carrusel.js"></script>
 <script src="<?= URL ?>public/web/js/notificaciones_vivo.js"></script>
 
 </body>

@@ -255,4 +255,74 @@ flex-direction: column;
     padding: 30px;
     background: var(--admin-bg-content); /* Fondo limpio para leer datos y tablas */
     box-sizing: border-box;          
+}/* ==========================================================================
+   ADAPTABILIDAD RESPONSIVA PANEL ADMINISTRATIVO
+   ========================================================================== */
+
+.mobile-toggle-btn {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1002;
+    background: var(--admin-sidebar-bg);
+    color: var(--admin-text-light);
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(11, 23, 42, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 1003;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+@media (max-width: 991px) {
+    .mobile-toggle-btn {
+        display: flex !important;
+    }
+
+    .sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        height: 100vh !important;
+        width: 280px !important;
+        z-index: 1005 !important; /* Capa superior sobre todo el contenido */
+        transform: translateX(-100%) !important; /* Oculto fuera de pantalla */
+        transition: transform 0.3s ease-in-out !important;
+    }
+
+    .sidebar.show {
+        transform: translateX(0) !important; /* Muestra el menú al presionar */
+    }
+
+    .main-area {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    .content {
+        padding: 75px 15px 20px 15px !important;
+    }
 }

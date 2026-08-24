@@ -1,9 +1,9 @@
 /**
- * SISTEMA DE GESTIÓN DE VISITAS - JAVASCRIPT PRINCIPAL (CORREGIDO)
+ * SISTEMA DE GESTIÓN DE VISITAS - JAVASCRIPT PRINCIPAL
  */
 
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Restaurar filtros desde LocalStorage
+    // 1. Restaurar filtros desde LocalStorage al cargar la página
     if (localStorage.getItem('v_filtroNombre') !== null) {
         document.getElementById('filtroNombre').value = localStorage.getItem('v_filtroNombre');
     }
@@ -17,21 +17,11 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('filtroModo').value = localStorage.getItem('v_filtroModo');
     }
 
-// =========================================================================
-    // NUEVO: Escuchar los cambios en los inputs para filtrar sin recargar
-    // =========================================================================
-    
-    // // Escucha cuando el usuario escribe en el buscador de nombres
-    // document.getElementById('filtroNombre').addEventListener('input', filtrarVisitas);
-    
-    // // Escuha cuando el usuario cambia una opción en los selectores desplegables
-    // document.getElementById('filtroMotivo').addEventListener('change', filtrarVisitas);
-    // document.getElementById('filtroEstado').addEventListener('change', filtrarVisitas);
-    // document.getElementById('filtroModo').addEventListener('change', filtrarVisitas);
-    
-
-    // 2. Ejecutar el filtrado inicial
-    filtrarVisitas();
+    // 2. Escuchar eventos en los inputs para filtrar en tiempo real
+    document.getElementById('filtroNombre').addEventListener('input', filtrarVisitas);
+    document.getElementById('filtroMotivo').addEventListener('change', filtrarVisitas);
+    document.getElementById('filtroEstado').addEventListener('change', filtrarVisitas);
+    document.getElementById('filtroModo').addEventListener('change', filtrarVisitas);
 });
 
 // ==========================================
@@ -39,14 +29,11 @@ document.addEventListener("DOMContentLoaded", function() {
 // ==========================================
 
 function abrirModalVisita(id, nombre) {
-
     document.getElementById('modalHeaderTitulo').textContent = 'Registrar Visita';
     document.getElementById('btnTextVisita').textContent = 'Guardar Registro';
     
-   
     document.getElementById('modalVisitaId').value = ''; 
     document.getElementById('modalMiembroId').value = id;
-    
     document.getElementById('modalNombreMiembro').textContent = nombre;
 
     const inputFecha = document.getElementById('txtFechaVisita');
@@ -54,41 +41,27 @@ function abrirModalVisita(id, nombre) {
     inputFecha.value = hoy;
     inputFecha.max = hoy; 
 
-    
     document.getElementById('selectMotivo').value = 'Visita Regular';
     document.getElementById('contenedorOtros').style.display = 'none';
     document.getElementById('txtMotivoLibre').value = '';
     document.getElementById('txtMotivoLibre').required = false;
 
-    
     document.getElementById('modalVisita').style.display = 'flex';
 }
 
-
-/**
- * Función corregida para cargar la fecha correctamente
- */
-/**
- * Función corregida para cargar la fecha correctamente y bloquear fechas futuras
- */
 function abrirModalEditar(visitaId, miembroId, nombre, fecha, motivo) {
-    // ✅ CORRECCIÓN XSS: antes innerText → ahora textContent
     document.getElementById('modalHeaderTitulo').textContent = 'Modificar Visita';
     document.getElementById('btnTextVisita').textContent = 'Actualizar Cambios';
     
-    // ✅ Asignación segura de valores a inputs
     document.getElementById('modalVisitaId').value = visitaId;
     document.getElementById('modalMiembroId').value = miembroId;
-    // ✅ Mostrar nombre como texto plano
     document.getElementById('modalNombreMiembro').textContent = nombre;
 
-    // --- CORRECCIÓN DE FECHA AQUÍ ---
     const inputFecha = document.getElementById('txtFechaVisita');
-    const hoy = new Date().toISOString().split('T')[0]; // Obtiene hoy en formato YYYY-MM-DD
+    const hoy = new Date().toISOString().split('T')[0];
     
-    inputFecha.max = hoy;     // ✅ Bloquea que se puedan elegir días futuros
-    inputFecha.value = fecha; // ✅ Inserta la fecha que viene de la Base de Datos
-    // --------------------------------
+    inputFecha.max = hoy;
+    inputFecha.value = fecha;
 
     const select = document.getElementById('selectMotivo');
     const contenedorOtros = document.getElementById('contenedorOtros');
@@ -110,7 +83,6 @@ function abrirModalEditar(visitaId, miembroId, nombre, fecha, motivo) {
 
     document.getElementById('modalVisita').style.display = 'flex';
 }
-
 
 function cerrarModalVisita() {
     document.getElementById('modalVisita').style.display = 'none';
@@ -140,11 +112,10 @@ function procesarGuardarVisita(event) {
 
     const btnSubmit = document.getElementById('btnSubmitVisita');
     const btnText = document.getElementById('btnTextVisita');
-    // ✅ CORRECCIÓN XSS: usar textContent en lugar de innerText
     const textoOriginal = btnText ? btnText.textContent : 'Guardar Registro';
 
     if (btnSubmit) btnSubmit.disabled = true;
-    if (btnText) btnText.textContent = 'Guardando...'; // seguro
+    if (btnText) btnText.textContent = 'Guardando...';
 
     fetch(urlDestino, {
         method: 'POST',
@@ -154,28 +125,21 @@ function procesarGuardarVisita(event) {
     .then(data => {
         if (data.ok) {
             cerrarModalVisita();
-            filtrarVisitas(); // ✅ actualiza tabla sin recargar
+            filtrarVisitas();
         } else {
-            // ✅ CORRECCIÓN XSS: mostrar error como texto plano
             const mensajeError = typeof data.error === "string" ? data.error : "Error al procesar el registro.";
             alert(mensajeError);
         }
     })
     .catch(err => {
         console.error("Error Fetch:", err);
-        alert("Error de conexión con el servidor."); // seguro
+        alert("Error de conexión con el servidor.");
     })
     .finally(() => {
         if (btnSubmit) btnSubmit.disabled = false;
-        if (btnText) btnText.textContent = textoOriginal; // seguro
+        if (btnText) btnText.textContent = textoOriginal;
     });
 }
-
-
-
-
-
-
 
 // ==========================================
 // MÓDULO: FILTRADO DINÁMICO (AJAX)
@@ -191,7 +155,6 @@ function filtrarVisitas() {
     localStorage.setItem('v_filtroEstado', estado);
     localStorage.setItem('v_filtroModo', modo);
 
-    // ✅ URL segura con encodeURIComponent
     const url = `index.php?vista=dashboard&seccion=visitasListar&ajax=1&nombre=${encodeURIComponent(nombre)}&motivo=${encodeURIComponent(motivo)}&estado=${encodeURIComponent(estado)}&modo=${encodeURIComponent(modo)}`;
 
     fetch(url)
@@ -200,31 +163,25 @@ function filtrarVisitas() {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
 
+            // Actualización limpia de cuerpo
             const nuevoCuerpo = doc.getElementById('ajax-tbody-bridge');
             const tablaDestino = document.getElementById('tabla-visitas-cuerpo');
-            
-            // ✅ Actualizar cuerpo de tabla de forma segura
             if (nuevoCuerpo && tablaDestino) {
-                tablaDestino.textContent = ""; // limpiar seguro
-                tablaDestino.append(...nuevoCuerpo.children); // copiar nodos en lugar de innerHTML
-            } else {
-                console.error("Error: Respuesta AJAX incompleta (posibles errores PHP).");
+                tablaDestino.innerHTML = nuevoCuerpo.innerHTML;
             }
 
-            // ✅ Actualizar estadísticas
+            // Actualización de tarjetas de estadísticas
             const nuevasStats = doc.getElementById('ajax-stats-bridge');
             const contenedorStats = document.getElementById('contenedor-stats');
             if (nuevasStats && contenedorStats) {
-                contenedorStats.textContent = "";
-                contenedorStats.append(...nuevasStats.children);
+                contenedorStats.innerHTML = nuevasStats.innerHTML;
             }
 
-            // ✅ Actualizar cabecera
+            // Actualización limpia de cabecera
             const nuevaCab = doc.getElementById('ajax-thead-bridge');
             const tablaHead = document.getElementById('tabla-visitas-head');
             if (nuevaCab && tablaHead) {
-                tablaHead.textContent = "";
-                tablaHead.append(...nuevaCab.children);
+                tablaHead.innerHTML = nuevaCab.querySelector('thead') ? nuevaCab.querySelector('thead').innerHTML : nuevaCab.innerHTML;
             }
         })
         .catch(error => console.error('Error en el filtrado:', error));
@@ -244,15 +201,12 @@ function limpiarFiltros() {
     filtrarVisitas();
 }
 
-
 // ==========================================
 // MÓDULO: ELIMINACIÓN Y AJUSTES
 // ==========================================
 
 function abrirModalEliminar(visitaId, nombreMiembro) {
-    // ✅ Asignación segura de valores
     document.getElementById('modalEliminarVisitaId').value = visitaId;
-    // ✅ CORRECCIÓN XSS: mostrar nombre como texto plano
     document.getElementById('eliminarNombreMiembro').textContent = nombreMiembro;
     document.getElementById('modalEliminarVisita').style.display = 'flex';
 }
@@ -273,9 +227,8 @@ function procesarEliminacionLogica() {
     .then(data => {
         if (data.ok) {
             cerrarModalEliminar();
-            filtrarVisitas(); // ✅ Actualización automática tras eliminar
+            filtrarVisitas();
         } else {
-            // ✅ CORRECCIÓN XSS: mostrar error como texto plano
             const mensajeError = typeof data.error === "string" ? data.error : "Error al suprimir la visita.";
             alert(mensajeError);
         }
@@ -303,19 +256,15 @@ function procesarGuardarAjustes(event) {
     .then(resp => resp.json())
     .then(data => {
         if (data.ok) {
-            // ✅ Recargamos la página completa solo en ajustes
             window.location.reload(); 
         } else {
-            // ✅ Mensaje seguro contra XSS
             alert("Error al actualizar los ajustes.");
         }
     })
     .catch(err => console.error("Error Fetch Ajustes:", err));
 }
 
-// --- Cerrar modales al hacer clic fuera ---
 window.onclick = function(event) {
-    // ✅ Verificación segura: solo cierra si el target es un modal
     if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';
     }

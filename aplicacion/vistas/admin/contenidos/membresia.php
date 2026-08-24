@@ -187,10 +187,32 @@ $fechaHoy = date('Y-m-d');
                     <label>Teléfono:</label>
                     <input type="text" name="telefono" placeholder="Ej. 987654321">
                 </div>
-                <div class="form-group">
-                    <label>Fecha de Nacimiento:</label>
-                    <input type="date" name="fecha_nacimiento" value="<?= $fechaHoy ?>">
-                </div>
+    <div class="form-group" style="grid-column: span 2;">
+        <label>Fecha de Nacimiento:</label>
+        <input type="hidden" name="fecha_nacimiento" id="fecha_nacimiento">
+        
+        <div class="fecha-nacimiento-container">
+            <input type="number" id="fn_dia" placeholder="Día" min="1" max="31">
+            
+            <select id="fn_mes">
+                <option value="">Mes</option>
+                <option value="01">Enero</option>
+                <option value="02">Febrero</option>
+                <option value="03">Marzo</option>
+                <option value="04">Abril</option>
+                <option value="05">Mayo</option>
+                <option value="06">Junio</option>
+                <option value="07">Julio</option>
+                <option value="08">Agosto</option>
+                <option value="09">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+            </select>
+            
+            <input type="number" id="fn_anio" placeholder="Año" min="1900" max="<?= date('Y') ?>">
+        </div>
+    </div>
                 <div class="form-group">
                     <label>Origen / Tipo:</label>
                     <select name="tipo_miembro_id" id="tipo_miembro_id" required>
@@ -209,10 +231,13 @@ $fechaHoy = date('Y-m-d');
                 </div>
                 <div class="form-group">
                     <label>Condición:</label>
-                    <select name="condicion_id" required>
+                    <select name="condicion_id" id="condicion_id" required>
                         <option value="">Seleccione Condición</option>
                         <?php foreach($condiciones as $con): ?>
-                            <option value="<?= getProp($con, 'id') ?>"><?= htmlspecialchars(ucfirst(getProp($con, 'nombre'))) ?></option>
+                            <?php $idCond = getProp($con, 'id'); ?>
+                            <option value="<?= $idCond ?>" <?= ((int)$idCond === 1) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars(ucfirst(getProp($con, 'nombre'))) ?>
+                            </option>
                         <?php endforeach; ?>
                     </select>
                 </div>

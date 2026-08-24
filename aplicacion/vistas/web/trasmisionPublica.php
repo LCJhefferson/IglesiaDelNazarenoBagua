@@ -1,153 +1,93 @@
 <?php
 use aplicacion\modelos\TransmisionModelo;
 
-// Buscamos si hay alguna transmisión activa (Estado 1) usando Eloquent
+// Buscamos si hay alguna transmisión activa (Estado 1)
 $live = TransmisionModelo::where('estado_id', 1)->first();
+
+// Definimos los parámetros de reproducción limpia de YouTube
+$youtubeParams = "?autoplay=1&modestbranding=1&rel=0&controls=1";
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Transmisión en Vivo - Iglesia del Nazareno</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transmisión - Iglesia del Nazareno</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+    <link rel="stylesheet" href="<?= URL ?>public/web/css/globalPublico.css">
     <link rel="stylesheet" href="<?= URL ?>public/web/css/nav.css">
+    <link rel="stylesheet" href="<?= URL ?>public/web/css/transmisionPublica.css">
     <link rel="stylesheet" href="<?= URL ?>public/web/css/footer.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-    
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; color: #2d3748; margin: 0; padding: 0; }
-        
-        /* MODO CINE: Contenedor negro de extremo a extremo de la pantalla */
-       .cinema-mode-container {
-            width: 100%;
-            background: #0f0f0f; 
-            padding: 20px 0;
-            margin-top: 76px; /* <-- ESTO EMPUJA EL CONTENIDO DEBAJO DE TU NAV FIXED */
-            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.5);
-        }
-
-        /* Envoltura del reproductor que mantiene la proporción y limita el ancho máximo en pantallas gigantes */
-        .cinema-wrapper {
-            max-width: 1500px; 
-            width: 95%;        
-            margin: 0 auto;
-            padding: 0;
-        }
-        
-        .video-container {
-            position: relative;
-            padding-bottom: 56.25%; /* Relación de aspecto 16:9 */
-            height: 0; overflow: hidden;
-            background: #000;
-            border-radius: 8px; /* Bordes ligeramente suavizados */
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-        }
-        .video-container iframe {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
-        }
-
-        /* Sección inferior para los detalles de la transmisión */
-        .details-container {
-            max-width: 1500px;
-            width: 95%;
-            margin: 0 auto;
-            padding: 25px 0;
-            box-sizing: border-box;
-        }
-
-        .status-card { text-align: center; padding: 80px 20px; color: white; }
-        .status-card i { opacity: 0.3; margin-bottom: 20px; }
-        .status-card h3 { font-size: 1.8rem; margin-bottom: 10px; }
-
-        .finished-bg { background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%); }
-        .empty-bg { background: #141414; }
-
-        #live-header { margin-bottom: 15px; }
-        #live-header h2 {
-            font-size: 0.9rem;
-            color: #ef4444; 
-            letter-spacing: 2px; 
-            display: flex; 
-            align-items: center; 
-            margin: 0 0 8px 0;
-        }
-        #live-title { font-size: 1.6rem; margin: 0; color: #ffffff; font-weight: 700; }
-        
-        .dot-live {
-            height: 10px; width: 10px; background-color: #ef4444;
-            border-radius: 50%; display: inline-block;
-            animation: blink 1s infinite; margin-right: 8px;
-            box-shadow: 0 0 8px #ef4444;
-        }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        
-        /* Caja de información (Descripción) abajo del video */
-        .info-card { 
-            margin-top: 20px; 
-            padding: 20px; 
-            background: white; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
-        }
-        .info-card h4 { margin: 0 0 8px 0; color: #4a5568; font-size: 1.1rem; }
-        .info-card p { margin: 0; color: #4a5568; line-height: 1.6; }
-    </style>
 </head>
-<body>
-    <?php 
-    include __DIR__ . '/componentes/nav.php'; 
-    ?>
+<body class="pagina-transmision">
 
-    <div class="cinema-mode-container">
-        <div class="cinema-wrapper">
+    <?php include __DIR__ . '/componentes/nav.php'; ?>
+
+    <section class="cinema-section-full">
+        <div class="cinema-container-full">
             
-            <div id="live-header" style="<?= $live ? 'display:block;' : 'display:none;' ?>">
-                <h2><span class="dot-live"></span> EN VIVO AHORA</h2>
-                <h1 id="live-title"><?= $live ? htmlspecialchars($live->titulo) : '' ?></h1>
-            </div>
+            <header id="live-header" class="live-header-box" style="<?= $live ? 'display:flex;' : 'display:none;' ?>">
+                <div class="badge-live">
+                    <span class="dot-live"></span>
+                    <span class="badge-text">TRANSMITIENDO</span>
+                   
+                </div>
+                 <!-- <h1 id="live-title" class="live-title">  <?= $live ? htmlspecialchars($live->titulo) : '' ?>  </h1> -->
+            </header>
 
-            <div id="player-wrapper">
+            <div id="player-wrapper" class="player-wrapper-full">
                 <?php if ($live): ?>
-                    <div class="video-container">
-                        <iframe id="main-iframe" src="<?= htmlspecialchars($live->link_video) ?>?autoplay=1" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                    <div class="video-container-full">
+                        <iframe id="main-iframe" src="<?= htmlspecialchars($live->link_video) . $youtubeParams ?>" allow="autoplay; fullscreen" allowfullscreen></iframe>
                     </div>
                 <?php else: ?>
-                    <div class="video-container empty-bg">
+                    <div class="video-container-full empty-bg">
                         <div class="status-card">
-                            <i class="fa-solid fa-church fa-4x"></i>
-                            <h3>Sin transmisión activa</h3>
-                            <p>Te invitamos a estar atento a nuestros próximos servicios.</p>
+                            <div class="status-icon-circle">
+                                <i class="fa-solid fa-church"></i>
+                            </div>
+                            <h3>Sin transmisión activa en este momento</h3>
+                            <p>Te invitamos a conectarte durante nuestros horarios habituales de culto y reuniones especiales.</p>
                         </div>
                     </div>
                 <?php endif; ?>
             </div>
 
         </div>
-    </div>
+    </section>
 
-    <div class="details-container">
-        <div id="info-wrapper">
-            <?php if ($live): ?>
-                <div class="info-card">
-                    <h4>Descripción del servicio</h4>
-                    <p><?= $live->descripcion ? nl2br(htmlspecialchars($live->descripcion)) : 'Sin descripción disponible.' ?></p>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
+    <main class="transmision-details-container">
+        <section class="details-section">
+            <div id="info-wrapper" class="info-wrapper">
+                <?php if ($live): ?>
+                    <article class="info-card">
+                        <div class="info-card-header">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <h4>Descripción del servicio</h4>
+                        </div>
+                        <p><?= $live->descripcion ? nl2br(htmlspecialchars($live->descripcion)) : 'Sin descripción disponible para esta transmisión.' ?></p>
+                    </article>
+                <?php endif; ?>
+            </div>
+        </section>
+    </main>
 
     <?php include __DIR__ . '/componentes/footer.php'; ?>
-    
 
     <script>
         const pusher = new Pusher('TU_KEY', { cluster: 'TU_CLUSTER' });
         const channel = pusher.subscribe('iglesia-canal');
 
         channel.bind('evento-vivo', function(data) {
-            console.log("Señal de Pusher:", data);
-            
             if (data.estado_id == 1 || data.message === 'live_started' || data.message === 'live_updated') {
                 actualizarVistaVivo(data);
             } 
@@ -156,8 +96,6 @@ $live = TransmisionModelo::where('estado_id', 1)->first();
             }
         });
 
-        // Whitelist estricta: solo permitimos embebidos de YouTube.
-        // Defensa en profundidad, aunque el backend ya normaliza en formatearUrlYoutube().
         function esUrlYoutubeEmbedValida(url) {
             if (typeof url !== 'string') return false;
             try {
@@ -175,26 +113,32 @@ $live = TransmisionModelo::where('estado_id', 1)->first();
         }
 
         function actualizarVistaVivo(data) {
-            document.getElementById('live-header').style.display = 'block';
+            const liveHeader = document.getElementById('live-header');
+            liveHeader.style.display = 'flex';
             document.getElementById('live-title').textContent = data.titulo || '';
 
             const playerWrapper = document.getElementById('player-wrapper');
             limpiarNodo(playerWrapper);
 
             const contenedor = document.createElement('div');
-            contenedor.className = 'video-container';
+            contenedor.className = 'video-container-full';
 
             if (esUrlYoutubeEmbedValida(data.link_video)) {
                 const iframe = document.createElement('iframe');
                 iframe.id = 'main-iframe';
-                iframe.setAttribute('src', data.link_video + '?autoplay=1');
+                
+                // Concatena los parámetros para la vista dinámica de Pusher
+                const separator = data.link_video.includes('?') ? '&' : '?';
+                iframe.setAttribute('src', data.link_video + separator + 'autoplay=1&modestbranding=1&rel=0&controls=1');
+                
                 iframe.setAttribute('allow', 'autoplay; fullscreen');
                 iframe.setAttribute('allowfullscreen', '');
                 contenedor.appendChild(iframe);
             } else {
                 const aviso = document.createElement('p');
-                aviso.style.color = '#fff';
-                aviso.style.padding = '20px';
+                aviso.style.color = '#334155';
+                aviso.style.padding = '30px';
+                aviso.style.textAlign = 'center';
                 aviso.textContent = 'La transmisión no tiene un enlace de video válido.';
                 contenedor.appendChild(aviso);
             }
@@ -203,17 +147,26 @@ $live = TransmisionModelo::where('estado_id', 1)->first();
             const infoWrapper = document.getElementById('info-wrapper');
             limpiarNodo(infoWrapper);
 
-            const card = document.createElement('div');
+            const card = document.createElement('article');
             card.className = 'info-card';
 
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'info-card-header';
+            
+            const icon = document.createElement('i');
+            icon.className = 'fa-solid fa-circle-info';
+            
             const titulo = document.createElement('h4');
             titulo.textContent = 'Descripción del servicio';
 
-            const parrafo = document.createElement('p');
-            parrafo.style.whiteSpace = 'pre-line'; // equivalente visual a nl2br sin usar HTML
-            parrafo.textContent = data.descripcion || 'Sin descripción disponible.';
+            headerDiv.appendChild(icon);
+            headerDiv.appendChild(titulo);
 
-            card.appendChild(titulo);
+            const parrafo = document.createElement('p');
+            parrafo.style.whiteSpace = 'pre-line';
+            parrafo.textContent = data.descripcion || 'Sin descripción disponible para esta transmisión.';
+
+            card.appendChild(headerDiv);
             card.appendChild(parrafo);
             infoWrapper.appendChild(card);
         }
@@ -225,13 +178,15 @@ $live = TransmisionModelo::where('estado_id', 1)->first();
             limpiarNodo(playerWrapper);
 
             playerWrapper.innerHTML = `
-                <div class="video-container finished-bg">
+                <div class="video-container-full finished-bg">
                     <div class="status-card">
-                        <i class="fa-solid fa-circle-check fa-4x"></i>
+                        <div class="status-icon-circle finished-icon">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
                         <h3>Fin de la transmisión</h3>
-                        <p>Gracias por acompañarnos. ¡Dios te bendiga!</p>
-                        <hr style="width:30%; opacity:0.1; margin:20px auto;">
-                        <small>La transmisión ha terminado. Esperamos verte pronto.</small>
+                        <p>Gracias por acompañarnos. ¡Que Dios te bendiga grandemente!</p>
+                        <div class="status-divider"></div>
+                        <small>La transmisión ha finalizado. Te esperamos en nuestro próximo servicio.</small>
                     </div>
                 </div>
             `;
@@ -239,5 +194,6 @@ $live = TransmisionModelo::where('estado_id', 1)->first();
             limpiarNodo(document.getElementById('info-wrapper'));
         }
     </script>
+
 </body>
 </html>

@@ -1,0 +1,251 @@
+/* ==========================================================================
+   CARRUSEL DE NOTICIAS INFINITO & CONTINUO
+   ========================================================================== */
+
+:root {
+    --noticias-bg: #f8fafc;
+    --noticias-card-bg: #ffffff;
+    --noticias-text-main: #0b2238;
+    --noticias-text-sub: #64748b;
+    --noticias-accent: #2563eb;
+    --noticias-speed: 35s; /* Ajusta este valor si deseas mayor/menor velocidad */
+}
+
+.noticias-section {
+    padding: 80px 0;
+    background-color: var(--noticias-bg);
+    overflow: hidden;
+}
+
+.noticias-container {
+    width: 100%;
+}
+
+.noticias-header {
+    text-align: center;
+    margin-bottom: 45px;
+    padding: 0 20px;
+}
+
+.titulo-seccion-noticias {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 2.8rem;
+    color: var(--noticias-text-main);
+    margin: 6px 0 0 0;
+    font-weight: 600;
+}
+
+.noticias-vacio {
+    text-align: center;
+    color: var(--noticias-text-sub);
+    font-size: 1rem;
+}
+
+/* MARQUEE / MARCO CONTENEDOR */
+.ticker-wrapper {
+    display: flex;
+    overflow: hidden;
+    user-select: none;
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 8%,
+        black 92%,
+        transparent
+    );
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 8%,
+        black 92%,
+        transparent
+    );
+}
+
+/* TRACK ANIMADO */
+.ticker-track {
+    display: flex;
+    gap: 25px;
+    width: max-content;
+    animation: scrollContinuo var(--noticias-speed) linear infinite;
+    padding: 10px 0;
+}
+
+/* PAUSAR ANIMACIÓN AL PASAR EL MOUSE PARA LEER */
+.ticker-wrapper:hover .ticker-track {
+    animation-play-state: paused;
+}
+
+/* TARJETA DE NOTICIA HOMOGÉNEA */
+.noticia-card {
+    width: 310px;
+    flex-shrink: 0;
+    background: var(--noticias-card-bg);
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.noticia-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.08);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+.noticia-img-wrap {
+    width: 100%;
+    height: 175px;
+    overflow: hidden;
+    background-color: #e2e8f0;
+}
+
+.noticia-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.noticia-card:hover .noticia-img-wrap img {
+    transform: scale(1.05);
+}
+
+.noticia-content {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.noticia-fecha {
+    font-size: 0.78rem;
+    color: var(--noticias-text-sub);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.noticia-content h3 {
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--noticias-text-main);
+    margin-bottom: 8px;
+    line-height: 1.35;
+}
+
+.noticia-content p {
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 0.88rem;
+    color: var(--noticias-text-sub);
+    line-height: 1.5;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.btn-leer-mas {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--noticias-accent);
+    text-decoration: none;
+    transition: gap 0.2s ease, color 0.2s ease;
+}
+
+.btn-leer-mas i {
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
+}
+
+.btn-leer-mas:hover {
+    color: #1d4ed8;
+}
+
+.btn-leer-mas:hover i {
+    transform: translateX(4px);
+}
+
+/* KEYFRAMES MOVIMIENTO CONTINUO */
+@keyframes scrollContinuo {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+
+
+/* ==========================================================================
+   RESPONSIVO CARRUSEL NOTICIAS (MÓVILES)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .titulo-seccion-noticias {
+        font-size: 2.2rem;
+    }
+
+    .noticia-card {
+        width: 260px; /* Tarjeta un poco más angosta */
+    }
+
+    .noticia-img-wrap {
+        height: 140px;
+    }
+}
+
+@media (max-width: 480px) {
+    .noticias-section {
+        padding: 50px 0;
+    }
+
+    .titulo-seccion-noticias {
+        font-size: 1.8rem;
+    }
+
+    .ticker-track {
+        gap: 15px; /* Menos espacio en el carrusel infinito */
+    }
+
+    .noticia-card {
+        width: 210px; /* <-- Card de noticia bastante más pequeña en celulares */
+        border-radius: 14px;
+    }
+
+    .noticia-img-wrap {
+        height: 110px; /* Imagen compacta */
+    }
+
+    .noticia-content {
+        padding: 14px;
+    }
+
+    .noticia-fecha {
+        font-size: 0.7rem;
+        margin-bottom: 6px;
+    }
+
+    .noticia-content h3 {
+        font-size: 0.92rem;
+        margin-bottom: 6px;
+    }
+
+    .noticia-content p {
+        font-size: 0.78rem;
+        line-height: 1.35;
+        margin-bottom: 12px;
+    }
+
+    .btn-leer-mas {
+        font-size: 0.78rem;
+    }
+}

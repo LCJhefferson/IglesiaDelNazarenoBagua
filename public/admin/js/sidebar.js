@@ -1,6 +1,37 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    // --- LÓGICA DE SUBMENÚS (Discipulado y Visitas) ---
+    const btnToggle = document.getElementById('btnToggleSidebar');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    function toggleMobileMenu(e) {
+        if (e) e.preventDefault();
+        if (sidebar && overlay) {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('active');
+        }
+    }
+
+    if (btnToggle) {
+        btnToggle.addEventListener('click', toggleMobileMenu);
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', toggleMobileMenu);
+    }
+
+    // Cerrar el menú al presionar cualquier enlace en móvil
+    const linksSidebar = document.querySelectorAll('.sidebar a');
+    linksSidebar.forEach(link => {
+        link.addEventListener('click', function () {
+            if (window.innerWidth <= 991 && sidebar && sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+                if (overlay) overlay.classList.remove('active');
+            }
+        });
+    });
+
+    // --- LÓGICA DE SUBMENÚS ---
     const menuTitles = document.querySelectorAll('.menu-item > .menu-title:not(.direct-link)');
 
     menuTitles.forEach(title => {
@@ -13,24 +44,18 @@ document.addEventListener("DOMContentLoaded", function () {
             const currentSubmenu = this.nextElementSibling;
             
             if (currentSubmenu && currentSubmenu.classList.contains('submenu')) {
-                const isActive = currentSubmenu.classList.contains('active');
-
-                // Cerramos otros abiertos para efecto acordeón
                 document.querySelectorAll('.submenu.active').forEach(sub => {
                     if (sub !== currentSubmenu) {
                         sub.classList.remove('active');
                     }
                 });
 
-                // Toggle del actual
                 currentSubmenu.classList.toggle('active');
-                
-                console.log("Submenú estado activo:", currentSubmenu.classList.contains('active'));
             }
         });
     });
 
-    // --- LÓGICA DE BOTÓN DE USUARIO (Topbar) ---
+    // --- LÓGICA DE BOTÓN DE USUARIO ---
     const dropdown = document.querySelector('.dropdown');
     const userBtn = document.querySelector('.user-btn');
 
@@ -41,7 +66,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Cerrar todo al hacer clic fuera
     window.addEventListener('click', function () {
         if (dropdown) dropdown.classList.remove('active');
     });

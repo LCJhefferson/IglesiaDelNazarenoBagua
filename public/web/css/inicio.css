@@ -16,379 +16,217 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    /* Fuente por defecto: Segoe UI */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Déjalo exactamente así: */
 body {
     min-height: 100vh;
     overflow-x: hidden;
     background-color: var(--bg-light);
-    padding-top: 70px;
+    padding-top: 0;
 }
+
 /* ==========================================================================
-   CARRUSEL HERO (MODIFICADO: Posición, Degradado y Tipografía)
-   ========================================================================== */
-.hero-slider {
-    position: relative;
-    height: 75vh;
-    overflow: hidden;
-    background-color: #000; /* Fondo negro de seguridad para el carrusel */
-}
-
-.slide {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transform: scale(1.05);
-    transition: opacity 1s ease, transform 1.2s ease;
-}
-
-.slide.active {
-    opacity: 1;
-    transform: scale(1);
-    z-index: 1;
-}
-
-.slide-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* --- PARTE SOLICITADA: DEGRADADO MÁS FUERTE A LA IZQUIERDA --- */
-.overlay-slider {
-    position: absolute;
-    inset: 0;
-    /* Inicia oscuro (85%) a la izquierda y se desvanece totalmente a la derecha */
-    background: linear-gradient(to right, 
-        rgba(0, 0, 0, 0.85) 0%, 
-        rgba(0, 0, 0, 0.4) 50%, 
-        transparent 100%);
-    z-index: 1;
-}
-
-/* --- PARTE SOLICITADA: CONTENIDO ALINEADO A LA IZQUIERDA --- */
-.slide-content {
-    position: absolute;
-    top: 50%;
-    left: 8%; /* Margen desde la izquierda */
-    transform: translateY(-50%); /* Centrado solo vertical */
-    text-align: left; /* Alineación de texto a la izquierda */
-    color: var(--white);
-    z-index: 2;
-    width: 85%;
-    max-width: 800px;
-}
-
-/* TITULO 1: Georgia (Resaltante) */
-.slide-content h1 {
-    font-family: 'Bodoni Moda';
-    font-size: clamp(40px, 6vw, 75px); /* Tamaño responsivo */
-    font-weight: 900;
-    line-height: 1.1;
-    margin-bottom: 15px;
-    text-shadow: 2px 2px 20px rgba(0,0,0,0.4);
-}
-
-/* TITULO 2: Calibri (Menos resaltante) */
-.slide-content h2 {
-    font-family: 'Calibri', 'Candara', sans-serif;
-    font-size: clamp(20px, 3vw, 32px);
-    font-weight: 300;
-    margin-bottom: 15px;
-    color: rgba(255, 255, 255, 0.9);
-    letter-spacing: 1px;
-}
-
-/* SUBTITULO: Trebuchet MS */
-.slide-content p {
-    font-family: 'Trebuchet MS', sans-serif;
-    font-size: 18px;
-    font-weight: 400;
-    opacity: 0.8;
-    max-width: 550px;
-    line-height: 1.4;
-}
-/* ==========================================================================
-   SECCIÓN TARJETA SALVACIÓN (Armonizada)
+   SECCIÓN TARJETA SALVACIÓN (PROPUESTA IMAGEN 2)
    ========================================================================== */
 .card-section {
-    padding: 80px 20px;
+    padding: 70px 20px;
     display: flex;
     justify-content: center;
-    background: var(--bg-light);
+    background: #ffffff; /* Tono crema cálido idéntico al fondo de la propuesta */
 }
 
 .card-salvacion {
-    max-width: 550px;
-    background: var(--white);
-    padding: 45px 35px;
-    border-radius: 15px;
-    text-align: center;
-    /* Sombra armónica con el color primario */
-    box-shadow: 0 15px 35px rgba(18, 61, 90, 0.08);
-    transition: var(--transition);
-    border: 1px solid #e2e8f0;
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+    border-radius: 20px;
+    overflow: hidden;
+    /* Configuración para soportar la imagen dinámica definida en PHP */
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
 }
 
-.card-salvacion:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 45px rgba(18, 61, 90, 0.12);
+/* Capa de degradado oscuro sobre la imagen */
+.salvacion-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.55) 100%);
+    z-index: 1;
 }
 
-.card-salvacion h2 {
-    font-family: 'Georgia', serif;
-    font-size: 28px;
-    margin-bottom: 15px;
-    color: var(--primary-color);
+.salvacion-content {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 40px;
+    padding: 60px 50px;
+    align-items: center;
 }
 
-.card-salvacion p {
-    font-family: 'Segoe UI', sans-serif; /* Texto: Segoe UI */
-    font-size: 16px;
-    color: var(--text-light);
-    margin-bottom: 30px;
-    line-height: 1.6;
+/* --- LADO IZQUIERDO --- */
+.salvacion-left {
+    color: #ffffff;
 }
 
-.btn-descubre {
-    display: inline-block;
-    padding: 12px 35px;
-    background: var(--primary-color);
-    color: var(--white);
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    transition: var(--transition);
-}
-
-.btn-descubre:hover {
-    background: var(--accent-color); /* Cambia a dorado al pasar el mouse */
-    transform: scale(1.05);
-}
-
-/* ==========================================================================
-   SECCIÓN NOTICIAS (REDISEÑADA A COLORES CLAROS / SIN DORADOS)
-   ========================================================================== */
-.noticias-section {
-    padding: 70px 5% 80px;
-    background: var(--white); /* Fondo gris/azul muy claro y limpio */
-    text-align: center;
-    border-top: 1px solid #e2e8f0;
-}
-
-.titulo-noticias {
-    display: inline-block;
+.badge-subtitulo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--accent-color); /* Azul corporativo limpio */
-    padding: 6px 18px;
-    border: 1px solid rgba(2, 132, 199, 0.2);
-    border-radius: 20px;
-    margin-bottom: 40px;
-    background: rgba(2, 132, 199, 0.05);
-}
-
-/* CARRUSEL WRAPPER */
-.carrusel-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: relative;
-}
-
-/* BOTONES PREV / NEXT */
-.carrusel-btn {
-    background: var(--white);
-    color: var(--primary-color);
-    border: 1px solid #e2e8f0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    font-size: 0.85rem;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.carrusel-btn:hover {
-    background: var(--primary-color);
-    color: var(--white);
-    border-color:var(--primary-color);
-}
-
-.carrusel-btn:disabled {
-    opacity: 0.3;
-    cursor: default;
-    background: #f1f5f9;
-    color: #94a3b8;
-    border-color: #e2e8f0;
-}
-
-/* CONTENEDOR VISIBLE */
-.carrusel-track-container {
-    overflow: hidden;
-    flex: 1;
-}
-
-/* PISTA QUE SE MUEVE */
-.carrusel-track {
-    display: flex;
-    gap: 20px;
-    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* CADA ITEM */
-.carrusel-item {
-    flex-shrink: 0;
-}
-
-/* CARD DE NOTICIA CLARA */
-.noticia-card {
-    background: var(--white);
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-}
-
-.noticia-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 25px rgba(0,0,0,0.08);
-    border-color: var(--primary-color);
-}
-
-.noticia-card img {
-    width: 100%;
-    height: 170px;
-    object-fit: cover;
-    display: block;
-}
-
-.noticia-content {
-    padding: 18px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.noticia-fecha {
-    font-size: 0.72rem;
-    color: #64748b;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 8px;
-}
-
-.noticia-content h3 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--primary-color);
-    line-height: 1.4;
-}
-
-.noticia-content p {
-    font-size: 0.82rem;
-    color: #64748b;
+    color: #d4a359; /* Dorado/Ocre */
     margin-bottom: 15px;
-    line-height: 1.5;
-    flex: 1;
+    text-transform: uppercase;
 }
 
-.btn-leer {
+.badge-subtitulo i {
+    font-size: 0.7rem;
+}
+
+.salvacion-left h2 {
+    font-family: 'Georgia', serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 18px;
+    color: #ffffff;
+    line-height: 1.1;
+}
+
+.salvacion-left p {
+    font-size: 0.98rem;
+    color: #e2e8f0;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    max-width: 500px;
+}
+
+.salvacion-acciones {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/* Botón dorado con icono */
+.btn-evangelio {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    background: transparent;
-    color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-    text-decoration: none;
-    font-size: 0.78rem;
-    font-weight: 600;
-    border-radius: 4px;
-    transition: all 0.2s;
-    align-self: flex-start;
-}
-
-.btn-leer::after {
-    content: '→';
-    transition: transform 0.2s;
-}
-
-.btn-leer:hover {
-    background: var(--primary-color);
-    color: var(--white);
-}
-
-.btn-leer:hover::after {
-    transform: translateX(3px);
-}
-
-/* PUNTOS INDICADORES CLAROS */
-.carrusel-dots {
-    display: flex;
-    justify-content: center;
     gap: 8px;
-    margin-top: 25px;
+    padding: 12px 28px;
+    background: #c59b27;
+    color: #1a1a1a;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border-radius: 30px;
+    text-decoration: none;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(197, 155, 39, 0.3);
 }
 
-.dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #cbd5e1;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.dot.activo {
-    background: var(--primary-color);
-    transform: scale(1.1);
-    width: 20px;
-    border-radius: 4px;
-}
-
-
-/* ==========================================================================
-   TRANSMISIÓN EN VIVO & RESPONSIVE
-   ========================================================================== */
-@keyframes parpadeoAlerta {
-    0% { transform: scale(0.9); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.4; }
-    100% { transform: scale(0.9); opacity: 1; }
-}
-@keyframes slideUpFloat {
-    from { transform: translateY(50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-#bannerTransmision .btn-ver-vivo:hover {
-    background: #f3f4f6 !important;
+.btn-evangelio:hover {
+    background: #e5b32a;
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(197, 155, 39, 0.4);
 }
 
-@media (max-width: 768px) {
-    .hero-slider { height: 50vh; }
-    .slide-content h1 { font-size: 32px; }
-    .slide-content h2 { font-size: 22px; }
-    .slide-content p { font-size: 15px; }
-    .card-section { padding: 40px 15px; }
-    .info-section { padding: 45px 20px; }
-    .card { width: 100%; height: 200px; }
+/* Botón transparente delineado */
+.btn-iglesia {
+    display: inline-block;
+    padding: 11px 26px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 30px;
+    text-decoration: none;
+    transition: var(--transition);
+    backdrop-filter: blur(4px);
+}
+
+.btn-iglesia:hover {
+    background: #ffffff;
+    color: #123d5a;
+    border-color: #ffffff;
+}
+
+/* --- LADO DERECHO (CARD VERSÍCULO GLASSMORPHISM) --- */
+.salvacion-right {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.versiculo-card {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    padding: 35px 30px;
+    text-align: center;
+    color: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    max-width: 380px;
+}
+
+.icono-corazon {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 1px solid rgba(212, 163, 89, 0.5);
+    background: rgba(212, 163, 89, 0.15);
+    color: #d4a359;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 0.9rem;
+}
+
+.versiculo-card blockquote {
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #f8fafc;
+    margin-bottom: 15px;
+}
+
+.versiculo-card cite {
+    display: block;
+    font-style: normal;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #d4a359;
+    letter-spacing: 1px;
+}
+
+/* RESPONSIVO */
+@media (max-width: 900px) {
+    .salvacion-content {
+        grid-template-columns: 1fr;
+        padding: 40px 25px;
+        gap: 35px;
+    }
+
+    .salvacion-right {
+        justify-content: center;
+    }
+
+    .versiculo-card {
+        max-width: 100%;
+    }
+
+    .salvacion-left h2 {
+        font-size: 2.2rem;
+    }
 }

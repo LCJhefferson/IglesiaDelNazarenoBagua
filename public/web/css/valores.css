@@ -1,126 +1,158 @@
-/* ========================= */
-/* DISEÑO DE VALORES MEDULARES */
-/* ========================= */
+/* ==========================================================================
+   VALORES MEDULARES (Estilos específicos del módulo)
+   Consume variables globales de globalPublico.css
+   ========================================================================== */
 
+/* CONTENEDOR PRINCIPAL CON ESPACIO PARA NAVBAR FIJO */
+.valores-container {
+    max-width: 1000px;
+    margin: 120px auto 80px auto;
+    padding: 0 20px;
+}
+
+/* ENCABEZADO Y HERO */
 .valores-header {
     text-align: center;
-    padding: 60px 20px 40px;
-    background-color: #ffffff;
-    font-family: 'Segoe UI', sans-serif;
+    margin-bottom: 50px;
 }
 
-.titulo-valores {
-    font-size: 32px;
-    color: #8b5cf6; /* Tono púrpura de la imagen */
-    font-weight: 600;
-    margin-bottom: 20px;
+.valores-header h1 {
+    font-family: var(--font-serif);
+    font-size: 3.2rem;
+    color: var(--primary-color);
+    margin-top: 10px;
+    margin-bottom: 16px;
 }
 
-.subtitulo-valores {
-    font-size: 15px;
-    color: #64748b;
-    max-width: 800px;
-    margin: 0 auto;
-    line-height: 1.6;
-}
-
-.valores-container {
-    padding: 20px 5% 80px;
-    display: flex;
-    justify-content: center;
-    background-color: #f8fafc;
-}
-
-.valores-card-wrapper {
-    max-width: 1100px;
-    width: 100%;
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 50px;
-    display: grid;
-    grid-template-columns: 300px 1fr; /* Columna fija para el recurso y flexible para el texto */
-    gap: 60px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-    border: 1px solid #e2e8f0;
-}
-
-/* Sidebar del Recurso */
-.valores-sidebar {
-    text-align: center;
-}
-
-.valores-resource-icon img {
-    width: 100%;
-    max-width: 200px;
-    margin-bottom: 25px;
-}
-
-.valores-sidebar h3 {
-    font-size: 14px;
-    color: #1e293b;
-    font-weight: 700;
-    margin-bottom: 20px;
-}
-
-.btn-descargar-valores {
-    display: inline-block;
-    background: #334155;
-    color: white;
-    padding: 10px 25px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-    transition: background 0.3s;
-}
-
-.btn-descargar-valores:hover {
-    background: #1e293b;
-}
-
-/* Contenido de Valores */
-.valor-item {
-    margin-bottom: 45px;
-}
-
-.valor-icon-small img {
-    width: 45px;
-    height: 45px;
-    margin-bottom: 15px;
-    opacity: 0.8;
-}
-
-.valor-item h2 {
-    font-size: 18px;
-    color: #334155;
-    font-weight: 700;
-    margin-bottom: 15px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.valor-item p {
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 15px;
-    color: #475569;
+.valores-intro {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    color: var(--text-muted);
     line-height: 1.7;
-    margin-bottom: 15px;
+    max-width: 780px;
+    margin: 0 auto 30px auto;
 }
 
-.cita-biblica {
+
+
+/* GRID DE VALORES */
+.valores-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.valor-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 32px 36px;
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    transition: var(--transition);
+}
+
+.valor-card:hover {
+    border-color: var(--accent-blue);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+/* TARJETA DESTACADA (Un Pueblo de Santidad) */
+.valor-card.highlight-valor {
+    border-left: 5px solid var(--accent-blue);
+    background-color: #fafcfe;
+}
+
+/* CABECERA INTERNA DE CADA VALOR */
+.valor-header-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    min-width: 56px;
+}
+
+.valor-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    background-color: var(--accent-blue-light);
+    color: var(--accent-blue);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.valor-number {
+    font-family: var(--font-serif);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    opacity: 0.35;
+}
+
+/* CONTENIDO DEL VALOR */
+.valor-content {
+    flex: 1;
+}
+
+.valor-content h2 {
+    font-family: var(--font-sans);
+    font-size: 1.4rem;
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.valor-content p {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 12px;
+}
+
+.valor-content p:last-child {
+    margin-bottom: 0;
+}
+
+.citas-biblicas {
+    font-family: var(--font-serif);
     font-style: italic;
-    color: #64748b;
-    font-size: 14px;
+    font-size: 0.9rem;
+    color: var(--accent-blue);
+    display: block;
+    margin-top: 10px;
 }
 
-/* Responsivo */
-@media (max-width: 900px) {
-    .valores-card-wrapper {
-        grid-template-columns: 1fr;
-        padding: 40px 25px;
+/* RESPONSIVO */
+@media (max-width: 768px) {
+    .valores-header h1 {
+        font-size: 2.3rem;
     }
-    .valores-sidebar {
-        border-bottom: 1px solid #e2e8f0;
-        padding-bottom: 40px;
+
+    .valores-hero-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .valor-card {
+        padding: 24px;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .valor-card {
+        flex-direction: column;
+    }
+
+    .valor-header-badge {
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
     }
 }
